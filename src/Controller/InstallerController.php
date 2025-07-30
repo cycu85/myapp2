@@ -141,9 +141,9 @@ class InstallerController extends AbstractController
                 'required' => '8.2.0'
             ],
             [
-                'name' => 'SQLite Extension',
-                'status' => extension_loaded('sqlite3'),
-                'current' => extension_loaded('sqlite3') ? 'Zainstalowane' : 'Brak',
+                'name' => 'MySQL Extension',
+                'status' => extension_loaded('mysqli') || extension_loaded('pdo_mysql'),
+                'current' => (extension_loaded('mysqli') || extension_loaded('pdo_mysql')) ? 'Zainstalowane' : 'Brak',
                 'required' => 'Wymagane'
             ],
             [
