@@ -33,16 +33,18 @@ class PermissionService
     public function getUserModules(User $user): array
     {
         $userRoles = $this->userRoleRepository->findActiveByUser($user->getId());
-        $modules = [];
+        $moduleUserRoles = [];
+        $seenModules = [];
         
         foreach ($userRoles as $userRole) {
             $module = $userRole->getRole()->getModule();
-            if ($module->isEnabled() && !in_array($module, $modules, true)) {
-                $modules[] = $module;
+            if ($module->isEnabled() && !in_array($module->getId(), $seenModules, true)) {
+                $moduleUserRoles[] = $userRole;
+                $seenModules[] = $module->getId();
             }
         }
         
-        return $modules;
+        return $moduleUserRoles;
     }
 
     public function getModulePermissions(User $user, string $moduleName): array
