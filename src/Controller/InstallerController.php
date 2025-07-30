@@ -185,11 +185,14 @@ class InstallerController extends AbstractController
             $schemaManager = $this->entityManager->getConnection()->createSchemaManager();
             $tables = $schemaManager->listTableNames();
             
+            // Debug: log what tables were actually created
+            error_log('Created tables: ' . implode(', ', $tables));
+            
             $requiredTables = ['modules', 'users', 'roles', 'user_roles', 'equipment_categories', 'equipment', 'equipment_log', 'equipment_attachment'];
             $missingTables = array_diff($requiredTables, $tables);
             
             if (!empty($missingTables)) {
-                throw new \Exception('Brakujące tabele w bazie danych: ' . implode(', ', $missingTables));
+                throw new \Exception('Brakujące tabele w bazie danych: ' . implode(', ', $missingTables) . '. Utworzone tabele: ' . implode(', ', $tables));
             }
         } catch (\Exception $e) {
             throw new \Exception('Błąd podczas tworzenia schematu bazy danych: ' . $e->getMessage());

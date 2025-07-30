@@ -156,7 +156,7 @@ final class Version20250730070000 extends AbstractMigration
             INDEX IDX_equipment_log_created_by (created_by_id),
             INDEX IDX_equipment_log_previous_assignee (previous_assignee_id),
             INDEX IDX_equipment_log_new_assignee (new_assignee_id),
-            CONSTRAINT FK_equipment_log_equipment FOREIGN KEY (equipment_id) REFERENCES equipment (id) ON DELETE CASCADE,
+            CONSTRAINT FK_equipment_log_equipment FOREIGN KEY (equipment_id) REFERENCES equipment (id),
             CONSTRAINT FK_equipment_log_created_by FOREIGN KEY (created_by_id) REFERENCES users (id),
             CONSTRAINT FK_equipment_log_previous_assignee FOREIGN KEY (previous_assignee_id) REFERENCES users (id),
             CONSTRAINT FK_equipment_log_new_assignee FOREIGN KEY (new_assignee_id) REFERENCES users (id)
@@ -177,7 +177,7 @@ final class Version20250730070000 extends AbstractMigration
             PRIMARY KEY(id),
             INDEX IDX_equipment_attachment_equipment (equipment_id),
             INDEX IDX_equipment_attachment_uploaded_by (uploaded_by_id),
-            CONSTRAINT FK_equipment_attachment_equipment FOREIGN KEY (equipment_id) REFERENCES equipment (id) ON DELETE CASCADE,
+            CONSTRAINT FK_equipment_attachment_equipment FOREIGN KEY (equipment_id) REFERENCES equipment (id),
             CONSTRAINT FK_equipment_attachment_uploaded_by FOREIGN KEY (uploaded_by_id) REFERENCES users (id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
     }
