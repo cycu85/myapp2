@@ -138,7 +138,7 @@ final class Version20250730070000 extends AbstractMigration
             CONSTRAINT FK_equipment_updated_by FOREIGN KEY (updated_by_id) REFERENCES users (id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
-        // Create equipment_log table
+        // Create equipment_log table (after equipment table is created)
         $this->addSql('CREATE TABLE equipment_log (
             id INT AUTO_INCREMENT NOT NULL,
             equipment_id INT NOT NULL,
@@ -162,7 +162,7 @@ final class Version20250730070000 extends AbstractMigration
             CONSTRAINT FK_equipment_log_new_assignee FOREIGN KEY (new_assignee_id) REFERENCES users (id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
-        // Create equipment_attachment table
+        // Create equipment_attachment table (after equipment table is created)
         $this->addSql('CREATE TABLE equipment_attachment (
             id INT AUTO_INCREMENT NOT NULL,
             equipment_id INT NOT NULL,

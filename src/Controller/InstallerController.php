@@ -178,7 +178,7 @@ class InstallerController extends AbstractController
             $process->run();
             
             if (!$process->isSuccessful()) {
-                throw new \Exception('Błąd podczas wykonywania migracji: ' . $process->getErrorOutput());
+                throw new \Exception('Błąd podczas wykonywania migracji: ' . $process->getErrorOutput() . ' Output: ' . $process->getOutput());
             }
             
             // Verify tables were created
