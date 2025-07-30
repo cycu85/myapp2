@@ -115,6 +115,9 @@
 
     <!-- App js -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
+    {% else %}
+        <!-- Login/Guest layout -->
+        {% block body %}{% endblock %}
     {% endif %}
 </body>
 
