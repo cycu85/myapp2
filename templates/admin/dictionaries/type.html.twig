@@ -1,0 +1,267 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ type|title }} - Słowniki - AssetHub{% endblock %}
+{% block page_title %}Słownik: {{ type|title }}{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('admin_dictionaries') }}">Słowniki</a></li>
+    <li class="breadcrumb-item active">{{ type|title }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h5 class="card-title mb-0 flex-grow-1">Pozycje słownikowe: {{ type|title }}</h5>
+                    <div class="flex-shrink-0">
+                        <a href="{{ path('admin_dictionaries_new', {type: type}) }}" class="btn btn-success add-btn">
+                            <i class="ri-add-line align-bottom me-1"></i> Dodaj pozycję
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if dictionaries|length > 0 %}
+                <div id="table-gridjs"></div>
+                {% else %}
+                <div class="text-center py-5">
+                    <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#405189,secondary:#0ab39c" style="width:72px;height:72px">
+                    </lord-icon>
+                    <h5 class="mt-4">Brak pozycji słownikowych</h5>
+                    <p class="text-muted">Dodaj pierwszą pozycję do słownika {{ type|title }}.</p>
+                    <a href="{{ path('admin_dictionaries_new', {type: type}) }}" class="btn btn-primary">
+                        <i class="ri-add-line me-1"></i> Dodaj pozycję
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade zoomIn" id="deleteRecordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btn-close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mt-2 text-center">
+                    <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
+                    <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                        <h4>Czy na pewno?</h4>
+                        <p class="text-muted mx-4 mb-0">Czy na pewno chcesz usunąć tę pozycję słownikową? Ta operacja jest nieodwracalna.</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                    <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Anuluj</button>
+                    <form id="delete-form" method="post" style="display: inline;">
+                        <input type="hidden" name="_token" id="delete-token">
+                        <button type="submit" class="btn w-sm btn-danger">Tak, usuń!</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Status Modal -->
+<div class="modal fade zoomIn" id="toggleStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mt-2 text-center">
+                    <lord-icon src="https://cdn.lordicon.com/lupuorrc.json" trigger="loop" colors="primary:#0ab39c,secondary:#405189" style="width:100px;height:100px"></lord-icon>
+                    <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                        <h4>Zmiana statusu</h4>
+                        <p class="text-muted mx-4 mb-0" id="toggle-message">Czy na pewno chcesz zmienić status tej pozycji?</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                    <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Anuluj</button>
+                    <form id="toggle-form" method="post" style="display: inline;">
+                        <input type="hidden" name="_token" id="toggle-token">
+                        <button type="submit" class="btn w-sm btn-primary">Tak, zmień!</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block head_css %}
+{{ parent() }}
+<!-- gridjs css -->
+<link href="{{ asset('assets/libs/gridjs/theme/mermaid.min.css') }}" rel="stylesheet" type="text/css" />
+<style>
+.gridjs-table {
+    border: none !important;
+}
+.gridjs-th {
+    background-color: #f8f9fa !important;
+    border: none !important;
+    color: #495057 !important;
+    font-weight: 600 !important;
+}
+.gridjs-td {
+    border: none !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+.gridjs-sort {
+    color: #495057 !important;
+}
+.gridjs-sort::after {
+    content: "\f0dc" !important;
+    font-family: "Font Awesome 5 Free" !important;
+    font-weight: 900 !important;
+}
+.gridjs-sort-asc::after {
+    content: "\f0de" !important;
+}
+.gridjs-sort-desc::after {
+    content: "\f0dd" !important;
+}
+</style>
+{% endblock %}
+
+{% block javascript %}
+<!-- gridjs js -->
+<script src="{{ asset('assets/libs/gridjs/gridjs.umd.js') }}"></script>
+
+{% if dictionaries|length > 0 %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Prepare data for GridJS
+    const dictionariesData = [
+        {% for dictionary in dictionaries %}
+        [
+            "{{ dictionary.name }}",
+            "{{ dictionary.value }}",
+            "{{ dictionary.description|default('—') }}",
+            gridjs.html("{% if dictionary.parent %}{{ dictionary.parent.name }}{% else %}—{% endif %}"),
+            gridjs.html("{% if dictionary.color %}<span class='badge' style='background-color: {{ dictionary.color }}; color: white;'>{{ dictionary.color }}</span>{% else %}—{% endif %}"),
+            "{{ dictionary.sortOrder }}",
+            gridjs.html("{% if dictionary.isActive %}<span class='badge bg-success-subtle text-success'>Aktywna</span>{% else %}<span class='badge bg-danger-subtle text-danger'>Nieaktywna</span>{% endif %}"),
+            gridjs.html(`<div class="d-flex gap-2">
+                <div class="edit">
+                    <a href="{{ path('admin_dictionaries_edit', {id: dictionary.id}) }}" class="btn btn-sm btn-success edit-item-btn">Edytuj</a>
+                </div>
+                <div class="edit">
+                    <button class="btn btn-sm {% if dictionary.isActive %}btn-warning{% else %}btn-info{% endif %} toggle-status-btn" 
+                            onclick="confirmToggleStatus({{ dictionary.id }}, '{{ dictionary.name }}', {{ dictionary.isActive ? 'true' : 'false' }})">
+                        {% if dictionary.isActive %}Dezaktywuj{% else %}Aktywuj{% endif %}
+                    </button>
+                </div>
+                {% if not dictionary.isSystem %}
+                <div class="remove">
+                    <button class="btn btn-sm btn-danger remove-item-btn" onclick="confirmDelete({{ dictionary.id }}, '{{ dictionary.name }}')">Usuń</button>
+                </div>
+                {% endif %}
+            </div>`)
+        ]{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    new gridjs.Grid({
+        columns: [
+            {
+                name: 'Nazwa',
+                width: '150px'
+            },
+            {
+                name: 'Wartość',
+                width: '120px'
+            },
+            {
+                name: 'Opis',
+                width: '200px'
+            },
+            {
+                name: 'Rodzic',
+                width: '120px'
+            },
+            {
+                name: 'Kolor',
+                width: '80px'
+            },
+            {
+                name: 'Kolejność',
+                width: '80px'
+            },
+            {
+                name: 'Status',
+                width: '100px'
+            },
+            {
+                name: 'Akcje',
+                width: '200px',
+                sort: false
+            }
+        ],
+        data: dictionariesData,
+        pagination: {
+            limit: 10
+        },
+        sort: true,
+        search: true,
+        className: {
+            table: 'table table-borderless table-centered align-middle table-nowrap mb-0',
+            th: 'text-muted',
+            td: 'text-body'
+        },
+        language: {
+            search: {
+                placeholder: 'Szukaj...'
+            },
+            pagination: {
+                previous: 'Poprzednia',
+                next: 'Następna',
+                showing: 'Pokazane',
+                results: () => 'wyniki'
+            }
+        }
+    }).render(document.getElementById("table-gridjs"));
+});
+
+function confirmDelete(dictId, dictName) {
+    // Set up the delete form
+    const form = document.getElementById('delete-form');
+    form.action = `/admin/dictionaries/${dictId}/delete`;
+    
+    // Generate CSRF token (in real app, you'd get this from Symfony)
+    document.getElementById('delete-token').value = 'delete_token_' + dictId;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('deleteRecordModal'));
+    modal.show();
+}
+
+function confirmToggleStatus(dictId, dictName, isActive) {
+    // Set up the toggle form
+    const form = document.getElementById('toggle-form');
+    form.action = `/admin/dictionaries/${dictId}/toggle-status`;
+    
+    // Update message
+    const action = isActive ? 'dezaktywować' : 'aktywować';
+    document.getElementById('toggle-message').textContent = 
+        `Czy na pewno chcesz ${action} pozycję "${dictName}"?`;
+    
+    // Generate CSRF token (in real app, you'd get this from Symfony)
+    document.getElementById('toggle-token').value = 'toggle_status' + dictId;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('toggleStatusModal'));
+    modal.show();
+}
+</script>
+{% endif %}
+{% endblock %}

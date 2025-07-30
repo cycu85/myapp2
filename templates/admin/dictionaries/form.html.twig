@@ -1,0 +1,247 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ dictionary ? 'Edytuj' : 'Dodaj' }} pozycję - {{ type|title }} - AssetHub{% endblock %}
+{% block page_title %}{{ dictionary ? 'Edytuj pozycję' : 'Dodaj pozycję' }}{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('admin_dictionaries') }}">Słowniki</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('admin_dictionaries_type', {type: type}) }}">{{ type|title }}</a></li>
+    <li class="breadcrumb-item active">{{ dictionary ? 'Edycja' : 'Nowa pozycja' }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">{{ dictionary ? 'Edytuj pozycję słownikową' : 'Dodaj nową pozycję słownikową' }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nazwa <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ dictionary ? dictionary.name : '' }}" required>
+                                <div class="form-text">Wyświetlana nazwa pozycji słownikowej</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="value" class="form-label">Wartość</label>
+                                <input type="text" class="form-control" id="value" name="value" 
+                                       value="{{ dictionary ? dictionary.value : '' }}">
+                                <div class="form-text">Wartość techniczna (jeśli pusta, zostanie użyta nazwa)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Opis</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ dictionary ? dictionary.description : '' }}</textarea>
+                        <div class="form-text">Opcjonalny opis pozycji słownikowej</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="parent" class="form-label">Pozycja nadrzędna</label>
+                                <select class="form-select" id="parent" name="parent">
+                                    <option value="">-- Brak --</option>
+                                    {% for parentOption in parentOptions %}
+                                        {% if dictionary and parentOption.id != dictionary.id %}
+                                        <option value="{{ parentOption.id }}" 
+                                                {{ dictionary and dictionary.parent and dictionary.parent.id == parentOption.id ? 'selected' : '' }}>
+                                            {{ parentOption.name }}
+                                        </option>
+                                        {% elseif not dictionary %}
+                                        <option value="{{ parentOption.id }}">{{ parentOption.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Opcjonalna pozycja nadrzędna dla hierarchii</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="color" class="form-label">Kolor</label>
+                                <div class="input-group">
+                                    <input type="color" class="form-control form-control-color" id="color" name="color" 
+                                           value="{{ dictionary ? dictionary.color : '#6c757d' }}" title="Wybierz kolor">
+                                    <input type="text" class="form-control" id="colorText" 
+                                           value="{{ dictionary ? dictionary.color : '#6c757d' }}" readonly>
+                                </div>
+                                <div class="form-text">Kolor dla wizualnego rozróżnienia</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="icon" class="form-label">Ikona</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i id="iconPreview" class="{{ dictionary ? dictionary.icon : 'ri-bookmark-line' }}"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="icon" name="icon" 
+                                           value="{{ dictionary ? dictionary.icon : '' }}" 
+                                           placeholder="np. ri-bookmark-line">
+                                </div>
+                                <div class="form-text">Klasa CSS ikony (Remix Icons)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sortOrder" class="form-label">Kolejność sortowania</label>
+                                <input type="number" class="form-control" id="sortOrder" name="sortOrder" 
+                                       value="{{ dictionary ? dictionary.sortOrder : 0 }}" min="0">
+                                <div class="form-text">Kolejność wyświetlania (0 = pierwsza)</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check form-switch mt-4">
+                                    <input class="form-check-input" type="checkbox" id="isActive" name="isActive" 
+                                           {{ dictionary and dictionary.isActive or not dictionary ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="isActive">
+                                        Pozycja aktywna
+                                    </label>
+                                </div>
+                                <div class="form-text">Czy pozycja ma być dostępna w systemie</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <a href="{{ path('admin_dictionaries_type', {type: type}) }}" class="btn btn-light me-2">
+                            <i class="ri-arrow-left-line me-1"></i> Anuluj
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-save-line me-1"></i> {{ dictionary ? 'Zaktualizuj' : 'Dodaj' }} pozycję
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Podgląd pozycji</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="avatar-sm">
+                            <span class="avatar-title rounded" id="previewColorBox" style="background-color: {{ dictionary ? dictionary.color : '#6c757d' }};">
+                                <i id="previewIcon" class="{{ dictionary ? dictionary.icon : 'ri-bookmark-line' }} text-white"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1" id="previewName">{{ dictionary ? dictionary.name : 'Nazwa pozycji' }}</h6>
+                        <p class="text-muted mb-0" id="previewDescription">{{ dictionary ? dictionary.description|default('Opis pozycji') : 'Opis pozycji' }}</p>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">Wartość:</small>
+                    <div id="previewValue" class="fw-medium">{{ dictionary ? dictionary.value : 'wartość-pozycji' }}</div>
+                </div>
+                
+                <div class="mt-2">
+                    <small class="text-muted">Kolejność:</small>
+                    <div id="previewSortOrder" class="fw-medium">{{ dictionary ? dictionary.sortOrder : '0' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Wskazówki</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-0">
+                    <h6 class="alert-heading">Tworzenie pozycji słownikowych</h6>
+                    <ul class="mb-0">
+                        <li><strong>Nazwa</strong> - jest wymagana i będzie wyświetlana użytkownikom</li>
+                        <li><strong>Wartość</strong> - używana przez system (jeśli pusta, zostanie użyta nazwa)</li>
+                        <li><strong>Kolor</strong> - pomoże w wizualnym rozróżnieniu pozycji</li>
+                        <li><strong>Kolejność</strong> - określa porządek wyświetlania</li>
+                        <li><strong>Pozycja nadrzędna</strong> - pozwala tworzyć hierarchię</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('name');
+    const valueInput = document.getElementById('value');
+    const descriptionInput = document.getElementById('description');
+    const colorInput = document.getElementById('color');
+    const colorTextInput = document.getElementById('colorText');
+    const iconInput = document.getElementById('icon');
+    const sortOrderInput = document.getElementById('sortOrder');
+    
+    const previewName = document.getElementById('previewName');
+    const previewValue = document.getElementById('previewValue');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewColorBox = document.getElementById('previewColorBox');
+    const previewIcon = document.getElementById('previewIcon');
+    const iconPreview = document.getElementById('iconPreview');
+    const previewSortOrder = document.getElementById('previewSortOrder');
+
+    // Update preview on input changes
+    nameInput.addEventListener('input', function() {
+        previewName.textContent = this.value || 'Nazwa pozycji';
+        if (!valueInput.value) {
+            const slug = this.value.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim('-');
+            valueInput.value = slug;
+            previewValue.textContent = slug || 'wartość-pozycji';
+        }
+    });
+
+    valueInput.addEventListener('input', function() {
+        previewValue.textContent = this.value || nameInput.value || 'wartość-pozycji';
+    });
+
+    descriptionInput.addEventListener('input', function() {
+        previewDescription.textContent = this.value || 'Opis pozycji';
+    });
+
+    colorInput.addEventListener('input', function() {
+        colorTextInput.value = this.value;
+        previewColorBox.style.backgroundColor = this.value;
+    });
+
+    colorTextInput.addEventListener('input', function() {
+        colorInput.value = this.value;
+        previewColorBox.style.backgroundColor = this.value;
+    });
+
+    iconInput.addEventListener('input', function() {
+        const iconClass = this.value || 'ri-bookmark-line';
+        previewIcon.className = iconClass + ' text-white';
+        iconPreview.className = iconClass;
+    });
+
+    sortOrderInput.addEventListener('input', function() {
+        previewSortOrder.textContent = this.value || '0';
+    });
+});
+</script>
+{% endblock %}
