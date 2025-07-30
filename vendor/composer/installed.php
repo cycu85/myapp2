@@ -3,7 +3,7 @@
         'name' => 'symfony/skeleton',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'ef7a75cb80e883acd75af25c6e58ab5ac23469c6',
+        'reference' => '7da3999d60233c788d9834807c666f92b0d9957e',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -162,6 +162,15 @@
             'install_path' => __DIR__ . '/../masterminds/html5',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'monolog/monolog' => array(
+            'pretty_version' => '3.9.0',
+            'version' => '3.9.0.0',
+            'reference' => '10d85740180ecba7896c87e06a166e0c95a0e3b6',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../monolog/monolog',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'myclabs/deep-copy' => array(
             'pretty_version' => '1.11.1',
@@ -326,6 +335,7 @@
             'dev_requirement' => false,
             'provided' => array(
                 0 => '1.0|2.0|3.0',
+                1 => '3.0.0',
             ),
         ),
         'psr/simple-cache-implementation' => array(
@@ -715,6 +725,24 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'symfony/monolog-bridge' => array(
+            'pretty_version' => 'v7.0.8',
+            'version' => '7.0.8.0',
+            'reference' => 'd80b7aeabc539538c6ae8962259ac422632d7796',
+            'type' => 'symfony-bridge',
+            'install_path' => __DIR__ . '/../symfony/monolog-bridge',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'symfony/monolog-bundle' => array(
+            'pretty_version' => 'v3.10.0',
+            'version' => '3.10.0.0',
+            'reference' => '414f951743f4aa1fd0f5bf6a0e9c16af3fe7f181',
+            'type' => 'symfony-bundle',
+            'install_path' => __DIR__ . '/../symfony/monolog-bundle',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'symfony/options-resolver' => array(
             'pretty_version' => 'v7.0.8',
             'version' => '7.0.8.0',
@@ -937,7 +965,7 @@
         'symfony/skeleton' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'ef7a75cb80e883acd75af25c6e58ab5ac23469c6',
+            'reference' => '7da3999d60233c788d9834807c666f92b0d9957e',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

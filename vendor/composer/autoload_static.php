@@ -77,11 +77,13 @@ class ComposerStaticInit1a8ef39f6118381c98aad8a65fb3a03b
             'Symfony\\Bundle\\WebProfilerBundle\\' => 33,
             'Symfony\\Bundle\\TwigBundle\\' => 26,
             'Symfony\\Bundle\\SecurityBundle\\' => 30,
+            'Symfony\\Bundle\\MonologBundle\\' => 29,
             'Symfony\\Bundle\\MakerBundle\\' => 27,
             'Symfony\\Bundle\\FrameworkBundle\\' => 31,
             'Symfony\\Bundle\\DebugBundle\\' => 27,
             'Symfony\\Bridge\\Twig\\' => 20,
             'Symfony\\Bridge\\PhpUnit\\' => 23,
+            'Symfony\\Bridge\\Monolog\\' => 23,
             'Symfony\\Bridge\\Doctrine\\' => 24,
         ),
         'P' => 
@@ -95,6 +97,7 @@ class ComposerStaticInit1a8ef39f6118381c98aad8a65fb3a03b
         ),
         'M' => 
         array (
+            'Monolog\\' => 8,
             'Masterminds\\' => 12,
         ),
         'D' => 
@@ -321,6 +324,10 @@ class ComposerStaticInit1a8ef39f6118381c98aad8a65fb3a03b
         array (
             0 => __DIR__ . '/..' . '/symfony/security-bundle',
         ),
+        'Symfony\\Bundle\\MonologBundle\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/monolog-bundle',
+        ),
         'Symfony\\Bundle\\MakerBundle\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/maker-bundle/src',
@@ -340,6 +347,10 @@ class ComposerStaticInit1a8ef39f6118381c98aad8a65fb3a03b
         'Symfony\\Bridge\\PhpUnit\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/phpunit-bridge',
+        ),
+        'Symfony\\Bridge\\Monolog\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/monolog-bridge',
         ),
         'Symfony\\Bridge\\Doctrine\\' => 
         array (
@@ -368,6 +379,10 @@ class ComposerStaticInit1a8ef39f6118381c98aad8a65fb3a03b
         'PhpParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
+        ),
+        'Monolog\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
         ),
         'Masterminds\\' => 
         array (

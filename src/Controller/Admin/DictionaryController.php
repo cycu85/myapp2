@@ -6,6 +6,7 @@ use App\Entity\Dictionary;
 use App\Repository\DictionaryRepository;
 use App\Service\PermissionService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +19,8 @@ class DictionaryController extends AbstractController
     public function __construct(
         private PermissionService $permissionService,
         private DictionaryRepository $dictionaryRepository,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -71,27 +73,47 @@ class DictionaryController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
-            $dictionary = new Dictionary();
-            $dictionary->setType($type);
-            $dictionary->setName($request->request->get('name'));
-            $dictionary->setValue($request->request->get('value') ?: $request->request->get('name'));
-            $dictionary->setDescription($request->request->get('description'));
-            $dictionary->setColor($request->request->get('color'));
-            $dictionary->setIcon($request->request->get('icon'));
-            $dictionary->setSortOrder((int)$request->request->get('sortOrder', 0));
-            $dictionary->setIsActive($request->request->has('isActive'));
-            
-            // Handle parent
-            $parentId = $request->request->get('parent');
-            if ($parentId) {
-                $parent = $this->dictionaryRepository->find($parentId);
-                $dictionary->setParent($parent);
+            try {
+                $dictionary = new Dictionary();
+                $dictionary->setType($type);
+                $dictionary->setName($request->request->get('name'));
+                $dictionary->setValue($request->request->get('value') ?: $request->request->get('name'));
+                $dictionary->setDescription($request->request->get('description'));
+                $dictionary->setColor($request->request->get('color'));
+                $dictionary->setIcon($request->request->get('icon'));
+                $dictionary->setSortOrder((int)$request->request->get('sortOrder', 0));
+                $dictionary->setIsActive($request->request->has('isActive'));
+                
+                // Handle parent
+                $parentId = $request->request->get('parent');
+                if ($parentId) {
+                    $parent = $this->dictionaryRepository->find($parentId);
+                    $dictionary->setParent($parent);
+                }
+
+                $this->dictionaryRepository->save($dictionary, true);
+
+                $this->logger->info('Dictionary entry created', [
+                    'type' => $type,
+                    'name' => $dictionary->getName(),
+                    'value' => $dictionary->getValue(),
+                    'user' => $user->getUsername(),
+                    'ip' => $request->getClientIp()
+                ]);
+
+                $this->addFlash('success', 'Pozycja słownikowa została dodana.');
+                return $this->redirectToRoute('admin_dictionaries_type', ['type' => $type]);
+                
+            } catch (\Exception $e) {
+                $this->logger->error('Failed to create dictionary entry', [
+                    'type' => $type,
+                    'error' => $e->getMessage(),
+                    'user' => $user->getUsername(),
+                    'ip' => $request->getClientIp()
+                ]);
+                
+                $this->addFlash('error', 'Wystąpił błąd podczas dodawania pozycji słownikowej.');
             }
-
-            $this->dictionaryRepository->save($dictionary, true);
-
-            $this->addFlash('success', 'Pozycja słownikowa została dodana.');
-            return $this->redirectToRoute('admin_dictionaries_type', ['type' => $type]);
         }
 
         $parentOptions = $this->dictionaryRepository->findRootLevelByType($type, false);
