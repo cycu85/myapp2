@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Zarządzanie Modułami - AssetHub{% endblock %}
+
+{% block page_title %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Moduły Systemu</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Admin</a></li>
+                    <li class="breadcrumb-item active">Moduły</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Lista Modułów</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for module in modules %}
+                    <div class="col-xl-4 col-sm-6">
+                        <div class="card profile-project-card shadow-none profile-project-{{ module.isEnabled ? 'success' : 'danger' }}">
+                            <div class="card-body p-4">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1 text-muted overflow-hidden">
+                                        <h5 class="fs-14 text-truncate mb-1">
+                                            <a href="#" class="text-body">{{ module.displayName }}</a>
+                                        </h5>
+                                        <p class="text-muted text-truncate mb-0">{{ module.description }}</p>
+                                    </div>
+                                    <div class="flex-shrink-0 ms-2">
+                                        <div class="badge bg-{{ module.isEnabled ? 'success' : 'danger' }}-subtle text-{{ module.isEnabled ? 'success' : 'danger' }} fs-10">
+                                            {{ module.isEnabled ? 'Aktywny' : 'Nieaktywny' }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex mt-4">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="flex-shrink-0">
+                                                <h6 class="mb-0">{{ module.roles|length }}</h6>
+                                                <p class="text-muted fs-13 mb-0">Ról</p>
+                                            </div>
+                                            <div class="flex-shrink-0 ms-2">
+                                                <p class="text-muted fs-13 mb-0">
+                                                    <strong>ID:</strong> {{ module.name }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        {% if module.isEnabled %}
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    onclick="toggleModule({{ module.id }}, false)">
+                                                <i class="ri-stop-line align-bottom"></i> Wyłącz
+                                            </button>
+                                        {% else %}
+                                            <button type="button" class="btn btn-outline-success btn-sm" 
+                                                    onclick="toggleModule({{ module.id }}, true)">
+                                                <i class="ri-play-line align-bottom"></i> Włącz
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleModule(moduleId, enable) {
+    if (confirm('Czy na pewno chcesz ' + (enable ? 'włączyć' : 'wyłączyć') + ' ten moduł?')) {
+        // TODO: Implement AJAX call to toggle module status
+        console.log('Toggle module ' + moduleId + ' to ' + enable);
+    }
+}
+</script>
+{% endblock %}
