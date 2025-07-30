@@ -1,0 +1,291 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - AssetHub{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
+
+{% block body %}
+<!-- Welcome Card -->
+<div class="row">
+    <div class="col-12">
+        <div class="card bg-primary bg-soft">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="avatar-sm flex-shrink-0 me-3">
+                        <span class="avatar-title bg-primary-subtle text-primary rounded-circle fs-3">
+                            <i class="bx bx-hand-up"></i>
+                        </span>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-1">Witaj z powrotem, {{ user.firstName }}!</h5>
+                        <p class="card-text text-muted mb-0">
+                            Zalogowany jako <strong>{{ user.fullName }}</strong> - {{ user.position }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row">
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Dostępne moduły</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> {{ modules|length }}
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ modules|length }}</h4>
+                        <a href="#modules" class="text-decoration-underline">Zobacz moduły</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-success-subtle rounded fs-3">
+                            <i class="bx bx-layer text-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Twoje role</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-info fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> 
+                            {% set activeRoles = 0 %}
+                            {% for userRole in user.userRoles %}
+                                {% if userRole.isActive %}
+                                    {% set activeRoles = activeRoles + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                            {{ activeRoles }}
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ activeRoles }}</h4>
+                        <a href="#permissions" class="text-decoration-underline">Zobacz uprawnienia</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-info-subtle rounded fs-3">
+                            <i class="bx bx-shield text-info"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Ostatnia aktywność</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">{{ user.updatedAt|date('H:i') }}</h4>
+                        <p class="text-muted mb-0">{{ user.updatedAt|date('d.m.Y') }}</p>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-warning-subtle rounded fs-3">
+                            <i class="bx bx-time text-warning"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Powiadomienia</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-danger fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i> 3 Nowe
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-4">
+                    <div>
+                        <h4 class="fs-22 fw-semibold ff-secondary mb-4">3</h4>
+                        <a href="#" class="text-decoration-underline">Zobacz wszystkie</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-danger-subtle rounded fs-3">
+                            <i class="bx bx-bell text-danger"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modules Section -->
+<div class="row" id="modules">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Dostępne moduły</h4>
+            </div>
+
+            <div class="card-body">
+                {% if modules|length > 0 %}
+                <div class="row">
+                    {% for userRole in modules %}
+                        {% set module = userRole.role.module %}
+                        {% if module.isEnabled %}
+                        <div class="col-xxl-3 col-sm-6">
+                            <div class="card profile-project-card shadow-none profile-project-success module-card" onclick="navigateToModule('{{ module.name }}')">
+                                <div class="card-body p-4">
+                                    <div class="d-flex">
+                                        <div class="flex-grow-1 text-muted overflow-hidden">
+                                            <h5 class="fs-14 text-truncate mb-1">
+                                                <a href="#" class="text-body">{{ module.displayName }}</a>
+                                            </h5>
+                                            <p class="text-muted text-truncate mb-0">{{ module.description }}</p>
+                                        </div>
+                                        <div class="flex-shrink-0 ms-2">
+                                            <div class="badge bg-success-subtle text-success fs-10">{{ userRole.role.name }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex mt-4">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="flex-shrink-0">
+                                                    {% if module.name == 'equipment' %}
+                                                        <span class="avatar-title bg-warning-subtle text-warning rounded fs-3">
+                                                            <i class="ri-tools-line"></i>
+                                                        </span>
+                                                    {% elseif module.name == 'admin' %}
+                                                        <span class="avatar-title bg-primary-subtle text-primary rounded fs-3">
+                                                            <i class="ri-settings-3-line"></i>
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="avatar-title bg-info-subtle text-info rounded fs-3">
+                                                            <i class="ri-apps-line"></i>
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <div class="d-flex align-items-center gap-1">
+                                                <button type="button" class="btn btn-light btn-sm">Otwórz moduł</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center">
+                    <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#405189,secondary:#0ab39c" style="width:72px;height:72px">
+                    </lord-icon>
+                    <h5 class="mt-4">Brak dostępnych modułów</h5>
+                    <p class="text-muted">Skontaktuj się z administratorem w celu przyznania uprawnień do modułów systemu.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Permissions -->
+<div class="row" id="permissions">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">
+                    <i class="ri-shield-user-line me-2"></i>Twoje uprawnienia
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for userRole in user.userRoles %}
+                        {% if userRole.isActive %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="avatar-sm">
+                                        <span class="avatar-title bg-success-subtle text-success rounded-circle">
+                                            <i class="ri-check-line"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ userRole.role.module.displayName }}</h6>
+                                    <p class="text-muted mb-0">{{ userRole.role.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascript %}
+<script>
+function navigateToModule(moduleName) {
+    switch(moduleName) {
+        case 'equipment':
+            window.location.href = '/equipment';
+            break;
+        case 'admin':
+            window.location.href = '/admin';
+            break;
+        default:
+            console.log('Unknown module: ' + moduleName);
+    }
+}
+
+// Add click effect to module cards
+document.querySelectorAll('.module-card').forEach(card => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+        this.style.transition = 'transform 0.2s ease';
+    });
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock %}

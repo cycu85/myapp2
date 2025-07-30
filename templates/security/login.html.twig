@@ -1,0 +1,118 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Logowanie - AssetHub{% endblock %}
+
+{% block body %}
+<div class="d-flex align-items-center justify-content-center min-vh-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="card shadow-lg" style="width: 400px;">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <div class="mb-3">
+                    <i class="ri-building-line" style="font-size: 3rem; color: var(--nc-primary);"></i>
+                </div>
+                <h3 class="fw-bold text-dark">AssetHub</h3>
+                <p class="text-muted">Zaloguj się do systemu</p>
+            </div>
+
+            {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <i class="ri-error-warning-line me-2"></i>
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+
+            <form method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Nazwa użytkownika</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="ri-user-line"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control" 
+                               id="username" 
+                               name="_username" 
+                               value="{{ last_username }}" 
+                               required 
+                               autofocus
+                               autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="password" class="form-label">Hasło</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="ri-lock-line"></i>
+                        </span>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="_password" 
+                               required
+                               autocomplete="current-password">
+                    </div>
+                </div>
+
+                <div class="mb-4 form-check">
+                    <input type="checkbox" class="form-check-input" id="remember_me" name="_remember_me">
+                    <label class="form-check-label" for="remember_me">
+                        Zapamiętaj mnie
+                    </label>
+                </div>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                <button class="btn btn-primary w-100 py-2" type="submit">
+                    <i class="ri-login-line me-2"></i>
+                    Zaloguj się
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    <strong>Konta testowe:</strong><br>
+                    Admin: admin / admin123<br>
+                    User: user / user123
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .min-vh-100 {
+        min-height: 100vh;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .input-group-text {
+        background: #f8f9fa;
+        border-right: none;
+    }
+    
+    .form-control {
+        border-left: none;
+    }
+    
+    .form-control:focus {
+        border-color: var(--nc-primary);
+        box-shadow: 0 0 0 0.2rem rgba(0, 130, 201, 0.25);
+    }
+    
+    .btn-primary {
+        background: var(--nc-primary);
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+    }
+    
+    .btn-primary:hover {
+        background: var(--nc-primary-dark);
+    }
+</style>
+{% endblock %}

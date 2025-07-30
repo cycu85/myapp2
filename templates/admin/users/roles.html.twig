@@ -1,0 +1,172 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Role użytkownika: {{ user.firstName }} {{ user.lastName }} - AssetHub{% endblock %}
+{% block page_title %}Zarządzanie rolami użytkownika{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('admin_users_index') }}">Użytkownicy</a></li>
+    <li class="breadcrumb-item active">Role: {{ user.firstName }} {{ user.lastName }}</li>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h5 class="card-title mb-0 flex-grow-1">
+                        Role użytkownika: {{ user.firstName }} {{ user.lastName }}
+                    </h5>
+                    <div class="flex-shrink-0">
+                        <a href="{{ path('admin_users_index') }}" class="btn btn-outline-secondary">
+                            <i class="ri-arrow-left-line align-bottom me-1"></i> Powrót
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card border">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">Informacje o użytkowniku</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Imię i nazwisko</label>
+                                        <p class="mb-1">{{ user.firstName }} {{ user.lastName }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Email</label>
+                                        <p class="mb-1">{{ user.email }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Login</label>
+                                        <p class="mb-1">{{ user.username }}</p>
+                                    </div>
+                                    {% if user.employeeNumber %}
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Numer pracownika</label>
+                                        <p class="mb-1">{{ user.employeeNumber }}</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if user.position %}
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Stanowisko</label>
+                                        <p class="mb-1">{{ user.position }}</p>
+                                    </div>
+                                    {% endif %}
+                                    {% if user.department %}
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Dział</label>
+                                        <p class="mb-1">{{ user.department }}</p>
+                                    </div>
+                                    {% endif %}
+                                    <div class="mb-0">
+                                        <label class="form-label text-muted">Status</label>
+                                        <p class="mb-0">
+                                            {% if user.isActive %}
+                                                <span class="badge bg-success-subtle text-success">Aktywny</span>
+                                            {% else %}
+                                                <span class="badge bg-danger-subtle text-danger">Nieaktywny</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-8">
+                            <div class="card border">
+                                <div class="card-header">
+                                    <h6 class="card-title mb-0">Dostępne role</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-3">Zaznacz role, które chcesz przypisać użytkownikowi. Role określają dostęp do poszczególnych modułów i uprawnień w systemie.</p>
+                                    
+                                    {% set currentModule = '' %}
+                                    {% for role in allRoles %}
+                                        {% if role.module.displayName != currentModule %}
+                                            {% if currentModule != '' %}
+                                                </div>
+                                            {% endif %}
+                                            {% set currentModule = role.module.displayName %}
+                                            <div class="mb-4">
+                                                <h6 class="text-primary mb-2">{{ currentModule }}</h6>
+                                        {% endif %}
+                                        
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   name="roles[]" value="{{ role.id }}" 
+                                                   id="role_{{ role.id }}"
+                                                   {% if role.id in userActiveRoles %}checked{% endif %}>
+                                            <label class="form-check-label" for="role_{{ role.id }}">
+                                                <strong>{{ role.name }}</strong>
+                                                {% if role.isSystemRole %}
+                                                    <span class="badge bg-info-subtle text-info ms-1">Systemowa</span>
+                                                {% endif %}
+                                                {% if role.description %}
+                                                    <br><small class="text-muted">{{ role.description }}</small>
+                                                {% endif %}
+                                                {% if role.permissions|length > 0 %}
+                                                    <br><small class="text-muted">Uprawnienia: {{ role.permissions|join(', ') }}</small>
+                                                {% endif %}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                    {% if currentModule != '' %}
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if allRoles|length == 0 %}
+                                        <div class="text-center py-4">
+                                            <i class="ri-folder-2-line text-muted" style="font-size: 3rem;"></i>
+                                            <p class="text-muted mt-2">Brak dostępnych ról w systemie.</p>
+                                            <a href="{{ path('admin_roles_new') }}" class="btn btn-primary">Utwórz pierwszą rolę</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if allRoles|length > 0 %}
+                    <div class="text-end mt-3">
+                        <a href="{{ path('admin_users_index') }}" class="btn btn-secondary me-2">Anuluj</a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="ri-save-line align-bottom me-1"></i> Zapisz role
+                        </button>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add functionality to select/deselect all roles within a module
+    const moduleHeaders = document.querySelectorAll('.text-primary');
+    moduleHeaders.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.title = 'Kliknij aby zaznaczyć/odznaczyć wszystkie role w tym module';
+        
+        header.addEventListener('click', function() {
+            const moduleDiv = this.parentElement;
+            const checkboxes = moduleDiv.querySelectorAll('input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !allChecked;
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

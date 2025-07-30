@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Podgląd roli: {{ role.name }} - AssetHub{% endblock %}
+{% block page_title %}Podgląd roli{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('admin_roles_index') }}">Role i uprawnienia</a></li>
+    <li class="breadcrumb-item active">{{ role.name }}</li>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h5 class="card-title mb-0 flex-grow-1">Podgląd roli: {{ role.name }}</h5>
+                    <div class="flex-shrink-0">
+                        {% if not role.isSystemRole %}
+                            <a href="{{ path('admin_roles_edit', {id: role.id}) }}" class="btn btn-success me-2">
+                                <i class="ri-edit-line align-bottom me-1"></i> Edytuj
+                            </a>
+                        {% endif %}
+                        <a href="{{ path('admin_roles_index') }}" class="btn btn-outline-secondary">
+                            <i class="ri-arrow-left-line align-bottom me-1"></i> Powrót
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-1">Nazwa roli</h6>
+                            <p class="fs-14 mb-0">{{ role.name }}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-1">Moduł</h6>
+                            <p class="fs-14 mb-0">{{ role.module.displayName }}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-1">Typ roli</h6>
+                            {% if role.isSystemRole %}
+                                <span class="badge bg-info-subtle text-info">Systemowa</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary">Niestandardowa</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-1">Opis</h6>
+                            <p class="fs-14 mb-0">{{ role.description ?: '—' }}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-1">Data utworzenia</h6>
+                            <p class="fs-14 mb-0">{{ role.createdAt|date('d.m.Y H:i') }}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-1">Ostatnia aktualizacja</h6>
+                            <p class="fs-14 mb-0">{{ role.updatedAt|date('d.m.Y H:i') }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">Uprawnienia</h6>
+                            <div class="row">
+                                {% for permission in role.permissions %}
+                                    <div class="col-md-4 col-sm-6 mb-2">
+                                        <span class="badge bg-primary-subtle text-primary">{{ permission }}</span>
+                                    </div>
+                                {% else %}
+                                    <div class="col-12">
+                                        <span class="text-muted">Brak uprawnień</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">Użytkownicy z tą rolą</h6>
+                            {% if role.userRoles|length > 0 %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-nowrap mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Użytkownik</th>
+                                                <th>Email</th>
+                                                <th>Status</th>
+                                                <th>Przypisana przez</th>
+                                                <th>Data przypisania</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for userRole in role.userRoles %}
+                                                <tr>
+                                                    <td>{{ userRole.user.firstName }} {{ userRole.user.lastName }}</td>
+                                                    <td>{{ userRole.user.email }}</td>
+                                                    <td>
+                                                        {% if userRole.isActive %}
+                                                            <span class="badge bg-success-subtle text-success">Aktywna</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger-subtle text-danger">Nieaktywna</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ userRole.assignedBy.firstName }} {{ userRole.assignedBy.lastName }}</td>
+                                                    <td>{{ userRole.assignedAt|date('d.m.Y H:i') }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <span class="text-muted">Rola nie jest przypisana do żadnego użytkownika</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

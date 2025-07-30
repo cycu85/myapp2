@@ -1,0 +1,167 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Użytkownicy - AssetHub{% endblock %}
+{% block page_title %}Zarządzanie użytkownikami{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
+    <li class="breadcrumb-item active">Użytkownicy</li>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h5 class="card-title mb-0 flex-grow-1">Lista użytkowników</h5>
+                    <div class="flex-shrink-0">
+                        <a href="{{ path('admin_users_new') }}" class="btn btn-success add-btn">
+                            <i class="ri-add-line align-bottom me-1"></i> Dodaj użytkownika
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="table-gridjs"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Status Modal -->
+<div class="modal fade zoomIn" id="toggleStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btn-close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mt-2 text-center">
+                    <lord-icon src="https://cdn.lordicon.com/lupuorrc.json" trigger="loop" colors="primary:#0ab39c,secondary:#405189" style="width:100px;height:100px"></lord-icon>
+                    <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                        <h4>Zmiana statusu</h4>
+                        <p class="text-muted mx-4 mb-0" id="toggle-message">Czy na pewno chcesz zmienić status tego użytkownika?</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                    <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Anuluj</button>
+                    <form id="toggle-form" method="post" style="display: inline;">
+                        <input type="hidden" name="_token" id="toggle-token">
+                        <button type="submit" class="btn w-sm btn-primary">Tak, zmień!</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<!-- gridjs js -->
+<script src="{{ asset('assets/libs/gridjs/gridjs.umd.js') }}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Prepare data for GridJS
+    const usersData = [
+        {% for user in users %}
+        [
+            "{{ user.firstName }} {{ user.lastName }}",
+            "{{ user.username }}",
+            "{{ user.email }}",
+            "{{ user.employeeNumber|default('—') }}",
+            "{{ user.position|default('—') }}",
+            "{{ user.department|default('—') }}",
+            {% if user.isActive %}"<span class='badge bg-success-subtle text-success'>Aktywny</span>"{% else %}"<span class='badge bg-danger-subtle text-danger'>Nieaktywny</span>"{% endif %},
+            `<div class="d-flex gap-2">
+                <div class="edit">
+                    <a href="{{ path('admin_users_roles', {id: user.id}) }}" class="btn btn-sm btn-primary edit-item-btn">Role</a>
+                </div>
+                <div class="edit">
+                    <button class="btn btn-sm {% if user.isActive %}btn-warning{% else %}btn-success{% endif %} toggle-status-btn" 
+                            onclick="confirmToggleStatus({{ user.id }}, '{{ user.firstName }} {{ user.lastName }}', {{ user.isActive ? 'true' : 'false' }})">
+                        {% if user.isActive %}Dezaktywuj{% else %}Aktywuj{% endif %}
+                    </button>
+                </div>
+            </div>`
+        ]{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    new gridjs.Grid({
+        columns: [
+            {
+                name: 'Imię i nazwisko',
+                width: '180px'
+            },
+            {
+                name: 'Login',
+                width: '120px'
+            },
+            {
+                name: 'Email',
+                width: '180px'
+            },
+            {
+                name: 'Nr pracownika',
+                width: '120px'
+            },
+            {
+                name: 'Stanowisko',
+                width: '150px'
+            },
+            {
+                name: 'Dział',
+                width: '120px'
+            },
+            {
+                name: 'Status',
+                width: '100px'
+            },
+            {
+                name: 'Akcje',
+                width: '120px',
+                sort: false
+            }
+        ],
+        data: usersData,
+        pagination: {
+            limit: 10
+        },
+        sort: true,
+        search: true,
+        language: {
+            search: {
+                placeholder: 'Szukaj...'
+            },
+            pagination: {
+                previous: 'Poprzednia',
+                next: 'Następna',
+                showing: 'Pokazane',
+                results: () => 'wyniki'
+            }
+        }
+    }).render(document.getElementById("table-gridjs"));
+});
+
+function confirmToggleStatus(userId, userName, isActive) {
+    // Set up the toggle form
+    const form = document.getElementById('toggle-form');
+    form.action = `/admin/users/${userId}/toggle-status`;
+    
+    // Update message
+    const action = isActive ? 'dezaktywować' : 'aktywować';
+    document.getElementById('toggle-message').textContent = 
+        `Czy na pewno chcesz ${action} użytkownika ${userName}?`;
+    
+    // Generate CSRF token (in real app, you'd get this from Symfony)
+    document.getElementById('toggle-token').value = 'toggle_status' + userId;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('toggleStatusModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

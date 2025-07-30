@@ -1,0 +1,107 @@
+{% extends 'installer/base.html.twig' %}
+
+{% block content %}
+<div class="step-indicator">
+    <div class="step active">1</div>
+    <div class="step">2</div>
+    <div class="step">3</div>
+    <div class="step">4</div>
+    <div class="step">5</div>
+</div>
+
+<div class="text-center mb-4">
+    <lord-icon
+        src="https://cdn.lordicon.com/nocovwne.json"
+        trigger="loop"
+        colors="primary:#667eea,secondary:#764ba2"
+        class="installer-lord-icon">
+    </lord-icon>
+    <h3 class="mt-3">Witamy w AssetHub!</h3>
+    <p class="text-muted">System zarządzania zasobami firmy</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="ri-tools-line text-primary installer-feature-icon"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">Sprzęt i narzędzia</h6>
+                        <p class="mb-0 text-muted">Zarządzanie inwentarzem sprzętu</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="ri-shield-check-line text-success installer-feature-icon"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">Środki ochrony</h6>
+                        <p class="mb-0 text-muted">Kontrola ŚOP i certyfikatów</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mt-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="ri-computer-line text-info installer-feature-icon"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">Sprzęt IT</h6>
+                        <p class="mb-0 text-muted">Zarządzanie infrastrukturą IT</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mt-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="ri-car-line text-warning installer-feature-icon"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">Flota pojazdów</h6>
+                        <p class="mb-0 text-muted">Kontrola pojazdów służbowych</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info mt-4">
+    <div class="d-flex">
+        <div class="flex-shrink-0">
+            <i class="ri-information-line"></i>
+        </div>
+        <div class="flex-grow-1 ms-2">
+            <h6 class="alert-heading">Informacje o instalacji</h6>
+            <p class="mb-0">
+                Ten kreator przeprowadzi Cię przez proces konfiguracji systemu AssetHub.
+                Instalacja obejmuje sprawdzenie wymagań systemowych, konfigurację bazy danych
+                oraz utworzenie konta administratora.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="{{ path('installer_requirements') }}" class="btn btn-primary btn-lg">
+        <i class="ri-arrow-right-line me-1"></i> Rozpocznij instalację
+    </a>
+</div>
+{% endblock %}

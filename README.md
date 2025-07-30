@@ -1,0 +1,648 @@
+# AssetHub - System Zarządzania Zasobami Firmy
+
+<div align="center">
+  <h3>📦 Kompleksowy system do zarządzania zasobami przedsiębiorstwa</h3>
+  <p>
+    <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat-square&logo=php&logoColor=white" alt="PHP 8.2+">
+    <img src="https://img.shields.io/badge/Symfony-7.0-000000?style=flat-square&logo=symfony&logoColor=white" alt="Symfony 7.0">
+    <img src="https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
+    <img src="https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=flat-square&logo=bootstrap&logoColor=white" alt="Bootstrap 5.3">
+    <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License MIT">
+  </p>
+</div>
+
+## 📋 Spis Treści
+
+- [O Projekcie](#-o-projekcie)
+- [Funkcjonalności](#-funkcjonalności)
+- [Wymagania Systemowe](#-wymagania-systemowe)
+- [Instalacja](#-instalacja)
+- [Konfiguracja](#-konfiguracja)
+- [Użytkowanie](#-użytkowanie)
+- [API i Integracje](#-api-i-integracje)
+- [Rozwój](#-rozwój)
+- [Wsparcie](#-wsparcie)
+- [Licencja](#-licencja)
+
+## 🎯 O Projekcie
+
+AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myślą o przedsiębiorstwach potrzebujących efektywnego kontrolowania swojego majątku. System oferuje modularną architekturę, pozwalającą na aktywację tylko niezbędnych funkcjonalności.
+
+### Główne Cechy
+
+- **🏗️ Architektura Modularna** - Aktywuj tylko potrzebne moduły
+- **👥 Zaawansowane Zarządzanie Użytkownikami** - Role i uprawnienia per moduł
+- **📊 Kompleksowe Raporty** - Analiza wykorzystania i kosztów
+- **🔐 Bezpieczeństwo** - Pełna kontrola dostępu i logi aktywności
+- **📱 Responsywny Interfejs** - Optymalizacja dla urządzeń mobilnych
+- **🚀 Łatwa Instalacja** - Graficzny kreator instalacji
+
+## ✨ Funkcjonalności
+
+### 🔧 Moduł Sprzętu i Narzędzi
+- Inwentaryzacja sprzętu z numerami inwentarzowymi
+- Śledzenie lokalizacji i przypisań do użytkowników
+- Harmonogram przeglądów i konserwacji
+- Historia użytkowania i napraw
+- Zarządzanie dokumentacją i certyfikatami
+
+### 🛡️ Moduł Środków Ochrony Osobistej (ŚOP)
+- Kontrola wydawania ŚOP zgodnie z normami
+- Śledzenie dat ważności certyfikatów
+- Przypomnienia o wymianie sprzętu
+- Ewidencja szkoleń BHP
+
+### 💻 Moduł Sprzętu IT
+- Inwentaryzacja komputerów, laptopów, serwerów
+- Śledzenie licencji oprogramowania
+- Zarządzanie konfiguracjami sprzętowymi
+- Historia serwisowania i modernizacji
+
+### 🚗 Moduł Floty Pojazdów
+- Rejestr pojazdów służbowych
+- Książki jazd i ewidencja przebiegu
+- Harmonogram przeglądów i ubezpieczeń
+- Kontrola kosztów eksploatacji
+
+### 👨‍💼 Panel Administracyjny
+- Zarządzanie użytkownikami i rolami
+- Konfiguracja modułów systemu
+- Generowanie raportów i analiz
+- Ustawienia systemowe i bezpieczeństwa
+
+## 💻 Wymagania Systemowe
+
+### Minimalne Wymagania
+
+| Komponent | Wymaganie |
+|-----------|-----------|
+| **System Operacyjny** | Ubuntu 20.04+ / CentOS 8+ / Debian 11+ |
+| **PHP** | 8.2 lub nowszy |
+| **Serwer Web** | Apache 2.4+ / Nginx 1.18+ |
+| **Baza Danych** | SQLite 3.35+ (domyślnie) / MySQL 8.0+ / PostgreSQL 13+ |
+| **Pamięć RAM** | Minimum 512MB, zalecane 2GB+ |
+| **Przestrzeń Dyskowa** | Minimum 1GB, zalecane 5GB+ |
+| **PHP Extensions** | sqlite3, pdo, intl, mbstring, xml, curl, gd |
+
+### Zalecane Wymagania Produkcyjne
+
+| Komponent | Zalecane |
+|-----------|----------|
+| **CPU** | 2+ rdzenie |
+| **RAM** | 4GB+ |
+| **Storage** | SSD 10GB+ |
+| **PHP OPcache** | Włączony |
+| **HTTPS** | Certyfikat SSL/TLS |
+| **Backup** | Automatyczne kopie zapasowe |
+
+## 🚀 Instalacja
+
+### Metoda 1: Instalacja z Kreatoriem (Zalecana)
+
+1. **Przygotowanie Serwera Ubuntu 22.04**
+   ```bash
+   # Aktualizacja systemu
+   sudo apt update && sudo apt upgrade -y
+   
+   # Instalacja PHP 8.2 i rozszerzeń
+   sudo apt install -y software-properties-common
+   sudo add-apt-repository ppa:ondrej/php
+   sudo apt update
+   sudo apt install -y php8.2 php8.2-cli php8.2-fpm php8.2-common \
+     php8.2-sqlite3 php8.2-pdo php8.2-intl php8.2-mbstring \
+     php8.2-xml php8.2-curl php8.2-gd php8.2-zip php8.2-opcache
+   ```
+
+2. **Instalacja Serwera Web (Apache)**
+   ```bash
+   # Instalacja Apache
+   sudo apt install -y apache2
+   
+   # Włączenie modułów
+   sudo a2enmod rewrite
+   sudo a2enmod php8.2
+   
+   # Uruchomienie usług
+   sudo systemctl enable apache2
+   sudo systemctl start apache2
+   ```
+
+3. **Instalacja Composera**
+   ```bash
+   curl -sS https://getcomposer.org/installer | php
+   sudo mv composer.phar /usr/local/bin/composer
+   sudo chmod +x /usr/local/bin/composer
+   ```
+
+4. **Pobranie i Instalacja AssetHub**
+   ```bash
+   # Przejście do katalogu web
+   cd /var/www
+   
+   # Klonowanie repozytorium
+   sudo git clone https://github.com/your-repo/assethub.git
+   sudo chown -R www-data:www-data assethub
+   cd assethub
+   
+   # Instalacja zależności
+   sudo -u www-data composer install --no-dev --optimize-autoloader
+   
+   # Ustawienie uprawnień
+   sudo chmod -R 755 var/
+   sudo chmod -R 777 var/cache var/log
+   ```
+
+5. **Konfiguracja Apache**
+   ```bash
+   # Utworzenie pliku konfiguracyjnego
+   sudo tee /etc/apache2/sites-available/assethub.conf > /dev/null <<EOF
+   <VirtualHost *:80>
+       ServerName your-domain.com
+       DocumentRoot /var/www/assethub/public
+       
+       <Directory /var/www/assethub/public>
+           AllowOverride All
+           Require all granted
+           DirectoryIndex index.php
+       </Directory>
+       
+       ErrorLog \${APACHE_LOG_DIR}/assethub_error.log
+       CustomLog \${APACHE_LOG_DIR}/assethub_access.log combined
+   </VirtualHost>
+   EOF
+   
+   # Aktywacja strony
+   sudo a2ensite assethub.conf
+   sudo a2dissite 000-default.conf
+   sudo systemctl reload apache2
+   ```
+
+6. **Uruchomienie Kreatora Instalacji**
+   - Otwórz przeglądarkę i przejdź do: `http://your-domain.com/install`
+   - Postępuj zgodnie z instrukcjami kreatora:
+     - **Krok 1**: Ekran powitalny
+     - **Krok 2**: Sprawdzenie wymagań systemowych
+     - **Krok 3**: Konfiguracja bazy danych (opcjonalnie z danymi przykładowymi)
+     - **Krok 4**: Utworzenie konta administratora
+     - **Krok 5**: Zakończenie instalacji
+
+### Metoda 2: Instalacja Manualna
+
+1. **Utworzenie Pliku .env**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edycja Konfiguracji**
+   ```env
+   # .env
+   APP_ENV=prod
+   APP_SECRET=your-secret-key-here
+   DATABASE_URL=sqlite:///%kernel.project_dir%/var/data.db
+   MAILER_DSN=smtp://localhost
+   ```
+
+3. **Utworzenie Bazy Danych**
+   ```bash
+   php bin/console doctrine:database:create
+   php bin/console doctrine:migrations:migrate --no-interaction
+   php bin/console doctrine:fixtures:load --no-interaction
+   ```
+
+4. **Utworzenie Użytkownika Administratora**
+   ```bash
+   php bin/console app:create-admin
+   ```
+
+## ⚙️ Konfiguracja
+
+### Konfiguracja Bazy Danych
+
+#### SQLite (Domyślna)
+```env
+DATABASE_URL=sqlite:///%kernel.project_dir%/var/data.db
+```
+
+#### MySQL
+```env
+DATABASE_URL=mysql://username:password@localhost:3306/assethub
+```
+
+#### PostgreSQL
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/assethub
+```
+
+### Konfiguracja Email
+
+#### SMTP
+```env
+MAILER_DSN=smtp://user:password@smtp.example.com:587
+```
+
+#### Gmail
+```env
+MAILER_DSN=gmail://username:password@default
+```
+
+### Konfiguracja HTTPS
+
+1. **Instalacja Certbot (Let's Encrypt)**
+   ```bash
+   sudo apt install -y certbot python3-certbot-apache
+   sudo certbot --apache -d your-domain.com
+   ```
+
+2. **Konfiguracja SSL w Apache**
+   ```apache
+   <VirtualHost *:443>
+       ServerName your-domain.com
+       DocumentRoot /var/www/assethub/public
+       
+       SSLEngine on
+       SSLCertificateFile /etc/letsencrypt/live/your-domain.com/fullchain.pem
+       SSLCertificateKeyFile /etc/letsencrypt/live/your-domain.com/privkey.pem
+       
+       # Dodatkowe ustawienia bezpieczeństwa
+       Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+       Header always set X-Frame-Options DENY
+       Header always set X-Content-Type-Options nosniff
+   </VirtualHost>
+   ```
+
+### Optymalizacja Wydajności
+
+1. **Konfiguracja OPcache**
+   ```ini
+   # /etc/php/8.2/apache2/php.ini
+   opcache.enable=1
+   opcache.memory_consumption=256
+   opcache.max_accelerated_files=20000
+   opcache.validate_timestamps=0
+   ```
+
+2. **Konfiguracja Cache Symfony**
+   ```bash
+   # Wyczyszczenie i rozgrzanie cache
+   php bin/console cache:clear --env=prod
+   php bin/console cache:warmup --env=prod
+   ```
+
+## 📚 Użytkowanie
+
+### Pierwsze Kroki
+
+1. **Logowanie do Systemu**
+   - Przejdź do głównej strony aplikacji
+   - Zaloguj się używając danych administratora utworzonych podczas instalacji
+
+2. **Konfiguracja Modułów**
+   - Przejdź do Panel Administracyjny → Moduły
+   - Aktywuj potrzebne moduły (domyślnie: Admin i Sprzęt)
+
+3. **Dodawanie Użytkowników**
+   - Panel Administracyjny → Użytkownicy → Dodaj użytkownika
+   - Przypisz odpowiednie role do modułów
+
+4. **Konfiguracja Kategorii Sprzętu**
+   - Panel Administracyjny → Kategorie Sprzętu
+   - Dodaj kategorie odpowiadające Twojemu inwentarzowi
+
+### Zarządzanie Sprzętem
+
+1. **Dodawanie Sprzętu**
+   ```
+   Sprzęt → Dodaj sprzęt
+   - Wprowadź numer inwentarzowy
+   - Wybierz kategorię
+   - Wypełnij dane techniczne
+   - Dodaj dokumentację
+   ```
+
+2. **Przypisywanie Sprzętu**
+   ```
+   Sprzęt → [Wybierz sprzęt] → Edytuj
+   - Wybierz użytkownika z listy
+   - Zmień status na "W użyciu"
+   - System automatycznie utworzy log aktywności
+   ```
+
+3. **Harmonogram Przeglądów**
+   ```
+   Sprzęt → [Wybierz sprzęt] → Edytuj
+   - Ustaw "Następny przegląd"
+   - System będzie wysyłał przypomnienia
+   ```
+
+### Zarządzanie Użytkownikami i Rolami
+
+1. **Struktura Ról**
+   ```
+   ADMIN - pełny dostęp do panelu administracyjnego
+   EQUIPMENT_MANAGER - zarządzanie sprzętem
+   EQUIPMENT_USER - tylko podgląd sprzętu
+   ```
+
+2. **Tworzenie Niestandardowych Ról**
+   ```
+   Panel Administracyjny → Role → Dodaj rolę
+   - Wybierz moduł
+   - Ustaw uprawnienia (VIEW, CREATE, EDIT, DELETE)
+   - Opisz rolę
+   ```
+
+## 🔌 API i Integracje
+
+### REST API
+
+System oferuje RESTful API dla integracji z zewnętrznymi systemami:
+
+```bash
+# Przykłady endpointów
+GET /api/equipment - lista sprzętu
+POST /api/equipment - dodanie sprzętu
+PUT /api/equipment/{id} - aktualizacja sprzętu
+DELETE /api/equipment/{id} - usunięcie sprzętu
+
+GET /api/users - lista użytkowników
+POST /api/equipment/{id}/assign - przypisanie sprzętu
+```
+
+### Autoryzacja API
+
+```http
+Authorization: Token your-api-token-here
+Content-Type: application/json
+```
+
+### Eksport Danych
+
+System umożliwia eksport danych w formatach:
+- **CSV** - dla arkuszy kalkulacyjnych
+- **PDF** - dla raportów
+- **JSON** - dla integracji API
+
+## 🛠️ Rozwój
+
+### Struktura Projektu
+
+```
+assethub/
+├── config/           # Konfiguracja Symfony
+├── migrations/       # Migracje bazy danych
+├── public/          # Pliki publiczne (CSS, JS, obrazy)
+├── src/
+│   ├── Controller/  # Kontrolery
+│   ├── Entity/      # Encje Doctrine
+│   ├── Form/        # Formularze Symfony
+│   ├── Repository/  # Repozytoria danych
+│   └── Service/     # Usługi biznesowe
+├── templates/       # Szablony Twig
+├── tests/          # Testy automatyczne
+└── var/            # Cache, logi, sesje
+```
+
+### Środowisko Deweloperskie
+
+1. **Instalacja Zależności Deweloperskich**
+   ```bash
+   composer install
+   ```
+
+2. **Uruchomienie Serwera Deweloperskiego**
+   ```bash
+   symfony server:start
+   ```
+
+3. **Uruchomienie Testów**
+   ```bash
+   php bin/phpunit
+   ```
+
+4. **Analiza Kodu**
+   ```bash
+   # PHP CS Fixer
+   vendor/bin/php-cs-fixer fix
+   
+   # PHPStan
+   vendor/bin/phpstan analyse
+   ```
+
+### Dodawanie Nowych Modułów
+
+1. **Utworzenie Encji**
+   ```bash
+   php bin/console make:entity
+   ```
+
+2. **Utworzenie Kontrolera**
+   ```bash
+   php bin/console make:controller
+   ```
+
+3. **Utworzenie Formularza**
+   ```bash
+   php bin/console make:form
+   ```
+
+4. **Migracja Bazy Danych**
+   ```bash
+   php bin/console make:migration
+   php bin/console doctrine:migrations:migrate
+   ```
+
+### Konwencje Kodowania
+
+- **PSR-12** - Standard kodowania PHP
+- **Symfony Best Practices** - Najlepsze praktyki Symfony
+- **PHPDoc** - Dokumentacja kodu
+- **Type Hints** - Typowanie zmiennych i funkcji
+
+## 🔒 Bezpieczeństwo
+
+### Najlepsze Praktyki
+
+1. **Regularne Aktualizacje**
+   ```bash
+   # Aktualizacja zależności
+   composer update
+   
+   # Sprawdzenie podatności
+   symfony security:check
+   ```
+
+2. **Backup Bazy Danych**
+   ```bash
+   # SQLite
+   cp var/data.db var/backup/data_$(date +%Y%m%d_%H%M%S).db
+   
+   # MySQL
+   mysqldump -u user -p assethub > backup_$(date +%Y%m%d_%H%M%S).sql
+   ```
+
+3. **Monitoring Logów**
+   ```bash
+   # Logi aplikacji
+   tail -f var/log/prod.log
+   
+   # Logi Apache
+   tail -f /var/log/apache2/assethub_error.log
+   ```
+
+### Zabezpieczenia Serwera
+
+1. **Firewall**
+   ```bash
+   sudo ufw enable
+   sudo ufw allow 22/tcp
+   sudo ufw allow 80/tcp
+   sudo ufw allow 443/tcp
+   ```
+
+2. **Automatyczne Aktualizacje**
+   ```bash
+   sudo apt install unattended-upgrades
+   sudo dpkg-reconfigure unattended-upgrades
+   ```
+
+## 📊 Monitoring i Analityka
+
+### Metryki Systemowe
+
+System automatycznie zbiera następujące metryki:
+- Liczba użytkowników aktywnych
+- Wykorzystanie sprzętu
+- Koszty eksploatacji
+- Częstotliwość awarii
+
+### Raporty
+
+1. **Raport Wykorzystania Sprzętu**
+   - Dostępny w: Sprzęt → Raporty
+   - Format: PDF, CSV
+   - Zakres: miesięczny, kwartalny, roczny
+
+2. **Raport Kosztów**
+   - Analiza kosztów zakupu i eksploatacji
+   - Amortyzacja sprzętu
+   - Prognozy budżetowe
+
+## 🤝 Wsparcie
+
+### Dokumentacja
+
+- **Wiki**: [github.com/your-repo/assethub/wiki](https://github.com/your-repo/assethub/wiki)
+- **API Docs**: [your-domain.com/api/docs](http://your-domain.com/api/docs)
+- **FAQ**: [github.com/your-repo/assethub/wiki/FAQ](https://github.com/your-repo/assethub/wiki/FAQ)
+
+### Zgłaszanie Problemów
+
+1. **GitHub Issues**: [github.com/your-repo/assethub/issues](https://github.com/your-repo/assethub/issues)
+2. **Email Support**: support@your-domain.com
+3. **Community Forum**: [forum.your-domain.com](http://forum.your-domain.com)
+
+### Szablony Zgłoszeń
+
+#### Bug Report
+```markdown
+**Opis problemu**
+Krótki opis tego, co nie działa
+
+**Kroki do odtworzenia**
+1. Przejdź do...
+2. Kliknij na...
+3. Zobacz błąd
+
+**Oczekiwane zachowanie**
+Co powinno się stać
+
+**Środowisko**
+- OS: [Ubuntu 22.04]
+- PHP: [8.2.10]
+- Browser: [Chrome 118]
+```
+
+#### Feature Request
+```markdown
+**Czy Twoja propozycja jest związana z problemem?**
+Jasny opis problemu. Np. Frustruje mnie, że...
+
+**Opisz rozwiązanie, które chciałbyś zobaczyć**
+Jasny opis tego, co chcesz, żeby się stało.
+
+**Dodatkowy kontekst**
+Dodaj inne informacje lub zrzuty ekranu dotyczące prośby o funkcję tutaj.
+```
+
+## 🎯 Roadmapa
+
+### Wersja 2.0 (Q2 2024)
+- [ ] Moduł BI i zaawansowana analityka
+- [ ] Integracja z systemami ERP
+- [ ] Aplikacja mobilna (React Native)
+- [ ] Multi-tenancy (obsługa wielu firm)
+
+### Wersja 2.1 (Q3 2024)
+- [ ] Workflow i procesy zatwierdzania
+- [ ] Integracja z systemami IoT
+- [ ] Zaawansowane raportowanie
+- [ ] API GraphQL
+
+### Wersja 2.2 (Q4 2024)
+- [ ] Machine Learning dla predykcji awarii
+- [ ] Integracja z chmurą (AWS, Azure, GCP)
+- [ ] Elasticsearch dla zaawansowanego wyszukiwania
+- [ ] Mikroserwisy
+
+## 🏆 Autorzy i Współtwórcy
+
+### Core Team
+- **Główny Deweloper**: Twoje Imię (your.email@domain.com)
+- **UI/UX Designer**: Designer Name (designer@domain.com)
+- **DevOps Engineer**: DevOps Name (devops@domain.com)
+
+### Contributors
+Zobacz pełną listę współtwórców na: [github.com/your-repo/assethub/contributors](https://github.com/your-repo/assethub/contributors)
+
+### Sposób Współpracy
+
+1. **Fork** repozytorium
+2. **Utwórz** branch dla funkcjonalności (`git checkout -b feature/AmazingFeature`)
+3. **Commit** zmiany (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** do branch (`git push origin feature/AmazingFeature`)
+5. **Otwórz** Pull Request
+
+## 📄 Licencja
+
+Projekt jest udostępniony na licencji MIT - zobacz plik [LICENSE](LICENSE) dla szczegółów.
+
+```
+MIT License
+
+Copyright (c) 2024 AssetHub Project
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction...
+```
+
+## 🙏 Podziękowania
+
+- **Symfony** - Framework PHP
+- **Bootstrap** - Framework CSS
+- **Velzon** - Template administratorski
+- **GridJS** - Tabele interaktywne
+- **Lord Icons** - Animowane ikony
+- **Community** - Za feedback i wsparcie
+
+---
+
+<div align="center">
+  <p>Made with ❤️ by AssetHub Team</p>
+  <p>
+    <a href="https://github.com/your-repo/assethub">GitHub</a> •
+    <a href="https://your-domain.com">Website</a> •
+    <a href="https://twitter.com/assethub">Twitter</a> •
+    <a href="mailto:contact@your-domain.com">Contact</a>
+  </p>
+</div>

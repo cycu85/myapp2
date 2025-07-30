@@ -1,0 +1,121 @@
+<!-- ========== App Menu ========== -->
+<div class="app-menu navbar-menu">
+    <!-- LOGO -->
+    <div class="navbar-brand-box">
+        <!-- Dark Logo-->
+        <a href="/" class="logo logo-dark">
+            <span class="logo-sm">
+                <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
+            </span>
+            <span class="logo-lg">
+                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" height="17">
+            </span>
+        </a>
+        <!-- Light Logo-->
+        <a href="/" class="logo logo-light">
+            <span class="logo-sm">
+                <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
+            </span>
+            <span class="logo-lg">
+                <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="17">
+            </span>
+        </a>
+        <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
+            <i class="ri-record-circle-line"></i>
+        </button>
+    </div>
+
+    <div id="scrollbar">
+        <div class="container-fluid">
+            <div id="two-column-menu">
+            </div>
+            <ul class="navbar-nav" id="navbar-nav">
+                <li class="menu-title"><span data-key="t-menu">Menu</span></li>
+                
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ app.request.get('_route') == 'dashboard' ? 'active' : '' }}" href="/">
+                        <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboard">Dashboard</span>
+                    </a>
+                </li>
+
+                <!-- AssetHub Modules -->
+                {% set hasModules = false %}
+                {% for userRole in app.user.userRoles %}
+                    {% if userRole.isActive and userRole.role.module.isEnabled %}
+                        {% if not hasModules %}
+                            <li class="menu-title"><span data-key="t-modules">Moduły</span></li>
+                            {% set hasModules = true %}
+                        {% endif %}
+                        
+                        {% set module = userRole.role.module %}
+                        {% if module.name == 'equipment' %}
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ app.request.get('_route') starts with 'equipment_' ? 'active' : '' }}" href="/equipment">
+                                <i class="ri-tools-line"></i> <span>{{ module.displayName }}</span>
+                            </a>
+                        </li>
+                        {% elseif module.name == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ app.request.get('_route') starts with 'admin_' ? 'active' : '' }}" href="#sidebarAdmin" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAdmin">
+                                <i class="ri-settings-3-line"></i> <span>{{ module.displayName }}</span>
+                            </a>
+                            <div class="collapse menu-dropdown" id="sidebarAdmin">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="/admin" class="nav-link">Panel główny</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/admin/users" class="nav-link">Użytkownicy</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/admin/roles" class="nav-link">Role i uprawnienia</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/admin/modules" class="nav-link">Moduły</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/admin/dictionaries" class="nav-link">Słowniki</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/admin/settings" class="nav-link">Ustawienia</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Additional modules would go here -->
+                <li class="menu-title"><span data-key="t-system">System</span></li>
+                
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#sidebarHelp" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarHelp">
+                        <i class="ri-question-line"></i> <span data-key="t-help">Pomoc</span>
+                    </a>
+                    <div class="collapse menu-dropdown" id="sidebarHelp">
+                        <ul class="nav nav-sm flex-column">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">Dokumentacja</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">O systemie</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">Zgłoś błąd</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+        <!-- Sidebar -->
+    </div>
+
+    <div class="sidebar-background"></div>
+</div>
+<!-- Left Sidebar End -->
+<!-- Vertical Overlay-->
+<div class="vertical-overlay"></div>

@@ -1,0 +1,102 @@
+{% extends 'installer/base.html.twig' %}
+
+{% block content %}
+<div class="step-indicator">
+    <div class="step completed">1</div>
+    <div class="step active">2</div>
+    <div class="step">3</div>
+    <div class="step">4</div>
+    <div class="step">5</div>
+</div>
+
+<div class="text-center mb-4">
+    <lord-icon
+        src="https://cdn.lordicon.com/kkvxgpti.json"
+        trigger="loop"
+        colors="primary:#667eea,secondary:#764ba2"
+        class="installer-lord-icon-small">
+    </lord-icon>
+    <h3 class="mt-3">Sprawdzanie wymagań systemowych</h3>
+    <p class="text-muted">Weryfikacja konfiguracji serwera</p>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Wymaganie</th>
+                <th>Wymagane</th>
+                <th>Aktualne</th>
+                <th class="text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for requirement in requirements %}
+            <tr class="installer-requirement-row">
+                <td>{{ requirement.name }}</td>
+                <td>{{ requirement.required }}</td>
+                <td>{{ requirement.current }}</td>
+                <td class="text-center">
+                    {% if requirement.status %}
+                        <span class="badge bg-success-subtle text-success installer-status-badge">
+                            <i class="ri-check-line me-1"></i> OK
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger-subtle text-danger installer-status-badge">
+                            <i class="ri-close-line me-1"></i> Błąd
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if not can_proceed %}
+<div class="alert alert-danger">
+    <div class="d-flex">
+        <div class="flex-shrink-0">
+            <i class="ri-error-warning-line"></i>
+        </div>
+        <div class="flex-grow-1 ms-2">
+            <h6 class="alert-heading">Wykryto problemy!</h6>
+            <p class="mb-0">
+                Nie wszystkie wymagania systemowe zostały spełnione. Proszę skontaktować się z administratorem serwera
+                w celu rozwiązania problemów oznaczonych jako "Błąd".
+            </p>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-success">
+    <div class="d-flex">
+        <div class="flex-shrink-0">
+            <i class="ri-check-double-line"></i>
+        </div>
+        <div class="flex-grow-1 ms-2">
+            <h6 class="alert-heading">Wszystko w porządku!</h6>
+            <p class="mb-0">
+                Wszystkie wymagania systemowe zostały spełnione. Możesz przejść do następnego kroku instalacji.
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="installer-navigation">
+    <a href="{{ path('installer_welcome') }}" class="btn btn-outline-secondary">
+        <i class="ri-arrow-left-line me-1"></i> Wstecz
+    </a>
+    
+    {% if can_proceed %}
+    <a href="{{ path('installer_database') }}" class="btn btn-primary">
+        <i class="ri-arrow-right-line me-1"></i> Dalej
+    </a>
+    {% else %}
+    <button type="button" class="btn btn-secondary" onclick="location.reload()">
+        <i class="ri-refresh-line me-1"></i> Sprawdź ponownie
+    </button>
+    {% endif %}
+</div>
+{% endblock %}
