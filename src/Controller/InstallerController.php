@@ -9,6 +9,7 @@ use App\Entity\UserRole;
 use App\Entity\EquipmentCategory;
 use App\Service\SampleDataService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,14 +24,23 @@ class InstallerController extends AbstractController
     public function __construct(
         private EntityManagerInterface $entityManager,
         private UserPasswordHasherInterface $passwordHasher,
-        private SampleDataService $sampleDataService
+        private SampleDataService $sampleDataService,
+        private LoggerInterface $logger
     ) {}
 
     #[Route('/', name: 'installer_welcome')]
-    public function welcome(): Response
+    public function welcome(Request $request): Response
     {
+        $this->logger->info('Installer welcome page accessed', [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent')
+        ]);
+
         // Check if already installed
         if ($this->isInstalled()) {
+            $this->logger->warning('Installer accessed but system already installed', [
+                'ip' => $request->getClientIp()
+            ]);
             return $this->redirectToRoute('home');
         }
 
@@ -38,17 +48,27 @@ class InstallerController extends AbstractController
     }
 
     #[Route('/requirements', name: 'installer_requirements')]
-    public function requirements(): Response
+    public function requirements(Request $request): Response
     {
         if ($this->isInstalled()) {
+            $this->logger->warning('Installer requirements accessed but system already installed', [
+                'ip' => $request->getClientIp()
+            ]);
             return $this->redirectToRoute('home');
         }
 
         $requirements = $this->checkRequirements();
+        $canProceed = !in_array(false, array_column($requirements, 'status'));
+
+        $this->logger->info('Installer requirements checked', [
+            'ip' => $request->getClientIp(),
+            'can_proceed' => $canProceed,
+            'failed_requirements' => array_keys(array_filter($requirements, fn($req) => !$req['status']))
+        ]);
 
         return $this->render('installer/requirements.html.twig', [
             'requirements' => $requirements,
-            'can_proceed' => !in_array(false, array_column($requirements, 'status'))
+            'can_proceed' => $canProceed
         ]);
     }
 
@@ -56,28 +76,56 @@ class InstallerController extends AbstractController
     public function database(Request $request): Response
     {
         if ($this->isInstalled()) {
+            $this->logger->warning('Installer database accessed but system already installed', [
+                'ip' => $request->getClientIp()
+            ]);
             return $this->redirectToRoute('home');
         }
 
         if ($request->isMethod('POST')) {
+            $loadSampleData = $request->request->get('load_sample_data') === '1';
+            
+            $this->logger->info('Database installation started', [
+                'ip' => $request->getClientIp(),
+                'load_sample_data' => $loadSampleData
+            ]);
+            
             try {
                 // Create database schema
                 $this->createDatabaseSchema();
+                $this->logger->info('Database schema created successfully', [
+                    'ip' => $request->getClientIp()
+                ]);
                 
                 // Insert basic data
                 $this->insertBasicData();
+                $this->logger->info('Basic data inserted successfully', [
+                    'ip' => $request->getClientIp()
+                ]);
                 
                 // Load sample data if requested
-                if ($request->request->get('load_sample_data') === '1') {
+                if ($loadSampleData) {
                     $this->sampleDataService->loadSampleData();
+                    $this->logger->info('Sample data loaded successfully', [
+                        'ip' => $request->getClientIp()
+                    ]);
                     $this->addFlash('success', 'Dane przykładowe zostały załadowane pomyślnie.');
                 }
                 
                 return $this->redirectToRoute('installer_admin');
             } catch (\Exception $e) {
+                $this->logger->error('Database installation failed', [
+                    'ip' => $request->getClientIp(),
+                    'error' => $e->getMessage(),
+                    'load_sample_data' => $loadSampleData
+                ]);
                 $this->addFlash('error', 'Błąd podczas tworzenia bazy danych: ' . $e->getMessage());
             }
         }
+
+        $this->logger->info('Installer database page accessed', [
+            'ip' => $request->getClientIp()
+        ]);
 
         return $this->render('installer/database.html.twig');
     }
@@ -86,34 +134,66 @@ class InstallerController extends AbstractController
     public function admin(Request $request): Response
     {
         if ($this->isInstalled()) {
+            $this->logger->warning('Installer admin accessed but system already installed', [
+                'ip' => $request->getClientIp()
+            ]);
             return $this->redirectToRoute('home');
         }
 
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
             
+            $this->logger->info('Admin user creation started', [
+                'ip' => $request->getClientIp(),
+                'username' => $data['username'] ?? 'unknown',
+                'email' => $data['email'] ?? 'unknown'
+            ]);
+            
             try {
                 // Create admin user
                 $this->createAdminUser($data);
+                $this->logger->info('Admin user created successfully', [
+                    'ip' => $request->getClientIp(),
+                    'username' => $data['username'] ?? 'unknown'
+                ]);
                 
                 // Mark as installed
                 $this->markAsInstalled();
+                $this->logger->info('System installation completed', [
+                    'ip' => $request->getClientIp()
+                ]);
                 
                 return $this->redirectToRoute('installer_finish');
             } catch (\Exception $e) {
+                $this->logger->error('Admin user creation failed', [
+                    'ip' => $request->getClientIp(),
+                    'username' => $data['username'] ?? 'unknown',
+                    'error' => $e->getMessage()
+                ]);
                 $this->addFlash('error', 'Błąd podczas tworzenia administratora: ' . $e->getMessage());
             }
         }
+
+        $this->logger->info('Installer admin page accessed', [
+            'ip' => $request->getClientIp()
+        ]);
 
         return $this->render('installer/admin.html.twig');
     }
 
     #[Route('/finish', name: 'installer_finish')]
-    public function finish(): Response
+    public function finish(Request $request): Response
     {
         if (!$this->isInstalled()) {
+            $this->logger->warning('Installer finish accessed but system not installed', [
+                'ip' => $request->getClientIp()
+            ]);
             return $this->redirectToRoute('installer_welcome');
         }
+
+        $this->logger->info('Installation finished page accessed', [
+            'ip' => $request->getClientIp()
+        ]);
 
         return $this->render('installer/finish.html.twig');
     }
@@ -170,6 +250,8 @@ class InstallerController extends AbstractController
 
     private function createDatabaseSchema(): void
     {
+        $this->logger->info('Starting database schema creation');
+        
         try {
             $projectDir = $this->getParameter('kernel.project_dir');
             
@@ -205,15 +287,27 @@ class InstallerController extends AbstractController
             $missingTables = array_diff($requiredTables, $tables);
             
             if (!empty($missingTables)) {
+                $this->logger->error('Database schema creation incomplete - missing tables', [
+                    'missing_tables' => $missingTables,
+                    'created_tables' => $tables
+                ]);
                 throw new \Exception('Brakujące tabele w bazie danych: ' . implode(', ', $missingTables) . '. Utworzone tabele: ' . implode(', ', $tables));
             }
+            
+            $this->logger->info('Database schema created successfully', [
+                'created_tables' => $tables
+            ]);
         } catch (\Exception $e) {
+            $this->logger->error('Database schema creation failed', [
+                'error' => $e->getMessage()
+            ]);
             throw new \Exception('Błąd podczas tworzenia schematu bazy danych: ' . $e->getMessage());
         }
     }
 
     private function insertBasicData(): void
     {
+        $this->logger->info('Starting basic data insertion');
         // Create modules
         $modules = [
             ['name' => 'admin', 'display_name' => 'Panel Administracyjny', 'description' => 'Zarządzanie systemem', 'is_enabled' => true],
@@ -306,13 +400,22 @@ class InstallerController extends AbstractController
         }
 
         $this->entityManager->flush();
+        
+        $this->logger->info('Basic data insertion completed successfully');
     }
 
     private function createAdminUser(array $data): void
     {
+        $this->logger->info('Creating admin user', [
+            'username' => $data['username'] ?? 'unknown'
+        ]);
+        
         // Check if admin user already exists
         $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $data['username']]);
         if ($existingUser) {
+            $this->logger->error('Admin user creation failed - user already exists', [
+                'username' => $data['username']
+            ]);
             throw new \Exception('Użytkownik o tej nazwie już istnieje');
         }
 
@@ -343,5 +446,9 @@ class InstallerController extends AbstractController
         }
 
         $this->entityManager->flush();
+        
+        $this->logger->info('Admin user created and assigned admin role successfully', [
+            'username' => $data['username']
+        ]);
     }
 }

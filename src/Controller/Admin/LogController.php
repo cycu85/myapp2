@@ -3,7 +3,9 @@
 namespace App\Controller\Admin;
 
 use App\Service\PermissionService;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -11,16 +13,21 @@ use Symfony\Component\Routing\Annotation\Route;
 class LogController extends AbstractController
 {
     public function __construct(
-        private PermissionService $permissionService
+        private PermissionService $permissionService,
+        private LoggerInterface $logger
     ) {
     }
 
     #[Route('/', name: 'admin_logs')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $user = $this->getUser();
         
         if (!$this->permissionService->canAccessModule($user, 'admin')) {
+            $this->logger->warning('Unauthorized admin logs access attempt', [
+                'user' => $user?->getUsername() ?? 'anonymous',
+                'ip' => $request->getClientIp()
+            ]);
             throw $this->createAccessDeniedException('Brak dostępu do panelu administracyjnego');
         }
 
@@ -47,17 +54,28 @@ class LogController extends AbstractController
             return $b['modified'] - $a['modified'];
         });
 
+        $this->logger->info('Admin logs index accessed', [
+            'user' => $user->getUsername(),
+            'ip' => $request->getClientIp(),
+            'log_files_count' => count($logFiles)
+        ]);
+
         return $this->render('admin/logs/index.html.twig', [
             'logFiles' => $logFiles,
         ]);
     }
 
     #[Route('/view/{filename}', name: 'admin_logs_view')]
-    public function view(string $filename): Response
+    public function view(string $filename, Request $request): Response
     {
         $user = $this->getUser();
         
         if (!$this->permissionService->canAccessModule($user, 'admin')) {
+            $this->logger->warning('Unauthorized admin log view access attempt', [
+                'user' => $user?->getUsername() ?? 'anonymous',
+                'ip' => $request->getClientIp(),
+                'filename' => $filename
+            ]);
             throw $this->createAccessDeniedException('Brak dostępu do panelu administracyjnego');
         }
 
@@ -66,6 +84,12 @@ class LogController extends AbstractController
 
         // Security check - ensure file is in log directory and exists
         if (!is_file($filePath) || !str_starts_with(realpath($filePath), realpath($logDirectory))) {
+            $this->logger->warning('Admin log view access denied - invalid file', [
+                'user' => $user->getUsername(),
+                'ip' => $request->getClientIp(),
+                'filename' => $filename,
+                'file_path' => $filePath
+            ]);
             throw $this->createNotFoundException('Plik logu nie został znaleziony');
         }
 
@@ -99,6 +123,14 @@ class LogController extends AbstractController
             fclose($handle);
         }
 
+        $this->logger->info('Admin log file viewed', [
+            'user' => $user->getUsername(),
+            'ip' => $request->getClientIp(),
+            'filename' => $filename,
+            'file_size' => filesize($filePath),
+            'lines_displayed' => count($lines)
+        ]);
+
         return $this->render('admin/logs/view.html.twig', [
             'filename' => $filename,
             'lines' => $lines,
@@ -108,11 +140,16 @@ class LogController extends AbstractController
     }
 
     #[Route('/download/{filename}', name: 'admin_logs_download')]
-    public function download(string $filename): Response
+    public function download(string $filename, Request $request): Response
     {
         $user = $this->getUser();
         
         if (!$this->permissionService->canAccessModule($user, 'admin')) {
+            $this->logger->warning('Unauthorized admin log download access attempt', [
+                'user' => $user?->getUsername() ?? 'anonymous',
+                'ip' => $request->getClientIp(),
+                'filename' => $filename
+            ]);
             throw $this->createAccessDeniedException('Brak dostępu do panelu administracyjnego');
         }
 
@@ -121,18 +158,36 @@ class LogController extends AbstractController
 
         // Security check
         if (!is_file($filePath) || !str_starts_with(realpath($filePath), realpath($logDirectory))) {
+            $this->logger->warning('Admin log download access denied - invalid file', [
+                'user' => $user->getUsername(),
+                'ip' => $request->getClientIp(),
+                'filename' => $filename,
+                'file_path' => $filePath
+            ]);
             throw $this->createNotFoundException('Plik logu nie został znaleziony');
         }
+
+        $this->logger->info('Admin log file downloaded', [
+            'user' => $user->getUsername(),
+            'ip' => $request->getClientIp(),
+            'filename' => $filename,
+            'file_size' => filesize($filePath)
+        ]);
 
         return $this->file($filePath, $filename);
     }
 
     #[Route('/clear/{filename}', name: 'admin_logs_clear', methods: ['POST'])]
-    public function clear(string $filename): Response
+    public function clear(string $filename, Request $request): Response
     {
         $user = $this->getUser();
         
         if (!$this->permissionService->canAccessModule($user, 'admin')) {
+            $this->logger->warning('Unauthorized admin log clear access attempt', [
+                'user' => $user?->getUsername() ?? 'anonymous',
+                'ip' => $request->getClientIp(),
+                'filename' => $filename
+            ]);
             throw $this->createAccessDeniedException('Brak dostępu do panelu administracyjnego');
         }
 
@@ -141,11 +196,26 @@ class LogController extends AbstractController
 
         // Security check
         if (!is_file($filePath) || !str_starts_with(realpath($filePath), realpath($logDirectory))) {
+            $this->logger->warning('Admin log clear access denied - invalid file', [
+                'user' => $user->getUsername(),
+                'ip' => $request->getClientIp(),
+                'filename' => $filename,
+                'file_path' => $filePath
+            ]);
             throw $this->createNotFoundException('Plik logu nie został znaleziony');
         }
 
+        $originalSize = filesize($filePath);
+        
         // Clear the file content
         file_put_contents($filePath, '');
+
+        $this->logger->warning('Admin log file cleared', [
+            'user' => $user->getUsername(),
+            'ip' => $request->getClientIp(),
+            'filename' => $filename,
+            'original_size' => $originalSize
+        ]);
 
         $this->addFlash('success', "Plik logu {$filename} został wyczyszczony.");
         
