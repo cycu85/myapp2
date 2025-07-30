@@ -165,6 +165,7 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    
    # Instalacja zależności
    sudo -u www-data composer install --no-dev --optimize-autoloader
+   sudo -u www-data composer require symfony/asset
    
    # Utworzenie struktury bazy danych
    sudo -u www-data php bin/console doctrine:database:create
