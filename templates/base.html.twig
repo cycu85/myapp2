@@ -115,8 +115,10 @@
 
     <!-- App js -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
-    {% else %}
-        <!-- Login/Guest layout -->
+    {% endif %}
+    
+    <!-- Content for non-authenticated users (like login page) -->
+    {% if not app.user %}
         {% block body %}{% endblock %}
     {% endif %}
 </body>
