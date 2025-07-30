@@ -283,6 +283,8 @@ class InstallerController extends AbstractController
                 $category->setIcon($categoryData['icon']);
                 $category->setSortOrder($i + 1);
                 $category->setIsActive(true);
+                $category->setCreatedAt(new \DateTime());
+                $category->setUpdatedAt(new \DateTime());
                 $this->entityManager->persist($category);
             }
         }
