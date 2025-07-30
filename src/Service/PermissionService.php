@@ -72,8 +72,8 @@ class PermissionService
         
         $userModules = $this->getUserModules($user);
         
-        foreach ($userModules as $userModule) {
-            if ($userModule->getName() === $moduleName) {
+        foreach ($userModules as $userRole) {
+            if ($userRole->getRole()->getModule()->getName() === $moduleName) {
                 return true;
             }
         }
