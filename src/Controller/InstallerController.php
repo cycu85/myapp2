@@ -171,9 +171,26 @@ class InstallerController extends AbstractController
     private function createDatabaseSchema(): void
     {
         try {
-            // Run database migrations
             $projectDir = $this->getParameter('kernel.project_dir');
             
+            // First, drop all existing tables to start fresh
+            $schemaManager = $this->entityManager->getConnection()->createSchemaManager();
+            $existingTables = $schemaManager->listTableNames();
+            
+            if (!empty($existingTables)) {
+                // Drop existing tables in reverse order to handle foreign keys
+                $tablesToDrop = array_reverse($existingTables);
+                foreach ($tablesToDrop as $table) {
+                    if ($table !== 'doctrine_migration_versions') {
+                        $schemaManager->dropTable($table);
+                    }
+                }
+                
+                // Clean migration status
+                $this->entityManager->getConnection()->executeStatement('DELETE FROM doctrine_migration_versions');
+            }
+            
+            // Run database migrations
             $process = new Process(['php', 'bin/console', 'doctrine:migrations:migrate', '--no-interaction'], $projectDir);
             $process->run();
             
@@ -182,11 +199,7 @@ class InstallerController extends AbstractController
             }
             
             // Verify tables were created
-            $schemaManager = $this->entityManager->getConnection()->createSchemaManager();
             $tables = $schemaManager->listTableNames();
-            
-            // Debug: log what tables were actually created
-            error_log('Created tables: ' . implode(', ', $tables));
             
             $requiredTables = ['modules', 'users', 'roles', 'user_roles', 'equipment_categories', 'equipment', 'equipment_log', 'equipment_attachment'];
             $missingTables = array_diff($requiredTables, $tables);
