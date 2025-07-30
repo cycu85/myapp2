@@ -45,4 +45,28 @@ class AdminController extends AbstractController
             'modules' => $modules,
         ]);
     }
+
+    #[Route('/dictionaries', name: 'admin_dictionaries')]
+    public function dictionaries(): Response
+    {
+        $user = $this->getUser();
+        
+        if (!$this->permissionService->canAccessModule($user, 'admin')) {
+            throw $this->createAccessDeniedException('Brak dostępu do panelu administracyjnego');
+        }
+
+        return $this->render('admin/dictionaries/index.html.twig');
+    }
+
+    #[Route('/settings', name: 'admin_settings')]
+    public function settings(): Response
+    {
+        $user = $this->getUser();
+        
+        if (!$this->permissionService->canAccessModule($user, 'admin')) {
+            throw $this->createAccessDeniedException('Brak dostępu do panelu administracyjnego');
+        }
+
+        return $this->render('admin/settings/index.html.twig');
+    }
 }

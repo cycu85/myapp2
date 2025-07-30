@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Słowniki - AssetHub{% endblock %}
+
+{% block page_title %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Słowniki Systemu</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Admin</a></li>
+                    <li class="breadcrumb-item active">Słowniki</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Zarządzanie Słownikami</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-4 col-sm-6">
+                        <div class="card profile-project-card shadow-none profile-project-info">
+                            <div class="card-body p-4">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1 text-muted overflow-hidden">
+                                        <h5 class="fs-14 text-truncate mb-1">
+                                            <a href="#" class="text-body">Kategorie Sprzętu</a>
+                                        </h5>
+                                        <p class="text-muted text-truncate mb-0">Zarządzanie kategoriami sprzętu i narzędzi</p>
+                                    </div>
+                                    <div class="flex-shrink-0 ms-2">
+                                        <div class="badge bg-info-subtle text-info fs-10">Aktywny</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex mt-4">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="flex-shrink-0">
+                                                <h6 class="mb-0">--</h6>
+                                                <p class="text-muted fs-13 mb-0">Rekordów</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <a href="#" class="btn btn-outline-primary btn-sm">
+                                            <i class="ri-settings-line align-bottom"></i> Zarządzaj
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-sm-6">
+                        <div class="card profile-project-card shadow-none profile-project-warning">
+                            <div class="card-body p-4">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1 text-muted overflow-hidden">
+                                        <h5 class="fs-14 text-truncate mb-1">
+                                            <a href="#" class="text-body">Statusy Sprzętu</a>
+                                        </h5>
+                                        <p class="text-muted text-truncate mb-0">Statusy i stany sprzętu w systemie</p>
+                                    </div>
+                                    <div class="flex-shrink-0 ms-2">
+                                        <div class="badge bg-warning-subtle text-warning fs-10">W planach</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex mt-4">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="flex-shrink-0">
+                                                <h6 class="mb-0">--</h6>
+                                                <p class="text-muted fs-13 mb-0">Rekordów</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <a href="#" class="btn btn-outline-warning btn-sm">
+                                            <i class="ri-time-line align-bottom"></i> Wkrótce
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-sm-6">
+                        <div class="card profile-project-card shadow-none profile-project-secondary">
+                            <div class="card-body p-4">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1 text-muted overflow-hidden">
+                                        <h5 class="fs-14 text-truncate mb-1">
+                                            <a href="#" class="text-body">Lokalizacje</a>
+                                        </h5>
+                                        <p class="text-muted text-truncate mb-0">Słownik lokalizacji i miejsc przechowywania</p>
+                                    </div>
+                                    <div class="flex-shrink-0 ms-2">
+                                        <div class="badge bg-secondary-subtle text-secondary fs-10">W planach</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex mt-4">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="flex-shrink-0">
+                                                <h6 class="mb-0">--</h6>
+                                                <p class="text-muted fs-13 mb-0">Rekordów</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <a href="#" class="btn btn-outline-secondary btn-sm">
+                                            <i class="ri-time-line align-bottom"></i> Wkrótce
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="ri-information-line"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-2">
+                            <h6 class="alert-heading">Informacja o słownikach</h6>
+                            <p class="mb-0">
+                                Słowniki systemowe pozwalają na zarządzanie kategoriami, statusami i innymi danymi referencyjnymi używanymi w systemie AssetHub.
+                                Część funkcjonalności jest obecnie w fazie rozwoju.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

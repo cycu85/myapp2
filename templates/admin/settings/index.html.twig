@@ -1,0 +1,214 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ustawienia Systemu - AssetHub{% endblock %}
+
+{% block page_title %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Ustawienia Systemu</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Admin</a></li>
+                    <li class="breadcrumb-item active">Ustawienia</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Konfiguracja Systemu</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6">
+                        <div class="card border card-border-primary">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-settings-3-line me-2"></i>Ogólne
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <p class="text-muted mb-0">Podstawowe ustawienia systemu, nazwa firmy, logo</p>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <button type="button" class="btn btn-primary btn-sm">
+                                            <i class="ri-settings-line me-1"></i>Konfiguruj
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-6">
+                        <div class="card border card-border-info">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-mail-line me-2"></i>Email
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <p class="text-muted mb-0">Konfiguracja SMTP, szablony wiadomości</p>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <button type="button" class="btn btn-info btn-sm">
+                                            <i class="ri-settings-line me-1"></i>Konfiguruj
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-6">
+                        <div class="card border card-border-warning">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-shield-check-line me-2"></i>Bezpieczeństwo
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <p class="text-muted mb-0">Polityki haseł, sesje, 2FA</p>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <button type="button" class="btn btn-warning btn-sm">
+                                            <i class="ri-settings-line me-1"></i>Konfiguruj
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6 col-lg-6">
+                        <div class="card border card-border-success">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-database-line me-2"></i>Baza Danych
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <p class="text-muted mb-0">Kopia zapasowa, optymalizacja, logi</p>
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <button type="button" class="btn btn-success btn-sm">
+                                            <i class="ri-settings-line me-1"></i>Konfiguruj
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border border-light">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-information-line me-2"></i>Informacje o Systemie
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-3 col-sm-6">
+                                        <div class="p-2 border border-dashed rounded">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-2">
+                                                    <div class="avatar-title rounded bg-transparent text-success fs-24">
+                                                        <i class="ri-php-line"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <p class="text-muted mb-1">Wersja PHP</p>
+                                                    <h5 class="mb-0">{{ constant('PHP_VERSION') }}</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-sm-6">
+                                        <div class="p-2 border border-dashed rounded">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-2">
+                                                    <div class="avatar-title rounded bg-transparent text-primary fs-24">
+                                                        <i class="ri-tools-line"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <p class="text-muted mb-1">AssetHub</p>
+                                                    <h5 class="mb-0">v1.0.0</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-sm-6">
+                                        <div class="p-2 border border-dashed rounded">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-2">
+                                                    <div class="avatar-title rounded bg-transparent text-info fs-24">
+                                                        <i class="ri-database-line"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <p class="text-muted mb-1">Baza Danych</p>
+                                                    <h5 class="mb-0">MySQL</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-sm-6">
+                                        <div class="p-2 border border-dashed rounded">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm me-2">
+                                                    <div class="avatar-title rounded bg-transparent text-warning fs-24">
+                                                        <i class="ri-time-line"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <p class="text-muted mb-1">Uptime</p>
+                                                    <h5 class="mb-0">{{ "now"|date("H:i") }}</h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="ri-alert-line"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-2">
+                            <h6 class="alert-heading">Uwaga</h6>
+                            <p class="mb-0">
+                                Sekcja ustawień systemu jest obecnie w fazie rozwoju. 
+                                Większość funkcji konfiguracyjnych będzie dostępna w przyszłych wersjach.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
