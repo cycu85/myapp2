@@ -96,6 +96,7 @@ final class Version20250730070000 extends AbstractMigration
             icon VARCHAR(50) DEFAULT NULL,
             sort_order INT NOT NULL DEFAULT 0,
             is_active TINYINT(1) NOT NULL DEFAULT 1,
+            custom_fields_config TEXT DEFAULT NULL,
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL,
             PRIMARY KEY(id),
