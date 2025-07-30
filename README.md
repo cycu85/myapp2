@@ -158,8 +158,17 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    sudo chown -R www-data:www-data myapp2
    cd myapp2
    
+   # Konfiguracja środowiska (opcjonalne - domyślnie używa SQLite)
+   # Jeśli chcesz używać MySQL, edytuj plik .env:
+   # sudo -u www-data nano .env
+   # Zmień DATABASE_URL na: mysql://myapp2:secure_password@localhost:3306/myapp2
+   
    # Instalacja zależności
    sudo -u www-data composer install --no-dev --optimize-autoloader
+   
+   # Utworzenie struktury bazy danych
+   sudo -u www-data php bin/console doctrine:database:create
+   sudo -u www-data php bin/console doctrine:migrations:migrate --no-interaction
    
    # Ustawienie uprawnień
    sudo chmod -R 755 var/
