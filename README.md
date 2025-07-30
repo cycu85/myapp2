@@ -5,7 +5,7 @@
   <p>
     <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat-square&logo=php&logoColor=white" alt="PHP 8.2+">
     <img src="https://img.shields.io/badge/Symfony-7.0-000000?style=flat-square&logo=symfony&logoColor=white" alt="Symfony 7.0">
-    <img src="https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
+    <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white" alt="MySQL">
     <img src="https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=flat-square&logo=bootstrap&logoColor=white" alt="Bootstrap 5.3">
     <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License MIT">
   </p>
@@ -79,10 +79,10 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 | **System Operacyjny** | Ubuntu 20.04+ / CentOS 8+ / Debian 11+ |
 | **PHP** | 8.2 lub nowszy |
 | **Serwer Web** | Apache 2.4+ / Nginx 1.18+ |
-| **Baza Danych** | SQLite 3.35+ (domyślnie) / MySQL 8.0+ / PostgreSQL 13+ |
+| **Baza Danych** | MySQL 8.0+ (domyślnie) / PostgreSQL 13+ / SQLite 3.35+ |
 | **Pamięć RAM** | Minimum 512MB, zalecane 2GB+ |
 | **Przestrzeń Dyskowa** | Minimum 1GB, zalecane 5GB+ |
-| **PHP Extensions** | sqlite3, pdo, intl, mbstring, xml, curl, gd |
+| **PHP Extensions** | mysql, pdo, intl, mbstring, xml, curl, gd |
 
 ### Zalecane Wymagania Produkcyjne
 
@@ -109,12 +109,26 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    sudo add-apt-repository ppa:ondrej/php
    sudo apt update
    sudo apt install -y php8.2 php8.2-cli php8.2-fpm php8.2-common \
-     php8.2-sqlite3 php8.2-pdo php8.2-intl php8.2-mbstring \
+     php8.2-mysql php8.2-pdo php8.2-intl php8.2-mbstring \
      php8.2-xml php8.2-curl php8.2-gd php8.2-zip php8.2-opcache
    ```
 
-2. **Instalacja Serwera Web (Apache)**
+2. **Instalacja MySQL i Serwera Web (Apache)**
    ```bash
+   # Instalacja MySQL
+   sudo apt install -y mysql-server
+   sudo systemctl enable mysql
+   sudo systemctl start mysql
+   
+   # Zabezpieczenie instalacji MySQL
+   sudo mysql_secure_installation
+   
+   # Utworzenie bazy danych i użytkownika
+   sudo mysql -e "CREATE DATABASE assethub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+   sudo mysql -e "CREATE USER 'assethub'@'localhost' IDENTIFIED BY 'secure_password';"
+   sudo mysql -e "GRANT ALL PRIVILEGES ON assethub.* TO 'assethub'@'localhost';"
+   sudo mysql -e "FLUSH PRIVILEGES;"
+   
    # Instalacja Apache
    sudo apt install -y apache2
    
@@ -198,7 +212,7 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    # .env
    APP_ENV=prod
    APP_SECRET=your-secret-key-here
-   DATABASE_URL=sqlite:///%kernel.project_dir%/var/data.db
+   DATABASE_URL=mysql://assethub:secure_password@localhost:3306/assethub
    MAILER_DSN=smtp://localhost
    ```
 
@@ -218,14 +232,14 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 
 ### Konfiguracja Bazy Danych
 
-#### SQLite (Domyślna)
+#### MySQL (Domyślna)
 ```env
-DATABASE_URL=sqlite:///%kernel.project_dir%/var/data.db
+DATABASE_URL=mysql://assethub:secure_password@localhost:3306/assethub
 ```
 
-#### MySQL
+#### SQLite
 ```env
-DATABASE_URL=mysql://username:password@localhost:3306/assethub
+DATABASE_URL=sqlite:///%kernel.project_dir%/var/data.db
 ```
 
 #### PostgreSQL
@@ -473,11 +487,11 @@ assethub/
 
 2. **Backup Bazy Danych**
    ```bash
-   # SQLite
-   cp var/data.db var/backup/data_$(date +%Y%m%d_%H%M%S).db
-   
    # MySQL
-   mysqldump -u user -p assethub > backup_$(date +%Y%m%d_%H%M%S).sql
+   mysqldump -u assethub -p assethub > backup_$(date +%Y%m%d_%H%M%S).sql
+   
+   # SQLite (jeśli używasz)
+   cp var/data.db var/backup/data_$(date +%Y%m%d_%H%M%S).db
    ```
 
 3. **Monitoring Logów**
