@@ -8,13 +8,13 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * MySQL Migration for AssetHub System
+ * Clean MySQL Migration for AssetHub System
  */
-final class Version20250730070000 extends AbstractMigration
+final class Version20250730080000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Initial database schema for AssetHub - MySQL version';
+        return 'Clean database schema for AssetHub - MySQL version';
     }
 
     public function up(Schema $schema): void
@@ -31,7 +31,7 @@ final class Version20250730070000 extends AbstractMigration
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL,
             PRIMARY KEY(id),
-            UNIQUE INDEX UNIQ_2EB743D75E237E06 (name)
+            UNIQUE INDEX UNIQ_modules_name (name)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
         // Create users table
@@ -51,8 +51,8 @@ final class Version20250730070000 extends AbstractMigration
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL,
             PRIMARY KEY(id),
-            UNIQUE INDEX UNIQ_1483A5E9F85E0677 (username),
-            UNIQUE INDEX UNIQ_1483A5E9E7927C74 (email)
+            UNIQUE INDEX UNIQ_users_username (username),
+            UNIQUE INDEX UNIQ_users_email (email)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
         // Create roles table
@@ -66,8 +66,7 @@ final class Version20250730070000 extends AbstractMigration
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL,
             PRIMARY KEY(id),
-            INDEX IDX_B63E2EC7AFC2B591 (module_id),
-            CONSTRAINT FK_B63E2EC7AFC2B591 FOREIGN KEY (module_id) REFERENCES modules (id)
+            INDEX IDX_roles_module (module_id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
         // Create user_roles table
@@ -79,21 +78,18 @@ final class Version20250730070000 extends AbstractMigration
             assigned_at DATETIME NOT NULL,
             is_active TINYINT(1) NOT NULL,
             PRIMARY KEY(id),
-            INDEX IDX_54FCD59FA76ED395 (user_id),
-            INDEX IDX_54FCD59FD60322AC (role_id),
-            INDEX IDX_54FCD59F6E6F1246 (assigned_by_id),
-            CONSTRAINT FK_54FCD59FA76ED395 FOREIGN KEY (user_id) REFERENCES users (id),
-            CONSTRAINT FK_54FCD59FD60322AC FOREIGN KEY (role_id) REFERENCES roles (id),
-            CONSTRAINT FK_54FCD59F6E6F1246 FOREIGN KEY (assigned_by_id) REFERENCES users (id)
+            INDEX IDX_user_roles_user (user_id),
+            INDEX IDX_user_roles_role (role_id),
+            INDEX IDX_user_roles_assigned_by (assigned_by_id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
         // Create equipment_categories table
         $this->addSql('CREATE TABLE equipment_categories (
             id INT AUTO_INCREMENT NOT NULL,
-            name VARCHAR(100) NOT NULL,
+            name VARCHAR(255) NOT NULL,
             description TEXT DEFAULT NULL,
-            color VARCHAR(7) DEFAULT NULL,
-            icon VARCHAR(50) DEFAULT NULL,
+            color VARCHAR(50) DEFAULT NULL,
+            icon VARCHAR(100) DEFAULT NULL,
             sort_order INT NOT NULL DEFAULT 0,
             is_active TINYINT(1) NOT NULL DEFAULT 1,
             custom_fields_config JSON DEFAULT NULL,
@@ -131,14 +127,10 @@ final class Version20250730070000 extends AbstractMigration
             INDEX IDX_equipment_category (category_id),
             INDEX IDX_equipment_assigned_to (assigned_to_id),
             INDEX IDX_equipment_created_by (created_by_id),
-            INDEX IDX_equipment_updated_by (updated_by_id),
-            CONSTRAINT FK_equipment_category FOREIGN KEY (category_id) REFERENCES equipment_categories (id),
-            CONSTRAINT FK_equipment_assigned_to FOREIGN KEY (assigned_to_id) REFERENCES users (id),
-            CONSTRAINT FK_equipment_created_by FOREIGN KEY (created_by_id) REFERENCES users (id),
-            CONSTRAINT FK_equipment_updated_by FOREIGN KEY (updated_by_id) REFERENCES users (id)
+            INDEX IDX_equipment_updated_by (updated_by_id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
-        // Create equipment_log table - simplified without foreign keys initially
+        // Create equipment_log table
         $this->addSql('CREATE TABLE equipment_log (
             id INT AUTO_INCREMENT NOT NULL,
             equipment_id INT NOT NULL,
@@ -151,10 +143,12 @@ final class Version20250730070000 extends AbstractMigration
             new_status VARCHAR(50) DEFAULT NULL,
             additional_data JSON DEFAULT NULL,
             created_at DATETIME NOT NULL,
-            PRIMARY KEY(id)
+            PRIMARY KEY(id),
+            INDEX IDX_equipment_log_equipment (equipment_id),
+            INDEX IDX_equipment_log_created_by (created_by_id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
-        // Create equipment_attachment table - simplified without foreign keys initially
+        // Create equipment_attachment table
         $this->addSql('CREATE TABLE equipment_attachment (
             id INT AUTO_INCREMENT NOT NULL,
             equipment_id INT NOT NULL,
@@ -166,7 +160,9 @@ final class Version20250730070000 extends AbstractMigration
             type VARCHAR(50) NOT NULL,
             description TEXT DEFAULT NULL,
             created_at DATETIME NOT NULL,
-            PRIMARY KEY(id)
+            PRIMARY KEY(id),
+            INDEX IDX_equipment_attachment_equipment (equipment_id),
+            INDEX IDX_equipment_attachment_uploaded_by (uploaded_by_id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
     }
 
@@ -174,10 +170,10 @@ final class Version20250730070000 extends AbstractMigration
     {
         $this->addSql('DROP TABLE equipment_attachment');
         $this->addSql('DROP TABLE equipment_log');
-        $this->addSql('DROP TABLE user_roles');
-        $this->addSql('DROP TABLE roles');
         $this->addSql('DROP TABLE equipment');
         $this->addSql('DROP TABLE equipment_categories');
+        $this->addSql('DROP TABLE user_roles');
+        $this->addSql('DROP TABLE roles');
         $this->addSql('DROP TABLE users');
         $this->addSql('DROP TABLE modules');
     }
