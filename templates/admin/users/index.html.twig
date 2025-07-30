@@ -58,6 +58,41 @@
 </div>
 {% endblock %}
 
+{% block head_css %}
+{{ parent() }}
+<!-- gridjs css -->
+<link href="{{ asset('assets/libs/gridjs/theme/mermaid.min.css') }}" rel="stylesheet" type="text/css" />
+<style>
+.gridjs-table {
+    border: none !important;
+}
+.gridjs-th {
+    background-color: #f8f9fa !important;
+    border: none !important;
+    color: #495057 !important;
+    font-weight: 600 !important;
+}
+.gridjs-td {
+    border: none !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+.gridjs-sort {
+    color: #495057 !important;
+}
+.gridjs-sort::after {
+    content: "\f0dc" !important;
+    font-family: "Font Awesome 5 Free" !important;
+    font-weight: 900 !important;
+}
+.gridjs-sort-asc::after {
+    content: "\f0de" !important;
+}
+.gridjs-sort-desc::after {
+    content: "\f0dd" !important;
+}
+</style>
+{% endblock %}
+
 {% block javascript %}
 <!-- gridjs js -->
 <script src="{{ asset('assets/libs/gridjs/gridjs.umd.js') }}"></script>
@@ -74,8 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
             "{{ user.employeeNumber|default('—') }}",
             "{{ user.position|default('—') }}",
             "{{ user.department|default('—') }}",
-            {% if user.isActive %}"<span class='badge bg-success-subtle text-success'>Aktywny</span>"{% else %}"<span class='badge bg-danger-subtle text-danger'>Nieaktywny</span>"{% endif %},
-            `<div class="d-flex gap-2">
+            gridjs.html("{% if user.isActive %}<span class='badge bg-success-subtle text-success'>Aktywny</span>{% else %}<span class='badge bg-danger-subtle text-danger'>Nieaktywny</span>{% endif %}"),
+            gridjs.html(`<div class="d-flex gap-2">
                 <div class="edit">
                     <a href="{{ path('admin_users_roles', {id: user.id}) }}" class="btn btn-sm btn-primary edit-item-btn">Role</a>
                 </div>
@@ -85,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         {% if user.isActive %}Dezaktywuj{% else %}Aktywuj{% endif %}
                     </button>
                 </div>
-            </div>`
+            </div>`)
         ]{% if not loop.last %},{% endif %}
         {% endfor %}
     ];
@@ -132,6 +167,11 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         sort: true,
         search: true,
+        className: {
+            table: 'table table-borderless table-centered align-middle table-nowrap mb-0',
+            th: 'text-muted',
+            td: 'text-body'
+        },
         language: {
             search: {
                 placeholder: 'Szukaj...'
