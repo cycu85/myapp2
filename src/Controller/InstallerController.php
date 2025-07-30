@@ -185,7 +185,7 @@ class InstallerController extends AbstractController
             $schemaManager = $this->entityManager->getConnection()->createSchemaManager();
             $tables = $schemaManager->listTableNames();
             
-            $requiredTables = ['modules', 'users', 'roles', 'user_roles', 'equipment_categories', 'equipment'];
+            $requiredTables = ['modules', 'users', 'roles', 'user_roles', 'equipment_categories', 'equipment', 'equipment_log', 'equipment_attachment'];
             $missingTables = array_diff($requiredTables, $tables);
             
             if (!empty($missingTables)) {

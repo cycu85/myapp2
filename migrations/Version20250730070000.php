@@ -96,7 +96,7 @@ final class Version20250730070000 extends AbstractMigration
             icon VARCHAR(50) DEFAULT NULL,
             sort_order INT NOT NULL DEFAULT 0,
             is_active TINYINT(1) NOT NULL DEFAULT 1,
-            custom_fields_config TEXT DEFAULT NULL,
+            custom_fields_config JSON DEFAULT NULL,
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL,
             PRIMARY KEY(id),
@@ -106,34 +106,86 @@ final class Version20250730070000 extends AbstractMigration
         // Create equipment table
         $this->addSql('CREATE TABLE equipment (
             id INT AUTO_INCREMENT NOT NULL,
-            category_id INT DEFAULT NULL,
+            category_id INT NOT NULL,
             assigned_to_id INT DEFAULT NULL,
-            inventory_number VARCHAR(50) NOT NULL,
-            name VARCHAR(200) NOT NULL,
+            created_by_id INT NOT NULL,
+            updated_by_id INT DEFAULT NULL,
+            inventory_number VARCHAR(100) NOT NULL,
+            name VARCHAR(255) NOT NULL,
             description TEXT DEFAULT NULL,
-            manufacturer VARCHAR(100) DEFAULT NULL,
-            model VARCHAR(100) DEFAULT NULL,
+            manufacturer VARCHAR(255) DEFAULT NULL,
+            model VARCHAR(255) DEFAULT NULL,
             serial_number VARCHAR(100) DEFAULT NULL,
             purchase_date DATE DEFAULT NULL,
             purchase_price DECIMAL(10,2) DEFAULT NULL,
-            warranty_until DATE DEFAULT NULL,
-            status VARCHAR(20) NOT NULL DEFAULT "available",
-            location VARCHAR(200) DEFAULT NULL,
+            warranty_expiry DATE DEFAULT NULL,
+            next_inspection_date DATE DEFAULT NULL,
+            status VARCHAR(50) NOT NULL DEFAULT "available",
+            location VARCHAR(255) DEFAULT NULL,
             notes TEXT DEFAULT NULL,
-            next_inspection DATE DEFAULT NULL,
+            custom_fields JSON DEFAULT NULL,
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL,
             PRIMARY KEY(id),
             UNIQUE INDEX UNIQ_equipment_inventory_number (inventory_number),
             INDEX IDX_equipment_category (category_id),
             INDEX IDX_equipment_assigned_to (assigned_to_id),
+            INDEX IDX_equipment_created_by (created_by_id),
+            INDEX IDX_equipment_updated_by (updated_by_id),
             CONSTRAINT FK_equipment_category FOREIGN KEY (category_id) REFERENCES equipment_categories (id),
-            CONSTRAINT FK_equipment_assigned_to FOREIGN KEY (assigned_to_id) REFERENCES users (id)
+            CONSTRAINT FK_equipment_assigned_to FOREIGN KEY (assigned_to_id) REFERENCES users (id),
+            CONSTRAINT FK_equipment_created_by FOREIGN KEY (created_by_id) REFERENCES users (id),
+            CONSTRAINT FK_equipment_updated_by FOREIGN KEY (updated_by_id) REFERENCES users (id)
+        ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
+
+        // Create equipment_log table
+        $this->addSql('CREATE TABLE equipment_log (
+            id INT AUTO_INCREMENT NOT NULL,
+            equipment_id INT NOT NULL,
+            created_by_id INT NOT NULL,
+            previous_assignee_id INT DEFAULT NULL,
+            new_assignee_id INT DEFAULT NULL,
+            action VARCHAR(50) NOT NULL,
+            description TEXT NOT NULL,
+            previous_status VARCHAR(50) DEFAULT NULL,
+            new_status VARCHAR(50) DEFAULT NULL,
+            additional_data JSON DEFAULT NULL,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY(id),
+            INDEX IDX_equipment_log_equipment (equipment_id),
+            INDEX IDX_equipment_log_created_by (created_by_id),
+            INDEX IDX_equipment_log_previous_assignee (previous_assignee_id),
+            INDEX IDX_equipment_log_new_assignee (new_assignee_id),
+            CONSTRAINT FK_equipment_log_equipment FOREIGN KEY (equipment_id) REFERENCES equipment (id) ON DELETE CASCADE,
+            CONSTRAINT FK_equipment_log_created_by FOREIGN KEY (created_by_id) REFERENCES users (id),
+            CONSTRAINT FK_equipment_log_previous_assignee FOREIGN KEY (previous_assignee_id) REFERENCES users (id),
+            CONSTRAINT FK_equipment_log_new_assignee FOREIGN KEY (new_assignee_id) REFERENCES users (id)
+        ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
+
+        // Create equipment_attachment table
+        $this->addSql('CREATE TABLE equipment_attachment (
+            id INT AUTO_INCREMENT NOT NULL,
+            equipment_id INT NOT NULL,
+            uploaded_by_id INT NOT NULL,
+            filename VARCHAR(255) NOT NULL,
+            original_filename VARCHAR(255) NOT NULL,
+            mime_type VARCHAR(100) NOT NULL,
+            file_size INT NOT NULL,
+            type VARCHAR(50) NOT NULL,
+            description TEXT DEFAULT NULL,
+            created_at DATETIME NOT NULL,
+            PRIMARY KEY(id),
+            INDEX IDX_equipment_attachment_equipment (equipment_id),
+            INDEX IDX_equipment_attachment_uploaded_by (uploaded_by_id),
+            CONSTRAINT FK_equipment_attachment_equipment FOREIGN KEY (equipment_id) REFERENCES equipment (id) ON DELETE CASCADE,
+            CONSTRAINT FK_equipment_attachment_uploaded_by FOREIGN KEY (uploaded_by_id) REFERENCES users (id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
     }
 
     public function down(Schema $schema): void
     {
+        $this->addSql('DROP TABLE equipment_attachment');
+        $this->addSql('DROP TABLE equipment_log');
         $this->addSql('DROP TABLE user_roles');
         $this->addSql('DROP TABLE roles');
         $this->addSql('DROP TABLE equipment');
