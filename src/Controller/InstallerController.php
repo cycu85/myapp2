@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
 
 #[Route('/install')]
 class InstallerController extends AbstractController
@@ -169,15 +170,29 @@ class InstallerController extends AbstractController
 
     private function createDatabaseSchema(): void
     {
-        // In a real application, you would use Doctrine migrations here
-        // For simplicity, we'll assume the schema is already created
-        
-        // Check if tables exist
-        $schemaManager = $this->entityManager->getConnection()->createSchemaManager();
-        $tables = $schemaManager->listTableNames();
-        
-        if (empty($tables)) {
-            throw new \Exception('Baza danych nie została prawidłowo skonfigurowana. Uruchom najpierw migracje Doctrine.');
+        try {
+            // Run database migrations
+            $projectDir = $this->getParameter('kernel.project_dir');
+            
+            $process = new Process(['php', 'bin/console', 'doctrine:migrations:migrate', '--no-interaction'], $projectDir);
+            $process->run();
+            
+            if (!$process->isSuccessful()) {
+                throw new \Exception('Błąd podczas wykonywania migracji: ' . $process->getErrorOutput());
+            }
+            
+            // Verify tables were created
+            $schemaManager = $this->entityManager->getConnection()->createSchemaManager();
+            $tables = $schemaManager->listTableNames();
+            
+            $requiredTables = ['modules', 'users', 'roles', 'user_roles', 'equipment_categories', 'equipment'];
+            $missingTables = array_diff($requiredTables, $tables);
+            
+            if (!empty($missingTables)) {
+                throw new \Exception('Brakujące tabele w bazie danych: ' . implode(', ', $missingTables));
+            }
+        } catch (\Exception $e) {
+            throw new \Exception('Błąd podczas tworzenia schematu bazy danych: ' . $e->getMessage());
         }
     }
 
