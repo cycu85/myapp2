@@ -124,9 +124,9 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    sudo mysql_secure_installation
    
    # Utworzenie bazy danych i użytkownika
-   sudo mysql -e "CREATE DATABASE assethub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-   sudo mysql -e "CREATE USER 'assethub'@'localhost' IDENTIFIED BY 'secure_password';"
-   sudo mysql -e "GRANT ALL PRIVILEGES ON assethub.* TO 'assethub'@'localhost';"
+   sudo mysql -e "CREATE DATABASE myapp2 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+   sudo mysql -e "CREATE USER 'myapp2'@'localhost' IDENTIFIED BY 'secure_password';"
+   sudo mysql -e "GRANT ALL PRIVILEGES ON myapp2.* TO 'myapp2'@'localhost';"
    sudo mysql -e "FLUSH PRIVILEGES;"
    
    # Instalacja Apache
@@ -154,9 +154,9 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    cd /var/www
    
    # Klonowanie repozytorium
-   sudo git clone https://github.com/your-repo/assethub.git
-   sudo chown -R www-data:www-data assethub
-   cd assethub
+   sudo git clone https://github.com/cycu85/myapp2.git
+   sudo chown -R www-data:www-data myapp2
+   cd myapp2
    
    # Instalacja zależności
    sudo -u www-data composer install --no-dev --optimize-autoloader
@@ -169,24 +169,24 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 5. **Konfiguracja Apache**
    ```bash
    # Utworzenie pliku konfiguracyjnego
-   sudo tee /etc/apache2/sites-available/assethub.conf > /dev/null <<EOF
+   sudo tee /etc/apache2/sites-available/myapp2.conf > /dev/null <<EOF
    <VirtualHost *:80>
        ServerName your-domain.com
-       DocumentRoot /var/www/assethub/public
+       DocumentRoot /var/www/myapp2/public
        
-       <Directory /var/www/assethub/public>
+       <Directory /var/www/myapp2/public>
            AllowOverride All
            Require all granted
            DirectoryIndex index.php
        </Directory>
        
-       ErrorLog \${APACHE_LOG_DIR}/assethub_error.log
-       CustomLog \${APACHE_LOG_DIR}/assethub_access.log combined
+       ErrorLog \${APACHE_LOG_DIR}/myapp2_error.log
+       CustomLog \${APACHE_LOG_DIR}/myapp2_access.log combined
    </VirtualHost>
    EOF
    
    # Aktywacja strony
-   sudo a2ensite assethub.conf
+   sudo a2ensite myapp2.conf
    sudo a2dissite 000-default.conf
    sudo systemctl reload apache2
    ```
@@ -212,7 +212,7 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    # .env
    APP_ENV=prod
    APP_SECRET=your-secret-key-here
-   DATABASE_URL=mysql://assethub:secure_password@localhost:3306/assethub
+   DATABASE_URL=mysql://myapp2:secure_password@localhost:3306/myapp2
    MAILER_DSN=smtp://localhost
    ```
 
@@ -234,7 +234,7 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 
 #### MySQL (Domyślna)
 ```env
-DATABASE_URL=mysql://assethub:secure_password@localhost:3306/assethub
+DATABASE_URL=mysql://myapp2:secure_password@localhost:3306/myapp2
 ```
 
 #### SQLite
@@ -244,7 +244,7 @@ DATABASE_URL=sqlite:///%kernel.project_dir%/var/data.db
 
 #### PostgreSQL
 ```env
-DATABASE_URL=postgresql://username:password@localhost:5432/assethub
+DATABASE_URL=postgresql://username:password@localhost:5432/myapp2
 ```
 
 ### Konfiguracja Email
@@ -271,7 +271,7 @@ MAILER_DSN=gmail://username:password@default
    ```apache
    <VirtualHost *:443>
        ServerName your-domain.com
-       DocumentRoot /var/www/assethub/public
+       DocumentRoot /var/www/myapp2/public
        
        SSLEngine on
        SSLCertificateFile /etc/letsencrypt/live/your-domain.com/fullchain.pem
@@ -401,7 +401,7 @@ System umożliwia eksport danych w formatach:
 ### Struktura Projektu
 
 ```
-assethub/
+myapp2/
 ├── config/           # Konfiguracja Symfony
 ├── migrations/       # Migracje bazy danych
 ├── public/          # Pliki publiczne (CSS, JS, obrazy)
@@ -488,7 +488,7 @@ assethub/
 2. **Backup Bazy Danych**
    ```bash
    # MySQL
-   mysqldump -u assethub -p assethub > backup_$(date +%Y%m%d_%H%M%S).sql
+   mysqldump -u myapp2 -p myapp2 > backup_$(date +%Y%m%d_%H%M%S).sql
    
    # SQLite (jeśli używasz)
    cp var/data.db var/backup/data_$(date +%Y%m%d_%H%M%S).db
@@ -500,7 +500,7 @@ assethub/
    tail -f var/log/prod.log
    
    # Logi Apache
-   tail -f /var/log/apache2/assethub_error.log
+   tail -f /var/log/apache2/myapp2_error.log
    ```
 
 ### Zabezpieczenia Serwera
@@ -545,13 +545,13 @@ System automatycznie zbiera następujące metryki:
 
 ### Dokumentacja
 
-- **Wiki**: [github.com/your-repo/assethub/wiki](https://github.com/your-repo/assethub/wiki)
+- **Wiki**: [github.com/cycu85/myapp2/wiki](https://github.com/cycu85/myapp2/wiki)
 - **API Docs**: [your-domain.com/api/docs](http://your-domain.com/api/docs)
-- **FAQ**: [github.com/your-repo/assethub/wiki/FAQ](https://github.com/your-repo/assethub/wiki/FAQ)
+- **FAQ**: [github.com/cycu85/myapp2/wiki/FAQ](https://github.com/cycu85/myapp2/wiki/FAQ)
 
 ### Zgłaszanie Problemów
 
-1. **GitHub Issues**: [github.com/your-repo/assethub/issues](https://github.com/your-repo/assethub/issues)
+1. **GitHub Issues**: [github.com/cycu85/myapp2/issues](https://github.com/cycu85/myapp2/issues)
 2. **Email Support**: support@your-domain.com
 3. **Community Forum**: [forum.your-domain.com](http://forum.your-domain.com)
 
@@ -616,7 +616,7 @@ Dodaj inne informacje lub zrzuty ekranu dotyczące prośby o funkcję tutaj.
 - **DevOps Engineer**: DevOps Name (devops@domain.com)
 
 ### Contributors
-Zobacz pełną listę współtwórców na: [github.com/your-repo/assethub/contributors](https://github.com/your-repo/assethub/contributors)
+Zobacz pełną listę współtwórców na: [github.com/cycu85/myapp2/contributors](https://github.com/cycu85/myapp2/contributors)
 
 ### Sposób Współpracy
 
@@ -654,9 +654,9 @@ in the Software without restriction...
 <div align="center">
   <p>Made with ❤️ by AssetHub Team</p>
   <p>
-    <a href="https://github.com/your-repo/assethub">GitHub</a> •
+    <a href="https://github.com/cycu85/myapp2">GitHub</a> •
     <a href="https://your-domain.com">Website</a> •
-    <a href="https://twitter.com/assethub">Twitter</a> •
+    <a href="https://twitter.com/myapp2">Twitter</a> •
     <a href="mailto:contact@your-domain.com">Contact</a>
   </p>
 </div>
