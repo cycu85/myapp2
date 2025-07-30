@@ -299,6 +299,33 @@
         <argument type="service" id=".service_locator.jUv.zyj.App\Controller\Admin\AdminController"/>
       </call>
     </service>
+    <service id="App\Controller\Admin\EquipmentCategoryController" class="App\Controller\Admin\EquipmentCategoryController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="container.service_subscriber"/>
+      <argument type="service" id="App\Service\PermissionService"/>
+      <argument type="service" id="doctrine.orm.default_entity_manager"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.jUv.zyj.App\Controller\Admin\EquipmentCategoryController"/>
+      </call>
+    </service>
+    <service id="App\Controller\Admin\RoleController" class="App\Controller\Admin\RoleController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="container.service_subscriber"/>
+      <argument type="service" id="App\Service\PermissionService"/>
+      <argument type="service" id="doctrine.orm.default_entity_manager"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.jUv.zyj.App\Controller\Admin\RoleController"/>
+      </call>
+    </service>
+    <service id="App\Controller\Admin\UserController" class="App\Controller\Admin\UserController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="container.service_subscriber"/>
+      <argument type="service" id="App\Service\PermissionService"/>
+      <argument type="service" id="doctrine.orm.default_entity_manager"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.jUv.zyj.App\Controller\Admin\UserController"/>
+      </call>
+    </service>
     <service id="App\Controller\DashboardController" class="App\Controller\DashboardController" public="true" autowire="true" autoconfigure="true">
       <tag name="controller.service_arguments"/>
       <tag name="container.service_subscriber"/>
@@ -311,6 +338,7 @@
       <tag name="controller.service_arguments"/>
       <tag name="container.service_subscriber"/>
       <argument type="service" id="App\Service\PermissionService"/>
+      <argument type="service" id="doctrine.orm.default_entity_manager"/>
       <call method="setContainer">
         <argument type="service" id=".service_locator.jUv.zyj.App\Controller\EquipmentController"/>
       </call>
@@ -323,6 +351,16 @@
         <argument type="service" id=".service_locator.jUv.zyj.App\Controller\HomeController"/>
       </call>
     </service>
+    <service id="App\Controller\InstallerController" class="App\Controller\InstallerController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="container.service_subscriber"/>
+      <argument type="service" id="doctrine.orm.default_entity_manager"/>
+      <argument type="service" id="security.user_password_hasher"/>
+      <argument type="service" id="App\Service\SampleDataService"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.jUv.zyj.App\Controller\InstallerController"/>
+      </call>
+    </service>
     <service id="App\Controller\SecurityController" class="App\Controller\SecurityController" public="true" autowire="true" autoconfigure="true">
       <tag name="controller.service_arguments"/>
       <tag name="container.service_subscriber"/>
@@ -333,6 +371,34 @@
     <service id="App\DataFixtures\AppFixtures" class="App\DataFixtures\AppFixtures" autowire="true" autoconfigure="true">
       <tag name="doctrine.fixture.orm"/>
       <argument type="service" id="security.user_password_hasher"/>
+    </service>
+    <service id="App\Form\EquipmentCategoryType" class="App\Form\EquipmentCategoryType" autowire="true" autoconfigure="true">
+      <tag name="form.type"/>
+    </service>
+    <service id="App\Form\EquipmentType" class="App\Form\EquipmentType" autowire="true" autoconfigure="true">
+      <tag name="form.type"/>
+    </service>
+    <service id="App\Form\RoleType" class="App\Form\RoleType" autowire="true" autoconfigure="true">
+      <tag name="form.type"/>
+    </service>
+    <service id="App\Form\UserType" class="App\Form\UserType" autowire="true" autoconfigure="true">
+      <tag name="form.type"/>
+    </service>
+    <service id="App\Repository\EquipmentAttachmentRepository" class="App\Repository\EquipmentAttachmentRepository" autowire="true" autoconfigure="true">
+      <tag name="doctrine.repository_service"/>
+      <argument type="service" id="doctrine"/>
+    </service>
+    <service id="App\Repository\EquipmentCategoryRepository" class="App\Repository\EquipmentCategoryRepository" autowire="true" autoconfigure="true">
+      <tag name="doctrine.repository_service"/>
+      <argument type="service" id="doctrine"/>
+    </service>
+    <service id="App\Repository\EquipmentLogRepository" class="App\Repository\EquipmentLogRepository" autowire="true" autoconfigure="true">
+      <tag name="doctrine.repository_service"/>
+      <argument type="service" id="doctrine"/>
+    </service>
+    <service id="App\Repository\EquipmentRepository" class="App\Repository\EquipmentRepository" autowire="true" autoconfigure="true">
+      <tag name="doctrine.repository_service"/>
+      <argument type="service" id="doctrine"/>
     </service>
     <service id="App\Repository\ModuleRepository" class="App\Repository\ModuleRepository" autowire="true" autoconfigure="true">
       <tag name="doctrine.repository_service"/>
@@ -353,6 +419,10 @@
     <service id="App\Service\PermissionService" class="App\Service\PermissionService" autowire="true" autoconfigure="true">
       <argument type="service" id="App\Repository\UserRoleRepository"/>
       <argument type="service" id="App\Repository\ModuleRepository"/>
+    </service>
+    <service id="App\Service\SampleDataService" class="App\Service\SampleDataService" autowire="true" autoconfigure="true">
+      <argument type="service" id="doctrine.orm.default_entity_manager"/>
+      <argument type="service" id="security.user_password_hasher"/>
     </service>
     <service id="argument_metadata_factory" class="Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFactory"/>
     <service id="argument_resolver.backed_enum_resolver" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\BackedEnumValueResolver">
@@ -377,7 +447,7 @@
     </service>
     <service id="argument_resolver.service" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\ServiceValueResolver">
       <tag priority="-50" name="Symfony\Component\HttpKernel\Controller\ArgumentResolver\ServiceValueResolver">controller.argument_value_resolver</tag>
-      <argument type="service" id=".service_locator.rmxHhKq"/>
+      <argument type="service" id=".service_locator.bL0w7oY"/>
     </service>
     <service id="argument_resolver.default" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver">
       <tag priority="-100" name="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver">controller.argument_value_resolver</tag>
@@ -1104,9 +1174,14 @@
       <argument type="service" id="form.registry"/>
       <argument type="collection">
         <argument>Symfony\Component\Form\Extension\Core\Type</argument>
+        <argument>App\Form</argument>
         <argument>Symfony\Bridge\Doctrine\Form\Type</argument>
       </argument>
       <argument type="collection">
+        <argument>App\Form\EquipmentCategoryType</argument>
+        <argument>App\Form\EquipmentType</argument>
+        <argument>App\Form\RoleType</argument>
+        <argument>App\Form\UserType</argument>
         <argument>Symfony\Component\Form\Extension\Core\Type\FormType</argument>
         <argument>Symfony\Component\Form\Extension\Core\Type\ChoiceType</argument>
         <argument>Symfony\Component\Form\Extension\Core\Type\FileType</argument>
@@ -1923,7 +1998,7 @@
     </service>
     <service id="argument_resolver.not_tagged_controller" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\NotTaggedControllerValueResolver">
       <tag name="controller.argument_value_resolver" priority="-200"/>
-      <argument type="service" id=".service_locator.rmxHhKq"/>
+      <argument type="service" id=".service_locator.bL0w7oY"/>
     </service>
     <service id="routing.resolver" class="Symfony\Component\Config\Loader\LoaderResolver">
       <call method="addLoader">
@@ -2232,7 +2307,7 @@
       <argument type="service" id="form.registry"/>
     </service>
     <service id="form.extension" class="Symfony\Component\Form\Extension\DependencyInjection\DependencyInjectionExtension">
-      <argument type="service" id=".service_locator.Za9MpXe"/>
+      <argument type="service" id=".service_locator.S2zVuE2"/>
       <argument type="collection">
         <argument key="Symfony\Component\Form\Extension\Core\Type\FormType" type="iterator">
           <argument type="service" id="form.type_extension.form.transformation_failure_handling"/>
@@ -3876,7 +3951,7 @@
     <service id="doctrine.orm.configuration" class="Doctrine\ORM\Configuration" abstract="true"/>
     <service id="doctrine.orm.entity_manager.abstract" class="Doctrine\ORM\EntityManager" lazy="true" abstract="true"/>
     <service id="doctrine.orm.container_repository_factory" class="Doctrine\Bundle\DoctrineBundle\Repository\ContainerRepositoryFactory">
-      <argument type="service" id=".service_locator.P_F9RXf"/>
+      <argument type="service" id=".service_locator.rZ.QGNZ"/>
     </service>
     <service id="doctrine.orm.manager_configurator.abstract" class="Doctrine\Bundle\DoctrineBundle\ManagerConfigurator" abstract="true">
       <argument type="collection"/>
@@ -5137,6 +5212,15 @@
     <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\Admin\AdminController" class="App\Controller\Admin\AdminController" autowire="true" abstract="true"/>
     <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\Admin\AdminController" class="App\Controller\Admin\AdminController" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Controller\Admin\AdminController" class="App\Controller\Admin\AdminController" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\Admin\EquipmentCategoryController" class="App\Controller\Admin\EquipmentCategoryController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\Admin\EquipmentCategoryController" class="App\Controller\Admin\EquipmentCategoryController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\Admin\EquipmentCategoryController" class="App\Controller\Admin\EquipmentCategoryController" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\Admin\RoleController" class="App\Controller\Admin\RoleController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\Admin\RoleController" class="App\Controller\Admin\RoleController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\Admin\RoleController" class="App\Controller\Admin\RoleController" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\Admin\UserController" class="App\Controller\Admin\UserController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\Admin\UserController" class="App\Controller\Admin\UserController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\Admin\UserController" class="App\Controller\Admin\UserController" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\DashboardController" class="App\Controller\DashboardController" autowire="true" abstract="true"/>
     <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\DashboardController" class="App\Controller\DashboardController" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Controller\DashboardController" class="App\Controller\DashboardController" autowire="true" autoconfigure="true" abstract="true"/>
@@ -5146,11 +5230,30 @@
     <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\HomeController" class="App\Controller\HomeController" autowire="true" abstract="true"/>
     <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\HomeController" class="App\Controller\HomeController" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Controller\HomeController" class="App\Controller\HomeController" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\InstallerController" class="App\Controller\InstallerController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\InstallerController" class="App\Controller\InstallerController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\InstallerController" class="App\Controller\InstallerController" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\SecurityController" class="App\Controller\SecurityController" autowire="true" abstract="true"/>
     <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\SecurityController" class="App\Controller\SecurityController" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Controller\SecurityController" class="App\Controller\SecurityController" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Doctrine\Bundle\FixturesBundle\ORMFixtureInterface.0.App\DataFixtures\AppFixtures" class="App\DataFixtures\AppFixtures" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\DataFixtures\AppFixtures" class="App\DataFixtures\AppFixtures" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\EquipmentCategoryType" class="App\Form\EquipmentCategoryType" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Form\EquipmentCategoryType" class="App\Form\EquipmentCategoryType" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\EquipmentType" class="App\Form\EquipmentType" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Form\EquipmentType" class="App\Form\EquipmentType" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\RoleType" class="App\Form\RoleType" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Form\RoleType" class="App\Form\RoleType" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\UserType" class="App\Form\UserType" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Form\UserType" class="App\Form\UserType" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\EquipmentAttachmentRepository" class="App\Repository\EquipmentAttachmentRepository" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Repository\EquipmentAttachmentRepository" class="App\Repository\EquipmentAttachmentRepository" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\EquipmentCategoryRepository" class="App\Repository\EquipmentCategoryRepository" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Repository\EquipmentCategoryRepository" class="App\Repository\EquipmentCategoryRepository" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\EquipmentLogRepository" class="App\Repository\EquipmentLogRepository" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Repository\EquipmentLogRepository" class="App\Repository\EquipmentLogRepository" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\EquipmentRepository" class="App\Repository\EquipmentRepository" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Repository\EquipmentRepository" class="App\Repository\EquipmentRepository" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\ModuleRepository" class="App\Repository\ModuleRepository" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Repository\ModuleRepository" class="App\Repository\ModuleRepository" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface.0.App\Repository\RoleRepository" class="App\Repository\RoleRepository" autowire="true" abstract="true"/>
@@ -5540,20 +5643,141 @@
         <argument key="loader" type="service_closure" id=".errored..service_locator.y4_Zrx..Symfony\Component\Config\Loader\LoaderInterface"/>
       </argument>
     </service>
+    <service id=".service_locator.Y8AzKyZ" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="categoryRepository" type="service_closure" id="App\Repository\EquipmentCategoryRepository"/>
+      </argument>
+    </service>
+    <service id=".service_locator.UJT5JVo" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="category" type="service_closure" id=".errored..service_locator.UJT5JVo.App\Entity\EquipmentCategory"/>
+      </argument>
+    </service>
+    <service id=".service_locator.LFjXlKs" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="roleRepository" type="service_closure" id="App\Repository\RoleRepository"/>
+      </argument>
+    </service>
+    <service id=".service_locator.BsfINrE" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="moduleRepository" type="service_closure" id="App\Repository\ModuleRepository"/>
+      </argument>
+    </service>
+    <service id=".service_locator.NjZv6sH" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="role" type="service_closure" id=".errored..service_locator.NjZv6sH.App\Entity\Role"/>
+      </argument>
+    </service>
+    <service id=".service_locator.h1EgrTx" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="moduleRepository" type="service_closure" id="App\Repository\ModuleRepository"/>
+        <argument key="role" type="service_closure" id=".errored..service_locator.h1EgrTx.App\Entity\Role"/>
+      </argument>
+    </service>
+    <service id=".service_locator.kPUOGb8" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="userRepository" type="service_closure" id="App\Repository\UserRepository"/>
+      </argument>
+    </service>
+    <service id=".service_locator.eu4C7I1" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="roleRepository" type="service_closure" id="App\Repository\RoleRepository"/>
+        <argument key="user" type="service_closure" id=".errored..service_locator.eu4C7I1.App\Entity\User"/>
+      </argument>
+    </service>
+    <service id=".service_locator.Mhqdd2r" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="passwordHasher" type="service_closure" id="security.user_password_hasher"/>
+      </argument>
+    </service>
+    <service id=".service_locator.Hz5btge" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="user" type="service_closure" id=".errored..service_locator.Hz5btge.App\Entity\User"/>
+      </argument>
+    </service>
+    <service id=".service_locator.oD4w6SV" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="categoryRepository" type="service_closure" id="App\Repository\EquipmentCategoryRepository"/>
+        <argument key="equipmentRepository" type="service_closure" id="App\Repository\EquipmentRepository"/>
+      </argument>
+    </service>
+    <service id=".service_locator.brsfv0z" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="equipment" type="service_closure" id=".errored..service_locator.brsfv0z.App\Entity\Equipment"/>
+      </argument>
+    </service>
+    <service id=".service_locator.TKagbnZ" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="equipmentRepository" type="service_closure" id="App\Repository\EquipmentRepository"/>
+      </argument>
+    </service>
     <service id=".service_locator.rSTd.nA" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="authenticationUtils" type="service_closure" id="security.authentication_utils"/>
       </argument>
     </service>
-    <service id=".service_locator.rmxHhKq" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.bL0w7oY" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
+        <argument key="App\Controller\Admin\EquipmentCategoryController::delete" type="service_closure" id=".service_locator.UJT5JVo"/>
+        <argument key="App\Controller\Admin\EquipmentCategoryController::edit" type="service_closure" id=".service_locator.UJT5JVo"/>
+        <argument key="App\Controller\Admin\EquipmentCategoryController::index" type="service_closure" id=".service_locator.Y8AzKyZ"/>
+        <argument key="App\Controller\Admin\EquipmentCategoryController::show" type="service_closure" id=".service_locator.UJT5JVo"/>
+        <argument key="App\Controller\Admin\EquipmentCategoryController::toggleStatus" type="service_closure" id=".service_locator.UJT5JVo"/>
+        <argument key="App\Controller\Admin\RoleController::delete" type="service_closure" id=".service_locator.NjZv6sH"/>
+        <argument key="App\Controller\Admin\RoleController::edit" type="service_closure" id=".service_locator.h1EgrTx"/>
+        <argument key="App\Controller\Admin\RoleController::index" type="service_closure" id=".service_locator.LFjXlKs"/>
+        <argument key="App\Controller\Admin\RoleController::new" type="service_closure" id=".service_locator.BsfINrE"/>
+        <argument key="App\Controller\Admin\RoleController::show" type="service_closure" id=".service_locator.NjZv6sH"/>
+        <argument key="App\Controller\Admin\UserController::index" type="service_closure" id=".service_locator.kPUOGb8"/>
+        <argument key="App\Controller\Admin\UserController::manageRoles" type="service_closure" id=".service_locator.eu4C7I1"/>
+        <argument key="App\Controller\Admin\UserController::new" type="service_closure" id=".service_locator.Mhqdd2r"/>
+        <argument key="App\Controller\Admin\UserController::toggleStatus" type="service_closure" id=".service_locator.Hz5btge"/>
+        <argument key="App\Controller\EquipmentController::byCategory" type="service_closure" id=".service_locator.oD4w6SV"/>
+        <argument key="App\Controller\EquipmentController::delete" type="service_closure" id=".service_locator.brsfv0z"/>
+        <argument key="App\Controller\EquipmentController::edit" type="service_closure" id=".service_locator.brsfv0z"/>
+        <argument key="App\Controller\EquipmentController::index" type="service_closure" id=".service_locator.oD4w6SV"/>
+        <argument key="App\Controller\EquipmentController::myEquipment" type="service_closure" id=".service_locator.TKagbnZ"/>
+        <argument key="App\Controller\EquipmentController::show" type="service_closure" id=".service_locator.brsfv0z"/>
         <argument key="App\Controller\SecurityController::login" type="service_closure" id=".service_locator.rSTd.nA"/>
         <argument key="App\Kernel::loadRoutes" type="service_closure" id=".service_locator.y4_Zrx."/>
         <argument key="App\Kernel::registerContainerConfiguration" type="service_closure" id=".service_locator.y4_Zrx."/>
         <argument key="kernel::loadRoutes" type="service_closure" id=".service_locator.y4_Zrx."/>
         <argument key="kernel::registerContainerConfiguration" type="service_closure" id=".service_locator.y4_Zrx."/>
+        <argument key="App\Controller\Admin\EquipmentCategoryController:delete" type="service_closure" id=".service_locator.UJT5JVo"/>
+        <argument key="App\Controller\Admin\EquipmentCategoryController:edit" type="service_closure" id=".service_locator.UJT5JVo"/>
+        <argument key="App\Controller\Admin\EquipmentCategoryController:index" type="service_closure" id=".service_locator.Y8AzKyZ"/>
+        <argument key="App\Controller\Admin\EquipmentCategoryController:show" type="service_closure" id=".service_locator.UJT5JVo"/>
+        <argument key="App\Controller\Admin\EquipmentCategoryController:toggleStatus" type="service_closure" id=".service_locator.UJT5JVo"/>
+        <argument key="App\Controller\Admin\RoleController:delete" type="service_closure" id=".service_locator.NjZv6sH"/>
+        <argument key="App\Controller\Admin\RoleController:edit" type="service_closure" id=".service_locator.h1EgrTx"/>
+        <argument key="App\Controller\Admin\RoleController:index" type="service_closure" id=".service_locator.LFjXlKs"/>
+        <argument key="App\Controller\Admin\RoleController:new" type="service_closure" id=".service_locator.BsfINrE"/>
+        <argument key="App\Controller\Admin\RoleController:show" type="service_closure" id=".service_locator.NjZv6sH"/>
+        <argument key="App\Controller\Admin\UserController:index" type="service_closure" id=".service_locator.kPUOGb8"/>
+        <argument key="App\Controller\Admin\UserController:manageRoles" type="service_closure" id=".service_locator.eu4C7I1"/>
+        <argument key="App\Controller\Admin\UserController:new" type="service_closure" id=".service_locator.Mhqdd2r"/>
+        <argument key="App\Controller\Admin\UserController:toggleStatus" type="service_closure" id=".service_locator.Hz5btge"/>
+        <argument key="App\Controller\EquipmentController:byCategory" type="service_closure" id=".service_locator.oD4w6SV"/>
+        <argument key="App\Controller\EquipmentController:delete" type="service_closure" id=".service_locator.brsfv0z"/>
+        <argument key="App\Controller\EquipmentController:edit" type="service_closure" id=".service_locator.brsfv0z"/>
+        <argument key="App\Controller\EquipmentController:index" type="service_closure" id=".service_locator.oD4w6SV"/>
+        <argument key="App\Controller\EquipmentController:myEquipment" type="service_closure" id=".service_locator.TKagbnZ"/>
+        <argument key="App\Controller\EquipmentController:show" type="service_closure" id=".service_locator.brsfv0z"/>
         <argument key="App\Controller\SecurityController:login" type="service_closure" id=".service_locator.rSTd.nA"/>
         <argument key="kernel:loadRoutes" type="service_closure" id=".service_locator.y4_Zrx."/>
         <argument key="kernel:registerContainerConfiguration" type="service_closure" id=".service_locator.y4_Zrx."/>
@@ -5636,9 +5860,13 @@
       <argument type="service" id="argument_resolver.query_parameter_value_resolver"/>
       <argument type="service" id="debug.stopwatch"/>
     </service>
-    <service id=".service_locator.Za9MpXe" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.S2zVuE2" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
+        <argument key="App\Form\EquipmentCategoryType" type="service_closure" id="App\Form\EquipmentCategoryType"/>
+        <argument key="App\Form\EquipmentType" type="service_closure" id="App\Form\EquipmentType"/>
+        <argument key="App\Form\RoleType" type="service_closure" id="App\Form\RoleType"/>
+        <argument key="App\Form\UserType" type="service_closure" id="App\Form\UserType"/>
         <argument key="Symfony\Bridge\Doctrine\Form\Type\EntityType" type="service_closure" id="form.type.entity"/>
         <argument key="Symfony\Component\Form\Extension\Core\Type\ChoiceType" type="service_closure" id="form.type.choice"/>
         <argument key="Symfony\Component\Form\Extension\Core\Type\ColorType" type="service_closure" id="form.type.color"/>
@@ -5720,9 +5948,13 @@
         <argument key="doctrine.orm.listeners.pdo_session_handler_schema_listener" type="service_closure" id="doctrine.orm.listeners.pdo_session_handler_schema_listener"/>
       </argument>
     </service>
-    <service id=".service_locator.P_F9RXf" class="Symfony\Component\DependencyInjection\ServiceLocator">
+    <service id=".service_locator.rZ.QGNZ" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator"/>
       <argument type="collection">
+        <argument key="App\Repository\EquipmentAttachmentRepository" type="service_closure" id="App\Repository\EquipmentAttachmentRepository"/>
+        <argument key="App\Repository\EquipmentCategoryRepository" type="service_closure" id="App\Repository\EquipmentCategoryRepository"/>
+        <argument key="App\Repository\EquipmentLogRepository" type="service_closure" id="App\Repository\EquipmentLogRepository"/>
+        <argument key="App\Repository\EquipmentRepository" type="service_closure" id="App\Repository\EquipmentRepository"/>
         <argument key="App\Repository\ModuleRepository" type="service_closure" id="App\Repository\ModuleRepository"/>
         <argument key="App\Repository\RoleRepository" type="service_closure" id="App\Repository\RoleRepository"/>
         <argument key="App\Repository\UserRepository" type="service_closure" id="App\Repository\UserRepository"/>
@@ -5904,6 +6136,24 @@
       <argument type="service" id="service_container"/>
       <factory service=".service_locator.jUv.zyj" method="withContext"/>
     </service>
+    <service id=".service_locator.jUv.zyj.App\Controller\Admin\EquipmentCategoryController" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator_context" id="App\Controller\Admin\EquipmentCategoryController"/>
+      <argument>App\Controller\Admin\EquipmentCategoryController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.jUv.zyj" method="withContext"/>
+    </service>
+    <service id=".service_locator.jUv.zyj.App\Controller\Admin\RoleController" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator_context" id="App\Controller\Admin\RoleController"/>
+      <argument>App\Controller\Admin\RoleController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.jUv.zyj" method="withContext"/>
+    </service>
+    <service id=".service_locator.jUv.zyj.App\Controller\Admin\UserController" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator_context" id="App\Controller\Admin\UserController"/>
+      <argument>App\Controller\Admin\UserController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.jUv.zyj" method="withContext"/>
+    </service>
     <service id=".service_locator.jUv.zyj.App\Controller\DashboardController" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator_context" id="App\Controller\DashboardController"/>
       <argument>App\Controller\DashboardController</argument>
@@ -5919,6 +6169,12 @@
     <service id=".service_locator.jUv.zyj.App\Controller\HomeController" class="Symfony\Component\DependencyInjection\ServiceLocator">
       <tag name="container.service_locator_context" id="App\Controller\HomeController"/>
       <argument>App\Controller\HomeController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.jUv.zyj" method="withContext"/>
+    </service>
+    <service id=".service_locator.jUv.zyj.App\Controller\InstallerController" class="Symfony\Component\DependencyInjection\ServiceLocator">
+      <tag name="container.service_locator_context" id="App\Controller\InstallerController"/>
+      <argument>App\Controller\InstallerController</argument>
       <argument type="service" id="service_container"/>
       <factory service=".service_locator.jUv.zyj" method="withContext"/>
     </service>
@@ -6116,6 +6372,24 @@
     <service id="debug.security.event_dispatcher.main.inner" class="Symfony\Component\EventDispatcher\EventDispatcher"/>
     <service id=".errored..service_locator.y4_Zrx..Symfony\Component\Config\Loader\LoaderInterface" class="Symfony\Component\Config\Loader\LoaderInterface">
       <tag name="container.error" message="Cannot autowire service &quot;.service_locator.y4_Zrx.&quot;: it needs an instance of &quot;Symfony\Component\Config\Loader\LoaderInterface&quot; but this type has been excluded from autowiring."/>
+    </service>
+    <service id=".errored..service_locator.UJT5JVo.App\Entity\EquipmentCategory" class="App\Entity\EquipmentCategory">
+      <tag name="container.error" message="Cannot autowire service &quot;.service_locator.UJT5JVo&quot;: it needs an instance of &quot;App\Entity\EquipmentCategory&quot; but this type has been excluded in &quot;config/services.yaml&quot;."/>
+    </service>
+    <service id=".errored..service_locator.NjZv6sH.App\Entity\Role" class="App\Entity\Role">
+      <tag name="container.error" message="Cannot autowire service &quot;.service_locator.NjZv6sH&quot;: it needs an instance of &quot;App\Entity\Role&quot; but this type has been excluded in &quot;config/services.yaml&quot;."/>
+    </service>
+    <service id=".errored..service_locator.h1EgrTx.App\Entity\Role" class="App\Entity\Role">
+      <tag name="container.error" message="Cannot autowire service &quot;.service_locator.h1EgrTx&quot;: it needs an instance of &quot;App\Entity\Role&quot; but this type has been excluded in &quot;config/services.yaml&quot;."/>
+    </service>
+    <service id=".errored..service_locator.eu4C7I1.App\Entity\User" class="App\Entity\User">
+      <tag name="container.error" message="Cannot autowire service &quot;.service_locator.eu4C7I1&quot;: it needs an instance of &quot;App\Entity\User&quot; but this type has been excluded in &quot;config/services.yaml&quot;."/>
+    </service>
+    <service id=".errored..service_locator.Hz5btge.App\Entity\User" class="App\Entity\User">
+      <tag name="container.error" message="Cannot autowire service &quot;.service_locator.Hz5btge&quot;: it needs an instance of &quot;App\Entity\User&quot; but this type has been excluded in &quot;config/services.yaml&quot;."/>
+    </service>
+    <service id=".errored..service_locator.brsfv0z.App\Entity\Equipment" class="App\Entity\Equipment">
+      <tag name="container.error" message="Cannot autowire service &quot;.service_locator.brsfv0z&quot;: it needs an instance of &quot;App\Entity\Equipment&quot; but this type has been excluded in &quot;config/services.yaml&quot;."/>
     </service>
     <service id=".console.command.about.lazy" class="Symfony\Component\Console\Command\LazyCommand">
       <argument>about</argument>
@@ -7050,7 +7324,7 @@
     <service id="doctrine.migrations.metadata_storage" alias="doctrine.migrations.storage.table_storage"/>
     <service id="container.env_var_processors_locator" alias=".service_locator.bJ.4HC5" public="true"/>
     <service id="twig.loader.filesystem" alias="twig.loader.native_filesystem"/>
-    <service id="argument_resolver.controller_locator" alias=".service_locator.rmxHhKq"/>
+    <service id="argument_resolver.controller_locator" alias=".service_locator.bL0w7oY"/>
     <service id="twig.loader" alias="twig.loader.native_filesystem"/>
     <service id="doctrine.id_generator_locator" alias=".service_locator.KLVvNIq"/>
     <service id="Psr\Log\LoggerInterface" alias="logger"/>
@@ -7069,6 +7343,19 @@
     <service id="doctrine.orm.default_metadata_driver" alias=".doctrine.orm.default_metadata_driver"/>
     <service id="security.event_dispatcher.main" alias="debug.security.event_dispatcher.main"/>
     <service id=".service_locator.gFlme_s" alias=".service_locator.y4_Zrx."/>
+    <service id=".service_locator.5PlR2dM" alias=".service_locator.Y8AzKyZ"/>
+    <service id=".service_locator.wfHtoGb" alias=".service_locator.UJT5JVo"/>
+    <service id=".service_locator.2qer3NS" alias=".service_locator.LFjXlKs"/>
+    <service id=".service_locator.WGCCpVr" alias=".service_locator.BsfINrE"/>
+    <service id=".service_locator.oU6.QLt" alias=".service_locator.NjZv6sH"/>
+    <service id=".service_locator.XFSOotb" alias=".service_locator.h1EgrTx"/>
+    <service id=".service_locator.025Wi8b" alias=".service_locator.kPUOGb8"/>
+    <service id=".service_locator.H1KdcxH" alias=".service_locator.eu4C7I1"/>
+    <service id=".service_locator.W47vLMj" alias=".service_locator.Mhqdd2r"/>
+    <service id=".service_locator.EmZ4cZI" alias=".service_locator.Hz5btge"/>
+    <service id=".service_locator.i6nV.sR" alias=".service_locator.oD4w6SV"/>
+    <service id=".service_locator.YxjWVRw" alias=".service_locator.brsfv0z"/>
+    <service id=".service_locator.kk6lCbl" alias=".service_locator.TKagbnZ"/>
     <service id=".service_locator.7NIAq8D" alias=".service_locator.rSTd.nA"/>
     <service id=".service_locator.GDg2hr7" alias=".service_locator.jUv.zyj"/>
   </services>

@@ -44,11 +44,11 @@ class __TwigTemplate_a04292ea9bad4db520b90a728978312c extends Template
     <div class=\"container-fluid\">
         <div class=\"row\">
             <div class=\"col-sm-6\">
-                <script>document.write(new Date().getFullYear())</script> © Velzon.
+                <script>document.write(new Date().getFullYear())</script> © AssetHub.
             </div>
             <div class=\"col-sm-6\">
                 <div class=\"text-sm-end d-none d-sm-block\">
-                    Design & Develop by Themesbrand
+                    System zarządzania aktywami firmy
                 </div>
             </div>
         </div>
@@ -84,11 +84,11 @@ class __TwigTemplate_a04292ea9bad4db520b90a728978312c extends Template
     <div class=\"container-fluid\">
         <div class=\"row\">
             <div class=\"col-sm-6\">
-                <script>document.write(new Date().getFullYear())</script> © Velzon.
+                <script>document.write(new Date().getFullYear())</script> © AssetHub.
             </div>
             <div class=\"col-sm-6\">
                 <div class=\"text-sm-end d-none d-sm-block\">
-                    Design & Develop by Themesbrand
+                    System zarządzania aktywami firmy
                 </div>
             </div>
         </div>

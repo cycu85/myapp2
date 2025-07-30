@@ -22,7 +22,7 @@ class HomeController extends AbstractController
         return $this->render('index.html.twig');
     }
 
-    #[Route('/{path}', requirements: ['path' => '^(?!install|test|admin|api|login|logout).*'])]
+    #[Route('/{path}', requirements: ['path' => '^(?!install|admin|api|login|logout).*'])]
     public function root($path)
     {
         if ($this->loader->exists($path.'.html.twig')) {
