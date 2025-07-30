@@ -138,7 +138,7 @@ final class Version20250730070000 extends AbstractMigration
             CONSTRAINT FK_equipment_updated_by FOREIGN KEY (updated_by_id) REFERENCES users (id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
-        // Create equipment_log table (after equipment table is created)
+        // Create equipment_log table - simplified without foreign keys initially
         $this->addSql('CREATE TABLE equipment_log (
             id INT AUTO_INCREMENT NOT NULL,
             equipment_id INT NOT NULL,
@@ -151,18 +151,10 @@ final class Version20250730070000 extends AbstractMigration
             new_status VARCHAR(50) DEFAULT NULL,
             additional_data JSON DEFAULT NULL,
             created_at DATETIME NOT NULL,
-            PRIMARY KEY(id),
-            INDEX IDX_equipment_log_equipment (equipment_id),
-            INDEX IDX_equipment_log_created_by (created_by_id),
-            INDEX IDX_equipment_log_previous_assignee (previous_assignee_id),
-            INDEX IDX_equipment_log_new_assignee (new_assignee_id),
-            CONSTRAINT FK_equipment_log_equipment FOREIGN KEY (equipment_id) REFERENCES equipment (id),
-            CONSTRAINT FK_equipment_log_created_by FOREIGN KEY (created_by_id) REFERENCES users (id),
-            CONSTRAINT FK_equipment_log_previous_assignee FOREIGN KEY (previous_assignee_id) REFERENCES users (id),
-            CONSTRAINT FK_equipment_log_new_assignee FOREIGN KEY (new_assignee_id) REFERENCES users (id)
+            PRIMARY KEY(id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
 
-        // Create equipment_attachment table (after equipment table is created)
+        // Create equipment_attachment table - simplified without foreign keys initially
         $this->addSql('CREATE TABLE equipment_attachment (
             id INT AUTO_INCREMENT NOT NULL,
             equipment_id INT NOT NULL,
@@ -174,11 +166,7 @@ final class Version20250730070000 extends AbstractMigration
             type VARCHAR(50) NOT NULL,
             description TEXT DEFAULT NULL,
             created_at DATETIME NOT NULL,
-            PRIMARY KEY(id),
-            INDEX IDX_equipment_attachment_equipment (equipment_id),
-            INDEX IDX_equipment_attachment_uploaded_by (uploaded_by_id),
-            CONSTRAINT FK_equipment_attachment_equipment FOREIGN KEY (equipment_id) REFERENCES equipment (id),
-            CONSTRAINT FK_equipment_attachment_uploaded_by FOREIGN KEY (uploaded_by_id) REFERENCES users (id)
+            PRIMARY KEY(id)
         ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
     }
 
