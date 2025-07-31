@@ -1,0 +1,187 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ustawienia Ogólne - AssetHub{% endblock %}
+
+{% block page_title %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Ustawienia Ogólne</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Admin</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_settings') }}">Ustawienia</a></li>
+                    <li class="breadcrumb-item active">Ogólne</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h4 class="card-title mb-0">
+                            <i class="ri-settings-3-line me-2"></i>Ustawienia Ogólne
+                        </h4>
+                        <p class="text-muted mb-0 mt-1">Konfiguruj podstawowe ustawienia aplikacji</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a href="{{ path('admin_settings') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="ri-arrow-left-line me-1"></i>Powrót
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="mb-3">
+                            {{ form_label(form.app_name, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.app_name) }}
+                            {{ form_errors(form.app_name) }}
+                            <div class="form-text">
+                                <i class="ri-information-line me-1"></i>
+                                Nazwa ta będzie wyświetlana w całej aplikacji
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.primary_color, null, {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                {{ form_widget(form.primary_color, {'attr': {'style': 'width: 80px; height: 38px;'}}) }}
+                                <span class="input-group-text" id="color-preview" style="background-color: {{ current_settings.primary_color }}; width: 40px;"></span>
+                                <input type="text" class="form-control" id="color-text" value="{{ current_settings.primary_color }}" readonly>
+                            </div>
+                            {{ form_errors(form.primary_color) }}
+                            <div class="form-text">
+                                <i class="ri-information-line me-1"></i>
+                                Główny kolor używany w interfejsie aplikacji
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form_label(form.company_logo, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.company_logo) }}
+                            {{ form_errors(form.company_logo) }}
+                            <div class="form-text">
+                                <i class="ri-information-line me-1"></i>
+                                Akceptowane formaty: JPG, PNG, GIF, WebP. Maksymalny rozmiar: 2MB
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-start">
+                            {{ form_widget(form.save, {'attr': {'class': 'btn btn-primary'}}) }}
+                            <a href="{{ path('admin_settings') }}" class="btn btn-outline-secondary ms-2">Anuluj</a>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card border border-light">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-eye-line me-2"></i>Podgląd
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <div class="mb-3">
+                                        <img src="{{ current_settings.company_logo }}" 
+                                             alt="Logo" 
+                                             class="img-fluid" 
+                                             style="max-height: 80px; max-width: 200px;"
+                                             id="logo-preview">
+                                    </div>
+                                    <h5 class="mb-2" id="app-name-preview">{{ current_settings.app_name }}</h5>
+                                    <div class="mb-2">
+                                        <span class="badge" 
+                                              style="background-color: {{ current_settings.primary_color }}; color: white;"
+                                              id="color-badge-preview">
+                                            Przykładowy element
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">Tak będzie wyglądać w aplikacji</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="ri-lightbulb-line"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-2">
+                                    <h6 class="alert-heading">Wskazówka</h6>
+                                    <p class="mb-0">
+                                        Zmiany zostaną zastosowane natychmiast po zapisaniu. 
+                                        Może być konieczne odświeżenie strony, aby zobaczyć wszystkie zmiany.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Aktualizacja podglądu nazwy aplikacji
+    const appNameInput = document.getElementById('{{ form.app_name.vars.id }}');
+    const appNamePreview = document.getElementById('app-name-preview');
+    
+    if (appNameInput && appNamePreview) {
+        appNameInput.addEventListener('input', function() {
+            appNamePreview.textContent = this.value || '{{ current_settings.app_name }}';
+        });
+    }
+
+    // Aktualizacja podglądu koloru
+    const colorInput = document.getElementById('{{ form.primary_color.vars.id }}');
+    const colorPreview = document.getElementById('color-preview');
+    const colorText = document.getElementById('color-text');
+    const colorBadgePreview = document.getElementById('color-badge-preview');
+    
+    if (colorInput && colorPreview && colorText && colorBadgePreview) {
+        colorInput.addEventListener('input', function() {
+            const color = this.value;
+            colorPreview.style.backgroundColor = color;
+            colorText.value = color;
+            colorBadgePreview.style.backgroundColor = color;
+        });
+    }
+
+    // Podgląd logo
+    const logoInput = document.getElementById('{{ form.company_logo.vars.id }}');
+    const logoPreview = document.getElementById('logo-preview');
+    
+    if (logoInput && logoPreview) {
+        logoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    logoPreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -3,10 +3,13 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Module;
+use App\Form\GeneralSettingsType;
 use App\Repository\ModuleRepository;
 use App\Service\PermissionService;
+use App\Service\SettingService;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -16,6 +19,7 @@ class AdminController extends AbstractController
     public function __construct(
         private PermissionService $permissionService,
         private ModuleRepository $moduleRepository,
+        private SettingService $settingService,
         private LoggerInterface $logger
     ) {
     }
@@ -107,6 +111,64 @@ class AdminController extends AbstractController
         ]);
 
         return $this->render('admin/settings/index.html.twig');
+    }
+
+    #[Route('/settings/general', name: 'admin_settings_general')]
+    public function generalSettings(Request $request): Response
+    {
+        $user = $this->getUser();
+        
+        if (!$this->permissionService->canAccessModule($user, 'admin')) {
+            $this->logger->warning('Unauthorized admin general settings access attempt', [
+                'user' => $user?->getUsername() ?? 'anonymous',
+                'ip' => $this->getClientIp()
+            ]);
+            throw $this->createAccessDeniedException('Brak dostępu do panelu administracyjnego');
+        }
+
+        // Pobierz obecne ustawienia
+        $currentSettings = $this->settingService->getGeneralSettings();
+        
+        $form = $this->createForm(GeneralSettingsType::class, $currentSettings);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $logoFile = $form->get('company_logo')->getData();
+
+            try {
+                $this->settingService->saveGeneralSettings($data, $logoFile);
+                
+                $this->addFlash('success', 'Ustawienia zostały zapisane pomyślnie!');
+                
+                $this->logger->info('General settings updated successfully', [
+                    'user' => $user->getUsername(),
+                    'ip' => $this->getClientIp(),
+                    'settings' => $data
+                ]);
+
+                return $this->redirectToRoute('admin_settings_general');
+                
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Wystąpił błąd podczas zapisywania ustawień: ' . $e->getMessage());
+                
+                $this->logger->error('Failed to save general settings', [
+                    'user' => $user->getUsername(),
+                    'error' => $e->getMessage(),
+                    'ip' => $this->getClientIp()
+                ]);
+            }
+        }
+
+        $this->logger->info('Admin general settings page accessed', [
+            'user' => $user->getUsername(),
+            'ip' => $this->getClientIp()
+        ]);
+
+        return $this->render('admin/settings/general.html.twig', [
+            'form' => $form->createView(),
+            'current_settings' => $currentSettings,
+        ]);
     }
 
     private function getClientIp(): ?string
