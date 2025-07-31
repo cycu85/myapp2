@@ -1,0 +1,237 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ustawienia Email - {{ app_name() }}{% endblock %}
+
+{% block page_title %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Ustawienia Email</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Admin</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_settings') }}">Ustawienia</a></li>
+                    <li class="breadcrumb-item active">Email</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h4 class="card-title mb-0">
+                            <i class="ri-mail-line me-2"></i>Konfiguracja Email SMTP
+                        </h4>
+                        <p class="text-muted mb-0 mt-1">Skonfiguruj serwer SMTP do wysyłania wiadomości email</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a href="{{ path('admin_settings') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="ri-arrow-left-line me-1"></i>Powrót
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {{ form_start(form) }}
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card border border-light mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-server-line me-2"></i>Konfiguracja serwera SMTP
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="mb-3">
+                                            {{ form_label(form.smtp_host, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.smtp_host) }}
+                                            {{ form_errors(form.smtp_host) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form_label(form.smtp_port, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.smtp_port) }}
+                                            {{ form_errors(form.smtp_port) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.smtp_encryption, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.smtp_encryption) }}
+                                    {{ form_errors(form.smtp_encryption) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        TLS (port 587) jest zalecany, SSL (port 465) dla starszych serwerów
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.smtp_username, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.smtp_username) }}
+                                    {{ form_errors(form.smtp_username) }}
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.smtp_password, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.smtp_password) }}
+                                    {{ form_errors(form.smtp_password) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        Pozostaw puste, aby zachować obecne hasło
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border border-light mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-user-line me-2"></i>Ustawienia nadawcy
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form_label(form.from_email, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.from_email) }}
+                                    {{ form_errors(form.from_email) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        Adres email, z którego będą wysyłane wiadomości systemowe
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.from_name, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.from_name) }}
+                                    {{ form_errors(form.from_name) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border border-warning mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-send-plane-line me-2"></i>Test połączenia
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form_label(form.test_email, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.test_email) }}
+                                    {{ form_errors(form.test_email) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        Podaj adres email, na który chcesz wysłać wiadomość testową
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-start">
+                            {{ form_widget(form.save) }}
+                            {{ form_widget(form.test) }}
+                            <a href="{{ path('admin_settings') }}" class="btn btn-outline-secondary ms-2">Anuluj</a>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card border border-light">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-information-line me-2"></i>Popularne konfiguracje
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="emailProviders">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gmail">
+                                                Gmail
+                                            </button>
+                                        </h2>
+                                        <div id="gmail" class="accordion-collapse collapse" data-bs-parent="#emailProviders">
+                                            <div class="accordion-body">
+                                                <small>
+                                                    <strong>Host:</strong> smtp.gmail.com<br>
+                                                    <strong>Port:</strong> 587<br>
+                                                    <strong>Szyfrowanie:</strong> TLS<br>
+                                                    <strong>Uwaga:</strong> Użyj hasła aplikacji, nie hasła konta
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#outlook">
+                                                Outlook/Hotmail
+                                            </button>
+                                        </h2>
+                                        <div id="outlook" class="accordion-collapse collapse" data-bs-parent="#emailProviders">
+                                            <div class="accordion-body">
+                                                <small>
+                                                    <strong>Host:</strong> smtp-mail.outlook.com<br>
+                                                    <strong>Port:</strong> 587<br>
+                                                    <strong>Szyfrowanie:</strong> TLS
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#yahoo">
+                                                Yahoo
+                                            </button>
+                                        </h2>
+                                        <div id="yahoo" class="accordion-collapse collapse" data-bs-parent="#emailProviders">
+                                            <div class="accordion-body">
+                                                <small>
+                                                    <strong>Host:</strong> smtp.mail.yahoo.com<br>
+                                                    <strong>Port:</strong> 587<br>
+                                                    <strong>Szyfrowanie:</strong> TLS
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mt-3">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="ri-lightbulb-line"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-2">
+                                    <h6 class="alert-heading">Wskazówki</h6>
+                                    <p class="mb-0">
+                                        • Najpierw zapisz ustawienia, a następnie przetestuj połączenie<br>
+                                        • Upewnij się, że firewall nie blokuje portów SMTP<br>
+                                        • Dla Gmail użyj haseł aplikacji zamiast hasła konta
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
