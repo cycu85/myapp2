@@ -59,7 +59,7 @@
                             <div class="input-group">
                                 {{ form_widget(form.primary_color, {'attr': {'style': 'width: 80px; height: 38px;'}}) }}
                                 <span class="input-group-text" id="color-preview" style="background-color: {{ current_settings.primary_color }}; width: 40px;"></span>
-                                {{ form_widget(form.primary_color_text, {'attr': {'class': 'form-control', 'placeholder': '#405189', 'pattern': '^#[0-9A-Fa-f]{6}$', 'maxlength': '7', 'value': current_settings.primary_color}}) }}
+                                {{ form_widget(form.primary_color_text, {'value': current_settings.primary_color}) }}
                             </div>
                             {{ form_errors(form.primary_color) }}
                             <div class="form-text">

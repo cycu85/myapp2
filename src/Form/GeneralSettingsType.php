@@ -67,9 +67,16 @@ class GeneralSettingsType extends AbstractType
                     new NotBlank(['message' => 'Główny kolor musi być wybrany'])
                 ]
             ])
-            ->add('primary_color_text', HiddenType::class, [
+            ->add('primary_color_text', TextType::class, [
+                'label' => false,
                 'mapped' => false,
-                'required' => false
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => '#405189',
+                    'pattern' => '^#[0-9A-Fa-f]{6}$',
+                    'maxlength' => 7
+                ]
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Zapisz ustawienia',
