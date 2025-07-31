@@ -74,6 +74,8 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 - **System słowników** - Zarządzanie słownikami systemowymi dla wszystkich modułów
 - **🎨 Konfiguracja wyglądu** - Dynamiczne ustawienia nazwy, logo i kolorystyki
 - **⚙️ Panel ustawień** - Kompleksowy system konfiguracji aplikacji
+- **📧 Konfiguracja Email** - System SMTP z testowaniem połączenia
+- **🔗 Integracja LDAP/AD** - Synchronizacja użytkowników z Active Directory
 
 ## 💻 Wymagania Systemowe
 
@@ -87,7 +89,7 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 | **Baza Danych** | MySQL 8.0+ (domyślnie) / PostgreSQL 13+ / SQLite 3.35+ |
 | **Pamięć RAM** | Minimum 512MB, zalecane 2GB+ |
 | **Przestrzeń Dyskowa** | Minimum 1GB, zalecane 5GB+ |
-| **PHP Extensions** | mysql, pdo, intl, mbstring, xml, curl, gd |
+| **PHP Extensions** | mysql, pdo, intl, mbstring, xml, curl, gd, ldap |
 
 ### Zalecane Wymagania Produkcyjne
 
@@ -115,7 +117,8 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    sudo apt update
    sudo apt install -y php8.2 php8.2-cli php8.2-fpm php8.2-common \
      php8.2-mysql php8.2-pdo php8.2-intl php8.2-mbstring \
-     php8.2-xml php8.2-curl php8.2-gd php8.2-zip php8.2-opcache
+     php8.2-xml php8.2-curl php8.2-gd php8.2-zip php8.2-opcache \
+     php8.2-ldap
    ```
 
 2. **Instalacja MySQL i Serwera Web (Apache)**
@@ -364,6 +367,18 @@ MAILER_DSN=gmail://username:password@default
    - **Podgląd na żywo** - wszystkie zmiany widoczne natychmiast
    - **Synchronizacja dwukierunkowa** - color picker ↔ pole tekstowe
    - **Inteligentna walidacja** - automatyczne poprawki formatu HEX
+
+7. **🔗 Integracja LDAP/Active Directory**
+   - Panel Administracyjny → Ustawienia → LDAP
+   - **Konfiguracja serwera** - host, port, szyfrowanie (SSL/TLS/StartTLS)
+   - **Uwierzytelnianie** - Bind DN użytkownika serwisowego i hasło
+   - **Wyszukiwanie** - Base DN i filtr użytkowników LDAP
+   - **Mapowanie pól** - dopasowanie atrybutów LDAP do pól użytkownika
+   - **Testowanie połączenia** - weryfikacja konfiguracji z podglądem użytkowników
+   - **Synchronizacja istniejących** - aktualizacja danych użytkowników z LDAP
+   - **Synchronizacja nowych** - automatyczne tworzenie kont z katalogu
+   - **Wsparcie dla** - Active Directory, OpenLDAP, Azure AD Domain Services
+   - **Bezpieczeństwo** - szyfrowane połączenia i bezpieczne przechowywanie haseł
 
 ### Zarządzanie Sprzętem
 
