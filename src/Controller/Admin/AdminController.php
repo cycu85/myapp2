@@ -17,6 +17,9 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Ldap\Ldap;
+use Symfony\Component\Ldap\LdapInterface;
+use App\Repository\UserRepository;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/admin')]
@@ -27,7 +30,8 @@ class AdminController extends AbstractController
         private ModuleRepository $moduleRepository,
         private SettingService $settingService,
         private MailerInterface $mailer,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private UserRepository $userRepository
     ) {
     }
 
@@ -304,7 +308,19 @@ class AdminController extends AbstractController
                 // Testowanie połączenia LDAP
                 try {
                     $result = $this->testLdapConnection($data);
-                    $this->addFlash('success', 'Połączenie LDAP działa prawidłowo! Znaleziono ' . $result['user_count'] . ' użytkowników.');
+                    $message = 'Połączenie LDAP działa prawidłowo! Znaleziono ' . $result['user_count'] . ' użytkowników.';
+                    if (!empty($result['sample_users'])) {
+                        $message .= ' Przykładowi użytkownicy: ';
+                        $examples = [];
+                        foreach ($result['sample_users'] as $user) {
+                            $examples[] = $user['username'] . ' (' . $user['email'] . ')';
+                        }
+                        $message .= implode(', ', array_slice($examples, 0, 3));
+                        if (count($examples) > 3) {
+                            $message .= '...';
+                        }
+                    }
+                    $this->addFlash('success', $message);
                     
                     $this->logger->info('LDAP connection test successful', [
                         'user' => $user->getUsername(),
@@ -326,7 +342,11 @@ class AdminController extends AbstractController
                 // Synchronizacja istniejących użytkowników
                 try {
                     $result = $this->syncExistingUsers($data);
-                    $this->addFlash('success', 'Zsynchronizowano ' . $result['updated'] . ' istniejących użytkowników z LDAP.');
+                    $message = 'Zsynchronizowano ' . $result['updated'] . ' istniejących użytkowników z LDAP.';
+                    if ($result['errors'] > 0) {
+                        $message .= ' Błędy: ' . $result['errors'] . ' użytkowników.';
+                    }
+                    $this->addFlash('success', $message);
                     
                     $this->logger->info('LDAP existing users sync completed', [
                         'user' => $user->getUsername(),
@@ -346,7 +366,11 @@ class AdminController extends AbstractController
                 // Synchronizacja nowych użytkowników
                 try {
                     $result = $this->syncNewUsers($data);
-                    $this->addFlash('success', 'Dodano ' . $result['created'] . ' nowych użytkowników z LDAP.');
+                    $message = 'Dodano ' . $result['created'] . ' nowych użytkowników z LDAP.';
+                    if ($result['errors'] > 0) {
+                        $message .= ' Błędy: ' . $result['errors'] . ' użytkowników.';
+                    }
+                    $this->addFlash('success', $message);
                     
                     $this->logger->info('LDAP new users sync completed', [
                         'user' => $user->getUsername(),
@@ -532,32 +556,227 @@ class AdminController extends AbstractController
             $password = $this->settingService->get('ldap_bind_password', '');
         }
 
-        // Tutaj będzie implementacja połączenia z LDAP
-        // Na razie zwracamy przykładowe dane
+        // Utwórz połączenie LDAP
+        $ldap = $this->createLdapConnection($ldapSettings, $password);
+        
+        // Testuj bind (uwierzytelnianie)
+        $ldap->bind($ldapSettings['ldap_bind_dn'], $password);
+        
+        // Testuj wyszukiwanie użytkowników
+        $query = $ldap->query(
+            $ldapSettings['ldap_base_dn'],
+            $ldapSettings['ldap_user_filter'],
+            [
+                'maxItems' => 1000,
+                'timeout' => 30
+            ]
+        );
+        
+        $results = $query->execute();
+        $userCount = count($results);
+        
+        // Pobierz przykładowych użytkowników dla podglądu
+        $sampleUsers = [];
+        $count = 0;
+        foreach ($results as $entry) {
+            if ($count >= 5) break; // Maksymalnie 5 przykładów
+            
+            $sampleUsers[] = [
+                'dn' => $entry->getDn(),
+                'username' => $this->getLdapAttribute($entry, $ldapSettings['ldap_map_username']),
+                'email' => $this->getLdapAttribute($entry, $ldapSettings['ldap_map_email']),
+                'name' => $this->getLdapAttribute($entry, $ldapSettings['ldap_map_displayname']) 
+                    ?: $this->getLdapAttribute($entry, $ldapSettings['ldap_map_firstname']) . ' ' . $this->getLdapAttribute($entry, $ldapSettings['ldap_map_lastname'])
+            ];
+            $count++;
+        }
+        
         return [
-            'user_count' => 42,
-            'connection_successful' => true
+            'user_count' => $userCount,
+            'connection_successful' => true,
+            'sample_users' => $sampleUsers
         ];
     }
 
     private function syncExistingUsers(array $ldapSettings): array
     {
-        // Tutaj będzie implementacja synchronizacji istniejących użytkowników
-        // Na razie zwracamy przykładowe dane
+        $password = $ldapSettings['ldap_bind_password'];
+        if (empty($password)) {
+            $password = $this->settingService->get('ldap_bind_password', '');
+        }
+
+        $ldap = $this->createLdapConnection($ldapSettings, $password);
+        $ldap->bind($ldapSettings['ldap_bind_dn'], $password);
+        
+        // Pobierz wszystkich użytkowników z LDAP
+        $query = $ldap->query(
+            $ldapSettings['ldap_base_dn'],
+            $ldapSettings['ldap_user_filter'],
+            ['maxItems' => 5000, 'timeout' => 60]
+        );
+        
+        $ldapResults = $query->execute();
+        
+        // Pobierz wszystkich istniejących użytkowników z bazy
+        $existingUsers = $this->userRepository->findAll();
+        $existingUsernames = [];
+        foreach ($existingUsers as $user) {
+            $existingUsernames[strtolower($user->getUsername())] = $user;
+        }
+        
+        $updated = 0;
+        $errors = 0;
+        
+        foreach ($ldapResults as $entry) {
+            try {
+                $username = strtolower($this->getLdapAttribute($entry, $ldapSettings['ldap_map_username']));
+                
+                if (isset($existingUsernames[$username])) {
+                    $user = $existingUsernames[$username];
+                    
+                    // Aktualizuj dane użytkownika z LDAP
+                    $email = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_email']);
+                    $firstname = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_firstname']);
+                    $lastname = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_lastname']);
+                    $displayname = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_displayname']);
+                    
+                    if ($email && $email !== $user->getEmail()) {
+                        $user->setEmail($email);
+                    }
+                    
+                    // Zapisz zmiany
+                    $this->userRepository->save($user, true);
+                    $updated++;
+                    
+                    $this->logger->info('Updated user from LDAP', [
+                        'username' => $username,
+                        'email' => $email
+                    ]);
+                }
+            } catch (\Exception $e) {
+                $errors++;
+                $this->logger->error('Error updating user from LDAP', [
+                    'username' => $username ?? 'unknown',
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+        
         return [
-            'updated' => 15,
-            'errors' => 0
+            'updated' => $updated,
+            'errors' => $errors
         ];
     }
 
     private function syncNewUsers(array $ldapSettings): array
     {
-        // Tutaj będzie implementacja synchronizacji nowych użytkowników
-        // Na razie zwracamy przykładowe dane
+        $password = $ldapSettings['ldap_bind_password'];
+        if (empty($password)) {
+            $password = $this->settingService->get('ldap_bind_password', '');
+        }
+
+        $ldap = $this->createLdapConnection($ldapSettings, $password);
+        $ldap->bind($ldapSettings['ldap_bind_dn'], $password);
+        
+        // Pobierz wszystkich użytkowników z LDAP
+        $query = $ldap->query(
+            $ldapSettings['ldap_base_dn'],
+            $ldapSettings['ldap_user_filter'],
+            ['maxItems' => 5000, 'timeout' => 60]
+        );
+        
+        $ldapResults = $query->execute();
+        
+        // Pobierz listę istniejących usernames z bazy
+        $existingUsernames = [];
+        $existingUsers = $this->userRepository->findAll();
+        foreach ($existingUsers as $user) {
+            $existingUsernames[] = strtolower($user->getUsername());
+        }
+        
+        $created = 0;
+        $errors = 0;
+        
+        foreach ($ldapResults as $entry) {
+            try {
+                $username = strtolower($this->getLdapAttribute($entry, $ldapSettings['ldap_map_username']));
+                
+                // Sprawdź czy użytkownik już istnieje
+                if (!in_array($username, $existingUsernames)) {
+                    $email = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_email']);
+                    $firstname = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_firstname']);
+                    $lastname = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_lastname']);
+                    $displayname = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_displayname']);
+                    
+                    // Walidacja wymaganych pól
+                    if (empty($username) || empty($email)) {
+                        $errors++;
+                        continue;
+                    }
+                    
+                    // Utwórz nowego użytkownika
+                    $newUser = new \App\Entity\User();
+                    $newUser->setUsername($username);
+                    $newUser->setEmail($email);
+                    $newUser->setIsActive(true);
+                    $newUser->setCreatedAt(new \DateTimeImmutable());
+                    
+                    // Ustaw domyślne hasło (użytkownik będzie logował się przez LDAP)
+                    $newUser->setPassword(password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT));
+                    
+                    $this->userRepository->save($newUser, true);
+                    $created++;
+                    
+                    $this->logger->info('Created new user from LDAP', [
+                        'username' => $username,
+                        'email' => $email
+                    ]);
+                }
+            } catch (\Exception $e) {
+                $errors++;
+                $this->logger->error('Error creating user from LDAP', [
+                    'username' => $username ?? 'unknown',
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+        
         return [
-            'created' => 8,
-            'errors' => 0
+            'created' => $created,
+            'errors' => $errors
         ];
+    }
+
+    private function createLdapConnection(array $ldapSettings, string $password): LdapInterface
+    {
+        // Przygotuj opcje połączenia
+        $options = [
+            'host' => $ldapSettings['ldap_host'],
+            'port' => $ldapSettings['ldap_port'],
+        ];
+        
+        // Dodaj szyfrowanie jeśli skonfigurowane
+        if ($ldapSettings['ldap_encryption'] === 'ssl') {
+            $options['encryption'] = 'ssl';
+        } elseif ($ldapSettings['ldap_encryption'] === 'starttls') {
+            $options['encryption'] = 'tls';
+        }
+        
+        return Ldap::create('ext_ldap', $options);
+    }
+    
+    private function getLdapAttribute($entry, string $attributeName): ?string
+    {
+        if (empty($attributeName)) {
+            return null;
+        }
+        
+        $attributes = $entry->getAttributes();
+        if (isset($attributes[$attributeName]) && !empty($attributes[$attributeName][0])) {
+            return $attributes[$attributeName][0];
+        }
+        
+        return null;
     }
 
     private function getClientIp(): ?string

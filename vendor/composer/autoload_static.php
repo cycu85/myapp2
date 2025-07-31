@@ -62,6 +62,7 @@ class ComposerStaticInit1a8ef39f6118381c98aad8a65fb3a03b
             'Symfony\\Component\\Mime\\' => 23,
             'Symfony\\Component\\Messenger\\' => 28,
             'Symfony\\Component\\Mailer\\' => 25,
+            'Symfony\\Component\\Ldap\\' => 23,
             'Symfony\\Component\\HttpKernel\\' => 29,
             'Symfony\\Component\\HttpFoundation\\' => 33,
             'Symfony\\Component\\Form\\' => 23,
@@ -268,6 +269,10 @@ class ComposerStaticInit1a8ef39f6118381c98aad8a65fb3a03b
         'Symfony\\Component\\Mailer\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/mailer',
+        ),
+        'Symfony\\Component\\Ldap\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/ldap',
         ),
         'Symfony\\Component\\HttpKernel\\' => 
         array (

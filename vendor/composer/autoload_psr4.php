@@ -39,6 +39,7 @@ return array(
     'Symfony\\Component\\Mime\\' => array($vendorDir . '/symfony/mime'),
     'Symfony\\Component\\Messenger\\' => array($vendorDir . '/symfony/messenger'),
     'Symfony\\Component\\Mailer\\' => array($vendorDir . '/symfony/mailer'),
+    'Symfony\\Component\\Ldap\\' => array($vendorDir . '/symfony/ldap'),
     'Symfony\\Component\\HttpKernel\\' => array($vendorDir . '/symfony/http-kernel'),
     'Symfony\\Component\\HttpFoundation\\' => array($vendorDir . '/symfony/http-foundation'),
     'Symfony\\Component\\Form\\' => array($vendorDir . '/symfony/form'),

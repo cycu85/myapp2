@@ -3,7 +3,7 @@
         'name' => 'symfony/skeleton',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '61ba70dd855e48fe5f03a4367f2c37f81a07ecad',
+        'reference' => 'cd28757ea30003109898760f50393f21758e70b6',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -725,6 +725,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'symfony/ldap' => array(
+            'pretty_version' => 'v7.0.8',
+            'version' => '7.0.8.0',
+            'reference' => '0197dc64ddf295b6b83d117a09b5a0ee8436f2e5',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/ldap',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'symfony/mailer' => array(
             'pretty_version' => 'v7.0.9',
             'version' => '7.0.9.0',
@@ -1010,7 +1019,7 @@
         'symfony/skeleton' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '61ba70dd855e48fe5f03a4367f2c37f81a07ecad',
+            'reference' => 'cd28757ea30003109898760f50393f21758e70b6',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
