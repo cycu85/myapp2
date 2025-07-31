@@ -38,7 +38,7 @@ class AppFixtures extends Fixture
         $adminRole->setName('system_admin')
             ->setDescription('Administrator systemu')
             ->setModule($adminModule)
-            ->setPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE', 'EMPLOYEES_EDIT_FULL'])
+            ->setPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE', 'EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL'])
             ->setIsSystemRole(true);
         $manager->persist($adminRole);
 
