@@ -17,9 +17,11 @@
                 <div class="d-flex align-items-center">
                     <h5 class="card-title mb-0 flex-grow-1">Lista pracowników</h5>
                     <div class="flex-shrink-0">
+                        {% if can_edit_full %}
                         <a href="{{ path('admin_users_new') }}" class="btn btn-success add-btn">
                             <i class="ri-add-line align-bottom me-1"></i> Dodaj pracownika
                         </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -111,11 +113,14 @@ document.addEventListener('DOMContentLoaded', function() {
             "{{ user.department|default('—') }}",
             gridjs.html("{% if user.isActive %}<span class='badge bg-success-subtle text-success'>Aktywny</span>{% else %}<span class='badge bg-danger-subtle text-danger'>Nieaktywny</span>{% endif %}"),
             gridjs.html(`<div class="d-flex gap-1">
+                {% if can_edit %}
                 <div class="edit">
                     <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="btn btn-sm btn-info edit-item-btn" title="Edytuj pracownika">
                         <i class="ri-edit-line"></i>
                     </a>
                 </div>
+                {% endif %}
+                {% if can_edit_full %}
                 <div class="edit">
                     <a href="{{ path('admin_users_roles', {id: user.id}) }}" class="btn btn-sm btn-primary edit-item-btn" title="Zarządzaj rolami">
                         <i class="ri-shield-user-line"></i>
@@ -128,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="ri-{% if user.isActive %}user-unfollow{% else %}user-follow{% endif %}-line"></i>
                     </button>
                 </div>
+                {% endif %}
             </div>`)
         ]{% if not loop.last %},{% endif %}
         {% endfor %}

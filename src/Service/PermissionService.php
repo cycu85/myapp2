@@ -91,7 +91,10 @@ class PermissionService
             'ASSIGN' => 'Przypisywanie',
             'REVIEW' => 'Przeglądy',
             'EXPORT' => 'Eksport',
-            'CONFIGURE' => 'Konfiguracja'
+            'CONFIGURE' => 'Konfiguracja',
+            'EMPLOYEES_VIEW' => 'Przeglądanie pracowników',
+            'EMPLOYEES_EDIT_BASIC' => 'Edycja podstawowych danych pracowników',
+            'EMPLOYEES_EDIT_FULL' => 'Pełna edycja pracowników'
         ];
     }
 }

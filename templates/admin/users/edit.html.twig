@@ -51,11 +51,13 @@
                                 </h6>
                             </div>
                             <div class="card-body">
+                                {% if has_full_permission %}
                                 <div class="mb-3">
                                     {{ form_label(form.username) }}
                                     {{ form_widget(form.username) }}
                                     {{ form_errors(form.username) }}
                                 </div>
+                                {% endif %}
 
                                 <div class="mb-3">
                                     {{ form_label(form.email) }}
@@ -80,6 +82,7 @@
                                     </div>
                                 </div>
 
+                                {% if has_full_permission %}
                                 <div class="mb-3">
                                     {{ form_label(form.plainPassword) }}
                                     {{ form_widget(form.plainPassword) }}
@@ -95,6 +98,7 @@
                                     {{ form_label(form.isActive, null, {'label_attr': {'class': 'form-check-label ms-2'}}) }}
                                     {{ form_errors(form.isActive) }}
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -176,9 +180,11 @@
                             <button type="submit" class="btn btn-success">
                                 <i class="ri-save-line me-1"></i>Zapisz zmiany
                             </button>
+                            {% if has_full_permission %}
                             <a href="{{ path('admin_users_roles', {id: user.id}) }}" class="btn btn-primary">
                                 <i class="ri-shield-user-line me-1"></i>Zarządzaj rolami
                             </a>
+                            {% endif %}
                             <a href="{{ path('admin_users_index') }}" class="btn btn-outline-secondary">
                                 <i class="ri-arrow-left-line me-1"></i>Anuluj
                             </a>

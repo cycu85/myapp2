@@ -31,12 +31,14 @@ class UserController extends AbstractController
     {
         $user = $this->getUser();
         
-        if (!$this->permissionService->canAccessModule($user, 'admin')) {
-            $this->logger->warning('Unauthorized admin users access attempt', [
+        if (!$this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_VIEW') && 
+            !$this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_BASIC') && 
+            !$this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_FULL')) {
+            $this->logger->warning('Unauthorized employees access attempt', [
                 'user' => $user?->getUsername() ?? 'anonymous',
                 'ip' => $request->getClientIp()
             ]);
-            throw $this->createAccessDeniedException('Brak dostępu do panelu administracyjnego');
+            throw $this->createAccessDeniedException('Brak uprawnień do przeglądania pracowników');
         }
 
         $users = $userRepository->findAll();
@@ -47,8 +49,15 @@ class UserController extends AbstractController
             'users_count' => count($users)
         ]);
 
+        // Check user permissions for template
+        $canEdit = $this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_BASIC') || 
+                   $this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_FULL');
+        $canEditFull = $this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_FULL');
+        
         return $this->render('admin/users/index.html.twig', [
             'users' => $users,
+            'can_edit' => $canEdit,
+            'can_edit_full' => $canEditFull,
         ]);
     }
 
@@ -57,13 +66,13 @@ class UserController extends AbstractController
     {
         $currentUser = $this->getUser();
         
-        if (!$this->permissionService->hasPermission($currentUser, 'admin', 'EDIT')) {
+        if (!$this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_FULL')) {
             $this->logger->warning('Unauthorized user roles management access attempt', [
                 'user' => $currentUser?->getUsername() ?? 'anonymous',
                 'ip' => $request->getClientIp(),
                 'target_user_id' => $user->getId()
             ]);
-            throw $this->createAccessDeniedException('Brak uprawnień do zarządzania rolami użytkowników');
+            throw $this->createAccessDeniedException('Brak uprawnień do zarządzania rolami pracowników');
         }
 
         if ($request->isMethod('POST')) {
@@ -142,12 +151,12 @@ class UserController extends AbstractController
     {
         $currentUser = $this->getUser();
         
-        if (!$this->permissionService->hasPermission($currentUser, 'admin', 'CREATE')) {
+        if (!$this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_FULL')) {
             $this->logger->warning('Unauthorized user create access attempt', [
                 'user' => $currentUser?->getUsername() ?? 'anonymous',
                 'ip' => $request->getClientIp()
             ]);
-            throw $this->createAccessDeniedException('Brak uprawnień do tworzenia użytkowników');
+            throw $this->createAccessDeniedException('Brak uprawnień do tworzenia pracowników');
         }
 
         $user = new User();
@@ -191,17 +200,25 @@ class UserController extends AbstractController
     {
         $currentUser = $this->getUser();
         
-        if (!$this->permissionService->hasPermission($currentUser, 'admin', 'EDIT')) {
+        if (!$this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_BASIC') && 
+            !$this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_FULL')) {
             $this->logger->warning('Unauthorized user edit access attempt', [
                 'user' => $currentUser?->getUsername() ?? 'anonymous',
                 'ip' => $request->getClientIp(),
                 'target_user_id' => $user->getId()
             ]);
-            throw $this->createAccessDeniedException('Brak uprawnień do edycji użytkowników');
+            throw $this->createAccessDeniedException('Brak uprawnień do edycji pracowników');
         }
 
+        // Determine user's permission level for form options
+        $hasFullPermission = $this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_FULL');
+        $hasBasicPermission = $this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_BASIC');
+        
         $form = $this->createForm(UserType::class, $user, [
-            'is_edit' => true
+            'is_edit' => true,
+            'allow_username_edit' => $hasFullPermission,
+            'allow_password_edit' => $hasFullPermission,
+            'allow_status_edit' => $hasFullPermission
         ]);
         $form->handleRequest($request);
 
@@ -239,6 +256,8 @@ class UserController extends AbstractController
         return $this->render('admin/users/edit.html.twig', [
             'user' => $user,
             'form' => $form,
+            'has_full_permission' => $hasFullPermission,
+            'has_basic_permission' => $hasBasicPermission,
         ]);
     }
 
@@ -247,13 +266,13 @@ class UserController extends AbstractController
     {
         $currentUser = $this->getUser();
         
-        if (!$this->permissionService->hasPermission($currentUser, 'admin', 'EDIT')) {
+        if (!$this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_FULL')) {
             $this->logger->warning('Unauthorized user toggle status access attempt', [
                 'user' => $currentUser?->getUsername() ?? 'anonymous',
                 'ip' => $request->getClientIp(),
                 'target_user_id' => $user->getId()
             ]);
-            throw $this->createAccessDeniedException('Brak uprawnień do zmiany statusu użytkowników');
+            throw $this->createAccessDeniedException('Brak uprawnień do zmiany statusu pracowników');
         }
 
         if ($this->isCsrfTokenValid('toggle_status'.$user->getId(), $request->request->get('_token'))) {

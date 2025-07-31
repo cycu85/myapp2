@@ -18,15 +18,23 @@ class UserType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $isEdit = $options['is_edit'] ?? false;
+        $allowUsernameEdit = $options['allow_username_edit'] ?? true;
+        $allowPasswordEdit = $options['allow_password_edit'] ?? true;
+        $allowStatusEdit = $options['allow_status_edit'] ?? true;
         
-        $builder
-            ->add('username', TextType::class, [
+        $builder;
+        
+        if ($allowUsernameEdit) {
+            $builder->add('username', TextType::class, [
                 'label' => 'Nazwa użytkownika',
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'Unikalna nazwa użytkownika'
                 ]
-            ])
+            ]);
+        }
+        
+        $builder
             ->add('email', EmailType::class, [
                 'label' => 'Email',
                 'attr' => [
@@ -76,7 +84,10 @@ class UserType extends AbstractType
                     'placeholder' => '+48 123 456 789'
                 ]
             ])
-            ->add('plainPassword', PasswordType::class, [
+        ;
+        
+        if ($allowPasswordEdit) {
+            $builder->add('plainPassword', PasswordType::class, [
                 'label' => $isEdit ? 'Nowe hasło (pozostaw puste, aby nie zmieniać)' : 'Hasło',
                 'mapped' => false,
                 'required' => !$isEdit,
@@ -101,14 +112,18 @@ class UserType extends AbstractType
                         'max' => 4096,
                     ]),
                 ],
-            ])
-            ->add('isActive', CheckboxType::class, [
+            ]);
+        }
+        
+        if ($allowStatusEdit) {
+            $builder->add('isActive', CheckboxType::class, [
                 'label' => 'Konto aktywne',
                 'required' => false,
                 'attr' => [
                     'class' => 'form-check-input'
                 ]
-            ])
+            ]);
+        }
         ;
     }
 
@@ -117,6 +132,9 @@ class UserType extends AbstractType
         $resolver->setDefaults([
             'data_class' => User::class,
             'is_edit' => false,
+            'allow_username_edit' => true,
+            'allow_password_edit' => true,
+            'allow_status_edit' => true,
         ]);
     }
 }

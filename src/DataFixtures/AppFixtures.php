@@ -23,7 +23,7 @@ class AppFixtures extends Fixture
         $adminModule->setName('admin')
             ->setDisplayName('Administracja')
             ->setDescription('Panel administracyjny systemu')
-            ->setRequiredPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE']);
+            ->setRequiredPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE', 'EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL']);
         $manager->persist($adminModule);
 
         $equipmentModule = new Module();
@@ -38,9 +38,34 @@ class AppFixtures extends Fixture
         $adminRole->setName('system_admin')
             ->setDescription('Administrator systemu')
             ->setModule($adminModule)
-            ->setPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE'])
+            ->setPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE', 'EMPLOYEES_EDIT_FULL'])
             ->setIsSystemRole(true);
         $manager->persist($adminRole);
+
+        // Employee management roles
+        $employeesViewRole = new Role();
+        $employeesViewRole->setName('employees_viewer')
+            ->setDescription('Przeglądanie listy pracowników')
+            ->setModule($adminModule)
+            ->setPermissions(['EMPLOYEES_VIEW'])
+            ->setIsSystemRole(true);
+        $manager->persist($employeesViewRole);
+
+        $employeesEditorRole = new Role();
+        $employeesEditorRole->setName('employees_editor')
+            ->setDescription('Edycja podstawowych danych pracowników')
+            ->setModule($adminModule)
+            ->setPermissions(['EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC'])
+            ->setIsSystemRole(true);
+        $manager->persist($employeesEditorRole);
+
+        $employeesManagerRole = new Role();
+        $employeesManagerRole->setName('employees_manager')
+            ->setDescription('Pełne zarządzanie pracownikami')
+            ->setModule($adminModule)
+            ->setPermissions(['EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL'])
+            ->setIsSystemRole(true);
+        $manager->persist($employeesManagerRole);
 
         $equipmentManagerRole = new Role();
         $equipmentManagerRole->setName('equipment_manager')
@@ -85,6 +110,20 @@ class AppFixtures extends Fixture
         $testUser->setPassword($hashedPassword);
         $manager->persist($testUser);
 
+        // Create HR user with employee management permissions
+        $hrUser = new User();
+        $hrUser->setUsername('hr')
+            ->setEmail('hr@assethub.local')
+            ->setFirstName('Anna')
+            ->setLastName('Nowak')
+            ->setEmployeeNumber('EMP002')
+            ->setPosition('Specjalista ds. kadr')
+            ->setDepartment('HR');
+
+        $hashedPassword = $this->passwordHasher->hashPassword($hrUser, 'hr123');
+        $hrUser->setPassword($hashedPassword);
+        $manager->persist($hrUser);
+
         $manager->flush();
 
         // Assign roles to users
@@ -105,6 +144,13 @@ class AppFixtures extends Fixture
             ->setRole($equipmentViewerRole)
             ->setAssignedBy($adminUser);
         $manager->persist($testUserRole);
+
+        // Assign HR role to HR user
+        $hrUserRole = new UserRole();
+        $hrUserRole->setUser($hrUser)
+            ->setRole($employeesEditorRole)
+            ->setAssignedBy($adminUser);
+        $manager->persist($hrUserRole);
 
         $manager->flush();
     }
