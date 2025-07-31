@@ -69,6 +69,9 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 - Konfiguracja modułów systemu
 - Generowanie raportów i analiz
 - Ustawienia systemowe i bezpieczeństwa
+- **System logowania** - Kompleksowe logowanie aktywności użytkowników
+- **Podgląd logów** - Przeglądanie logów systemowych w panelu administracyjnym
+- **System słowników** - Zarządzanie słownikami systemowymi dla wszystkich modułów
 
 ## 💻 Wymagania Systemowe
 
@@ -174,6 +177,9 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    # Ustawienie uprawnień
    sudo chmod -R 755 var/
    sudo chmod -R 777 var/cache var/log
+   
+   # Tworzenie katalogów logów (system automatycznie utworzy pliki logów)
+   sudo -u www-data mkdir -p var/log
    ```
 
 5. **Konfiguracja Apache**
@@ -331,6 +337,11 @@ MAILER_DSN=gmail://username:password@default
 4. **Konfiguracja Kategorii Sprzętu**
    - Panel Administracyjny → Kategorie Sprzętu
    - Dodaj kategorie odpowiadające Twojemu inwentarzowi
+
+5. **Monitoring Systemu**
+   - Panel Administracyjny → Logi
+   - Przeglądaj logi aktywności użytkowników i operacji systemowych
+   - Filtruj logi według dat, poziomów i kategorii
 
 ### Zarządzanie Sprzętem
 
@@ -506,8 +517,15 @@ myapp2/
 
 3. **Monitoring Logów**
    ```bash
-   # Logi aplikacji
+   # Logi aplikacji - główny plik logów
    tail -f var/log/prod.log
+   
+   # Logi specjalistyczne (dostępne od wersji z systemem logowania)
+   tail -f var/log/app.log          # Logi aplikacji
+   tail -f var/log/security.log     # Logi bezpieczeństwa
+   tail -f var/log/equipment.log    # Logi modułu sprzętu
+   tail -f var/log/dictionary.log   # Logi systemu słowników
+   tail -f var/log/doctrine.log     # Logi bazy danych
    
    # Logi Apache
    tail -f /var/log/apache2/myapp2_error.log
