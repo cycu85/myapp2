@@ -59,7 +59,7 @@
                             <div class="input-group">
                                 {{ form_widget(form.primary_color, {'attr': {'style': 'width: 80px; height: 38px;'}}) }}
                                 <span class="input-group-text" id="color-preview" style="background-color: {{ current_settings.primary_color }}; width: 40px;"></span>
-                                <input type="text" class="form-control" id="color-text" value="{{ current_settings.primary_color }}" placeholder="#405189" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
+                                {{ form_widget(form.primary_color_text, {'attr': {'class': 'form-control', 'placeholder': '#405189', 'pattern': '^#[0-9A-Fa-f]{6}$', 'maxlength': '7', 'value': current_settings.primary_color}}) }}
                             </div>
                             {{ form_errors(form.primary_color) }}
                             <div class="form-text">
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Aktualizacja podglądu koloru - synchronizacja dwukierunkowa
     const colorInput = document.getElementById('{{ form.primary_color.vars.id }}');
     const colorPreview = document.getElementById('color-preview');
-    const colorText = document.getElementById('color-text');
+    const colorText = document.getElementById('{{ form.primary_color_text.vars.id }}');
     const colorBadgePreview = document.getElementById('color-badge-preview');
     
     function updateColorPreview(color) {
@@ -213,6 +213,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateColorPreview(color);
             }
         });
+        
+        // Synchronizacja przed submitem formularza
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Upewnij się, że wartość z pola tekstowego jest w color picker
+                const textColor = colorText.value.trim();
+                if (isValidHexColor(textColor)) {
+                    colorInput.value = textColor;
+                }
+            });
+        }
     }
 
     // Podgląd logo

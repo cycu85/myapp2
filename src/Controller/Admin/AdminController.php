@@ -135,6 +135,12 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $logoFile = $form->get('company_logo')->getData();
+            
+            // Sprawdź czy użytkownik wpisał kolor w polu tekstowym
+            $colorFromText = $form->get('primary_color_text')->getData();
+            if ($colorFromText && preg_match('/^#[0-9A-Fa-f]{6}$/', $colorFromText)) {
+                $data['primary_color'] = $colorFromText;
+            }
 
             try {
                 $this->settingService->saveGeneralSettings($data, $logoFile);

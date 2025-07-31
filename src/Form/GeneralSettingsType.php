@@ -5,6 +5,7 @@ namespace App\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ColorType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -65,6 +66,10 @@ class GeneralSettingsType extends AbstractType
                 'constraints' => [
                     new NotBlank(['message' => 'Główny kolor musi być wybrany'])
                 ]
+            ])
+            ->add('primary_color_text', HiddenType::class, [
+                'mapped' => false,
+                'required' => false
             ])
             ->add('save', SubmitType::class, [
                 'label' => 'Zapisz ustawienia',
