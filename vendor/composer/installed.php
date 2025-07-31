@@ -3,7 +3,7 @@
         'name' => 'symfony/skeleton',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'dd7f5b6fc59ee2bf89340402dca8062142a18f4e',
+        'reference' => '61ba70dd855e48fe5f03a4367f2c37f81a07ecad',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -496,6 +496,15 @@
             'install_path' => __DIR__ . '/../sebastian/version',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'symfony/asset' => array(
+            'pretty_version' => 'v7.0.8',
+            'version' => '7.0.8.0',
+            'reference' => '0f106714bb8d857560edd2ada7f387d2f437c830',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../symfony/asset',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'symfony/browser-kit' => array(
             'pretty_version' => 'v6.4.0',
@@ -1001,7 +1010,7 @@
         'symfony/skeleton' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'dd7f5b6fc59ee2bf89340402dca8062142a18f4e',
+            'reference' => '61ba70dd855e48fe5f03a4367f2c37f81a07ecad',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

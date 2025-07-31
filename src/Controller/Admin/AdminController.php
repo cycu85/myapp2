@@ -13,6 +13,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -300,6 +302,36 @@ class AdminController extends AbstractController
 
     private function sendTestEmail(string $testEmail, array $smtpSettings): void
     {
+        // Pobierz hasło z bazy danych jeśli nie zostało podane w formularzu
+        $password = $smtpSettings['smtp_password'];
+        if (empty($password)) {
+            $password = $this->settingService->get('smtp_password', '');
+        }
+        
+        // Buduj DSN na podstawie ustawień SMTP
+        $encryption = $smtpSettings['smtp_encryption'] !== 'none' ? $smtpSettings['smtp_encryption'] : null;
+        $dsnParts = [
+            'smtp://',
+            urlencode($smtpSettings['smtp_username']),
+            ':',
+            urlencode($password),
+            '@',
+            $smtpSettings['smtp_host'],
+            ':',
+            $smtpSettings['smtp_port']
+        ];
+        
+        if ($encryption) {
+            $dsnParts[] = '?encryption=' . $encryption;
+        }
+        
+        $dsn = implode('', $dsnParts);
+        
+        // Utwórz transport SMTP na podstawie konfiguracji
+        $transport = Transport::fromDsn($dsn);
+        $mailer = new Mailer($transport);
+        
+        // Utwórz wiadomość
         $email = (new Email())
             ->from($smtpSettings['from_email'])
             ->to($testEmail)
@@ -317,7 +349,8 @@ class AdminController extends AbstractController
                 <p><em>Wiadomość wysłana z systemu AssetHub</em></p>
             ');
 
-        $this->mailer->send($email);
+        // Wyślij przez skonfigurowany transport
+        $mailer->send($email);
     }
 
     private function getClientIp(): ?string
