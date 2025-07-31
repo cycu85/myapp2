@@ -88,11 +88,6 @@ class DynamicCssController extends AbstractController
     color: var(--bs-primary) !important;
 }
 
-.vertical-menu .navbar-nav .nav-item .nav-link.active {
-    color: var(--bs-primary) !important;
-    background-color: rgba({$rgbString}, 0.1) !important;
-}
-
 .dropdown-item:hover,
 .dropdown-item:focus {
     background-color: rgba({$rgbString}, 0.1) !important;
@@ -112,23 +107,80 @@ class DynamicCssController extends AbstractController
     border-color: var(--bs-primary) !important;
 }
 
-/* Sidebar styling */
+/* Sidebar styling - kompletne przepisanie */
 .navbar-brand-box {
     background: var(--bs-primary) !important;
 }
 
-.app-menu .navbar-brand-box {
+.app-menu {
+    background-color: var(--bs-primary) !important;
+}
+
+.app-menu.navbar-menu {
+    background-color: var(--bs-primary) !important;
+}
+
+.vertical-menu {
+    background-color: var(--bs-primary) !important;
+}
+
+[data-sidebar=\"dark\"] .app-menu {
+    background-color: var(--bs-primary) !important;
+}
+
+[data-sidebar=\"dark\"] .vertical-menu {
+    background-color: var(--bs-primary) !important;
+}
+
+html[data-sidebar=\"dark\"] .app-menu {
     background: var(--bs-primary) !important;
 }
 
-/* Active menu items in sidebar */
-.vertical-menu .has-arrow.active:after,
-.vertical-menu .mm-active > .has-arrow:after {
-    color: var(--bs-primary) !important;
+html[data-sidebar=\"dark\"] .vertical-menu {
+    background: var(--bs-primary) !important;
+}
+
+#layout-wrapper .app-menu {
+    background: var(--bs-primary) !important;
+}
+
+.sidebar-enable .app-menu {
+    background-color: var(--bs-primary) !important;
+}
+
+/* Menu items styling */
+.vertical-menu .navbar-nav .nav-item .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .vertical-menu .navbar-nav .nav-item .nav-link:hover {
-    color: var(--bs-primary) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+}
+
+.vertical-menu .navbar-nav .nav-item .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+}
+
+.vertical-menu .navbar-nav .menu-title {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.vertical-menu .navbar-nav .nav-item .nav-link i {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.vertical-menu .navbar-nav .nav-item .nav-link.active i {
+    color: white !important;
+}
+
+#scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.navbar-brand-box:hover {
+    background-color: var(--bs-primary-text-emphasis) !important;
 }";
 
         $response = new Response($css);
