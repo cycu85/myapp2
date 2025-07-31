@@ -357,7 +357,7 @@ MAILER_DSN=gmail://username:password@default
 6. **🎨 Konfiguracja Wyglądu Aplikacji**
    - Panel Administracyjny → Ustawienia → Ogólne
    - **Zmiana nazwy aplikacji** - wyświetlana w całym systemie
-   - **Upload logo firmy** - formaty: JPG, PNG, GIF, WebP (max 2MB)
+   - **Upload logo firmy** - formaty: JPG, PNG, GIF, WebP, SVG (max 2MB)
    - **Wybór koloru głównego** - dwa sposoby:
      - Color picker (wizualny selektor kolorów)
      - Pole tekstowe HEX (ręczne wpisywanie, np. #ff0000, #abc)

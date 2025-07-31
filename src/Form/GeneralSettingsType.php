@@ -50,9 +50,10 @@ class GeneralSettingsType extends AbstractType
                             'image/jpeg',
                             'image/png',
                             'image/gif',
-                            'image/webp'
+                            'image/webp',
+                            'image/svg+xml'
                         ],
-                        'mimeTypesMessage' => 'Proszę wgrać prawidłowy plik obrazu (JPEG, PNG, GIF lub WebP)',
+                        'mimeTypesMessage' => 'Proszę wgrać prawidłowy plik obrazu (JPEG, PNG, GIF, WebP lub SVG)',
                         'maxSizeMessage' => 'Plik jest za duży ({{ size }} {{ suffix }}). Maksymalny rozmiar to {{ limit }} {{ suffix }}.',
                     ])
                 ]
