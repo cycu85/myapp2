@@ -14,7 +14,7 @@ class DynamicCssController extends AbstractController
     ) {
     }
 
-    #[Route('/dynamic-theme.css', name: 'dynamic_css')]
+    #[Route('/assets/css/dynamic-theme.css', name: 'dynamic_css')]
     public function generateCss(): Response
     {
         $primaryColor = $this->settingService->get('primary_color', '#405189');
