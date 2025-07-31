@@ -72,6 +72,8 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 - **System logowania** - Kompleksowe logowanie aktywności użytkowników
 - **Podgląd logów** - Przeglądanie logów systemowych w panelu administracyjnym
 - **System słowników** - Zarządzanie słownikami systemowymi dla wszystkich modułów
+- **🎨 Konfiguracja wyglądu** - Dynamiczne ustawienia nazwy, logo i kolorystyki
+- **⚙️ Panel ustawień** - Kompleksowy system konfiguracji aplikacji
 
 ## 💻 Wymagania Systemowe
 
@@ -161,10 +163,12 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    sudo chown -R www-data:www-data myapp2
    cd myapp2
    
-   # Konfiguracja środowiska (opcjonalne - domyślnie używa SQLite)
-   # Jeśli chcesz używać MySQL, edytuj plik .env:
-   # sudo -u www-data nano .env
+   # Konfiguracja środowiska
+   # Skopiuj szablon i dostosuj do swoich potrzeb:
+   sudo -u www-data cp .env.example .env
+   sudo -u www-data nano .env
    # Zmień DATABASE_URL na: mysql://myapp2:secure_password@localhost:3306/myapp2
+   # WAŻNE: Plik .env zawiera hasła i NIE jest w git!
    
    # Instalacja zależności
    sudo -u www-data composer install --no-dev --optimize-autoloader
@@ -224,13 +228,20 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    ```
 
 2. **Edycja Konfiguracji**
+   ```bash
+   # Skopiuj szablon i dostosuj do swoich potrzeb
+   cp .env.example .env
+   ```
+   
    ```env
-   # .env
+   # .env - NIGDY NIE COMMITUJ TEGO PLIKU!
    APP_ENV=prod
    APP_SECRET=your-secret-key-here
    DATABASE_URL=mysql://myapp2:secure_password@localhost:3306/myapp2
    MAILER_DSN=smtp://localhost
    ```
+   
+   **⚠️ BEZPIECZEŃSTWO:** Plik `.env` zawiera wrażliwe dane i NIE powinien być w git!
 
 3. **Utworzenie Bazy Danych**
    ```bash
@@ -342,6 +353,17 @@ MAILER_DSN=gmail://username:password@default
    - Panel Administracyjny → Logi
    - Przeglądaj logi aktywności użytkowników i operacji systemowych
    - Filtruj logi według dat, poziomów i kategorii
+
+6. **🎨 Konfiguracja Wyglądu Aplikacji**
+   - Panel Administracyjny → Ustawienia → Ogólne
+   - **Zmiana nazwy aplikacji** - wyświetlana w całym systemie
+   - **Upload logo firmy** - formaty: JPG, PNG, GIF, WebP (max 2MB)
+   - **Wybór koloru głównego** - dwa sposoby:
+     - Color picker (wizualny selektor kolorów)
+     - Pole tekstowe HEX (ręczne wpisywanie, np. #ff0000, #abc)
+   - **Podgląd na żywo** - wszystkie zmiany widoczne natychmiast
+   - **Synchronizacja dwukierunkowa** - color picker ↔ pole tekstowe
+   - **Inteligentna walidacja** - automatyczne poprawki formatu HEX
 
 ### Zarządzanie Sprzętem
 
@@ -568,6 +590,40 @@ System automatycznie zbiera następujące metryki:
    - Analiza kosztów zakupu i eksploatacji
    - Amortyzacja sprzętu
    - Prognozy budżetowe
+
+## 🔐 Bezpieczeństwo i Konfiguracja
+
+### Pliki Środowiskowe (.env)
+
+**⚠️ WAŻNE:** Projekt używa plików `.env` do konfiguracji wrażliwych danych.
+
+#### ✅ **Prawidłowa konfiguracja:**
+```bash
+# 1. Skopiuj szablon
+cp .env.example .env
+
+# 2. Edytuj plik .env z własnymi danymi
+nano .env
+
+# 3. Ustaw bezpieczne wartości:
+APP_SECRET=generate-random-32-char-string
+DATABASE_URL=mysql://user:password@localhost/dbname
+```
+
+#### ❌ **NIGDY nie commituj:**
+- `.env` - zawiera hasła produkcyjne
+- `.env.local` - lokalne nadpisania
+- `.env.prod` - ustawienia produkcyjne
+
+#### ✅ **Bezpieczne do git:**
+- `.env.example` - szablon bez haseł
+- `config/packages/` - konfiguracje bez sekretów
+
+#### 🛡️ **Dodatkowe zabezpieczenia:**
+- Plik `.env` jest w `.gitignore`
+- Używaj różnych haseł dla każdego środowiska
+- Regularnie zmieniaj `APP_SECRET` w produkcji
+- Nie udostępniaj plików `.env` przez email/chat
 
 ## 🤝 Wsparcie
 
