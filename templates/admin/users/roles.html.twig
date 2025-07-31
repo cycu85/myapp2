@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Role użytkownika: {{ user.firstName }} {{ user.lastName }} - AssetHub{% endblock %}
-{% block page_title %}Zarządzanie rolami użytkownika{% endblock %}
+{% block title %}Role pracownika: {{ user.firstName }} {{ user.lastName }} - AssetHub{% endblock %}
+{% block page_title %}Zarządzanie rolami pracownika{% endblock %}
 
 {% block breadcrumb %}
     <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
     <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
-    <li class="breadcrumb-item"><a href="{{ path('admin_users_index') }}">Użytkownicy</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('admin_users_index') }}">Pracownicy</a></li>
     <li class="breadcrumb-item active">Role: {{ user.firstName }} {{ user.lastName }}</li>
 {% endblock %}
 
@@ -17,7 +17,7 @@
             <div class="card-header">
                 <div class="d-flex align-items-center">
                     <h5 class="card-title mb-0 flex-grow-1">
-                        Role użytkownika: {{ user.firstName }} {{ user.lastName }}
+                        Role pracownika: {{ user.firstName }} {{ user.lastName }}
                     </h5>
                     <div class="flex-shrink-0">
                         <a href="{{ path('admin_users_index') }}" class="btn btn-outline-secondary">
@@ -32,7 +32,7 @@
                         <div class="col-md-4">
                             <div class="card border">
                                 <div class="card-header">
-                                    <h6 class="card-title mb-0">Informacje o użytkowniku</h6>
+                                    <h6 class="card-title mb-0">Informacje o pracowniku</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="mb-3">
@@ -85,7 +85,7 @@
                                     <h6 class="card-title mb-0">Dostępne role</h6>
                                 </div>
                                 <div class="card-body">
-                                    <p class="text-muted mb-3">Zaznacz role, które chcesz przypisać użytkownikowi. Role określają dostęp do poszczególnych modułów i uprawnień w systemie.</p>
+                                    <p class="text-muted mb-3">Zaznacz role, które chcesz przypisać pracownikowi. Role określają dostęp do poszczególnych modułów i uprawnień w systemie.</p>
                                     
                                     {% set currentModule = '' %}
                                     {% for role in allRoles %}

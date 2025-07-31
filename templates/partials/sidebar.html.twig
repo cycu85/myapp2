@@ -60,9 +60,6 @@
                                         <a href="/admin" class="nav-link">Panel główny</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="/admin/users" class="nav-link">Użytkownicy</a>
-                                    </li>
-                                    <li class="nav-item">
                                         <a href="/admin/roles" class="nav-link">Role i uprawnienia</a>
                                     </li>
                                     <li class="nav-item">
@@ -80,6 +77,13 @@
                         {% endif %}
                     {% endif %}
                 {% endfor %}
+
+                <!-- Pracownicy -->
+                <li class="nav-item">
+                    <a class="nav-link menu-link {{ app.request.get('_route') starts with 'admin_users' ? 'active' : '' }}" href="/admin/users">
+                        <i class="ri-team-line"></i> <span data-key="t-employees">Pracownicy</span>
+                    </a>
+                </li>
 
                 <!-- Additional modules would go here -->
                 <li class="menu-title"><span data-key="t-system">System</span></li>

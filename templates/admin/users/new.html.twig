@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Dodaj użytkownika - AssetHub{% endblock %}
-{% block page_title %}Dodaj nowego użytkownika{% endblock %}
+{% block title %}Dodaj pracownika - {{ app_name() }}{% endblock %}
+{% block page_title %}Dodaj nowego pracownika{% endblock %}
 
 {% block breadcrumb %}
     <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
     <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
-    <li class="breadcrumb-item"><a href="{{ path('admin_users_index') }}">Użytkownicy</a></li>
-    <li class="breadcrumb-item active">Dodaj użytkownika</li>
+    <li class="breadcrumb-item"><a href="{{ path('admin_users_index') }}">Pracownicy</a></li>
+    <li class="breadcrumb-item active">Dodaj pracownika</li>
 {% endblock %}
 
 {% block content %}
@@ -16,7 +16,7 @@
         <div class="card">
             <div class="card-header">
                 <div class="d-flex align-items-center">
-                    <h5 class="card-title mb-0 flex-grow-1">Dodaj nowego użytkownika</h5>
+                    <h5 class="card-title mb-0 flex-grow-1">Dodaj nowego pracownika</h5>
                     <div class="flex-shrink-0">
                         <a href="{{ path('admin_users_index') }}" class="btn btn-outline-secondary">
                             <i class="ri-arrow-left-line align-bottom me-1"></i> Powrót
@@ -122,7 +122,7 @@
                 <div class="text-end">
                     <a href="{{ path('admin_users_index') }}" class="btn btn-secondary me-2">Anuluj</a>
                     <button type="submit" class="btn btn-success">
-                        <i class="ri-save-line align-bottom me-1"></i> Utwórz użytkownika
+                        <i class="ri-save-line align-bottom me-1"></i> Utwórz pracownika
                     </button>
                 </div>
 

@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Użytkownicy - AssetHub{% endblock %}
-{% block page_title %}Zarządzanie użytkownikami{% endblock %}
+{% block title %}Pracownicy - {{ app_name() }}{% endblock %}
+{% block page_title %}Zarządzanie pracownikami{% endblock %}
 
 {% block breadcrumb %}
     <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
     <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
-    <li class="breadcrumb-item active">Użytkownicy</li>
+    <li class="breadcrumb-item active">Pracownicy</li>
 {% endblock %}
 
 {% block content %}
@@ -15,10 +15,10 @@
         <div class="card">
             <div class="card-header">
                 <div class="d-flex align-items-center">
-                    <h5 class="card-title mb-0 flex-grow-1">Lista użytkowników</h5>
+                    <h5 class="card-title mb-0 flex-grow-1">Lista pracowników</h5>
                     <div class="flex-shrink-0">
                         <a href="{{ path('admin_users_new') }}" class="btn btn-success add-btn">
-                            <i class="ri-add-line align-bottom me-1"></i> Dodaj użytkownika
+                            <i class="ri-add-line align-bottom me-1"></i> Dodaj pracownika
                         </a>
                     </div>
                 </div>
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
             gridjs.html("{% if user.isActive %}<span class='badge bg-success-subtle text-success'>Aktywny</span>{% else %}<span class='badge bg-danger-subtle text-danger'>Nieaktywny</span>{% endif %}"),
             gridjs.html(`<div class="d-flex gap-1">
                 <div class="edit">
-                    <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="btn btn-sm btn-info edit-item-btn" title="Edytuj użytkownika">
+                    <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="btn btn-sm btn-info edit-item-btn" title="Edytuj pracownika">
                         <i class="ri-edit-line"></i>
                     </a>
                 </div>
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="edit">
                     <button class="btn btn-sm {% if user.isActive %}btn-warning{% else %}btn-success{% endif %} toggle-status-btn" 
                             onclick="confirmToggleStatus({{ user.id }}, '{{ user.firstName }} {{ user.lastName }}', {{ user.isActive ? 'true' : 'false' }})"
-                            title="{% if user.isActive %}Dezaktywuj{% else %}Aktywuj{% endif %} użytkownika">
+                            title="{% if user.isActive %}Dezaktywuj{% else %}Aktywuj{% endif %} pracownika">
                         <i class="ri-{% if user.isActive %}user-unfollow{% else %}user-follow{% endif %}-line"></i>
                     </button>
                 </div>
@@ -202,7 +202,7 @@ function confirmToggleStatus(userId, userName, isActive) {
     // Update message
     const action = isActive ? 'dezaktywować' : 'aktywować';
     document.getElementById('toggle-message').textContent = 
-        `Czy na pewno chcesz ${action} użytkownika ${userName}?`;
+        `Czy na pewno chcesz ${action} pracownika ${userName}?`;
     
     // Generate CSRF token (in real app, you'd get this from Symfony)
     document.getElementById('toggle-token').value = 'toggle_status' + userId;
