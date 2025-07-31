@@ -59,12 +59,12 @@
                             <div class="input-group">
                                 {{ form_widget(form.primary_color, {'attr': {'style': 'width: 80px; height: 38px;'}}) }}
                                 <span class="input-group-text" id="color-preview" style="background-color: {{ current_settings.primary_color }}; width: 40px;"></span>
-                                <input type="text" class="form-control" id="color-text" value="{{ current_settings.primary_color }}" readonly>
+                                <input type="text" class="form-control" id="color-text" value="{{ current_settings.primary_color }}" placeholder="#405189" pattern="^#[0-9A-Fa-f]{6}$" maxlength="7">
                             </div>
                             {{ form_errors(form.primary_color) }}
                             <div class="form-text">
                                 <i class="ri-information-line me-1"></i>
-                                Główny kolor używany w interfejsie aplikacji
+                                Główny kolor używany w interfejsie aplikacji. Możesz wpisać kolor w formacie HEX (np. #405189, #ff0000, #abc)
                             </div>
                         </div>
 
@@ -151,18 +151,67 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Aktualizacja podglądu koloru
+    // Aktualizacja podglądu koloru - synchronizacja dwukierunkowa
     const colorInput = document.getElementById('{{ form.primary_color.vars.id }}');
     const colorPreview = document.getElementById('color-preview');
     const colorText = document.getElementById('color-text');
     const colorBadgePreview = document.getElementById('color-badge-preview');
     
+    function updateColorPreview(color) {
+        if (isValidHexColor(color)) {
+            colorPreview.style.backgroundColor = color;
+            colorBadgePreview.style.backgroundColor = color;
+            colorText.classList.remove('is-invalid');
+            colorText.classList.add('is-valid');
+        } else {
+            colorText.classList.remove('is-valid');
+            colorText.classList.add('is-invalid');
+        }
+    }
+    
+    function isValidHexColor(color) {
+        return /^#[0-9A-Fa-f]{6}$/.test(color);
+    }
+    
     if (colorInput && colorPreview && colorText && colorBadgePreview) {
+        // Color picker zmienia tekst
         colorInput.addEventListener('input', function() {
             const color = this.value;
-            colorPreview.style.backgroundColor = color;
             colorText.value = color;
-            colorBadgePreview.style.backgroundColor = color;
+            updateColorPreview(color);
+        });
+        
+        // Pole tekstowe zmienia color picker
+        colorText.addEventListener('input', function() {
+            const color = this.value;
+            if (isValidHexColor(color)) {
+                colorInput.value = color;
+                updateColorPreview(color);
+            } else {
+                updateColorPreview(color); // Pokazuje błąd walidacji
+            }
+        });
+        
+        // Walidacja przy opuszczeniu pola
+        colorText.addEventListener('blur', function() {
+            let color = this.value.trim();
+            
+            // Automatycznie dodaj # jeśli brakuje
+            if (color && !color.startsWith('#')) {
+                color = '#' + color;
+                this.value = color;
+            }
+            
+            // Sprawdź czy ma 3 znaki hex i rozszerz do 6
+            if (/^#[0-9A-Fa-f]{3}$/.test(color)) {
+                color = '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+                this.value = color;
+            }
+            
+            if (isValidHexColor(color)) {
+                colorInput.value = color;
+                updateColorPreview(color);
+            }
         });
     }
 
