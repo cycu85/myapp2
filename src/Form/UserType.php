@@ -17,6 +17,8 @@ class UserType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $isEdit = $options['is_edit'] ?? false;
+        
         $builder
             ->add('username', TextType::class, [
                 'label' => 'Nazwa użytkownika',
@@ -75,13 +77,21 @@ class UserType extends AbstractType
                 ]
             ])
             ->add('plainPassword', PasswordType::class, [
-                'label' => 'Hasło',
+                'label' => $isEdit ? 'Nowe hasło (pozostaw puste, aby nie zmieniać)' : 'Hasło',
                 'mapped' => false,
+                'required' => !$isEdit,
                 'attr' => [
                     'class' => 'form-control',
-                    'autocomplete' => 'new-password'
+                    'autocomplete' => 'new-password',
+                    'placeholder' => $isEdit ? 'Pozostaw puste, aby nie zmieniać hasła' : ''
                 ],
-                'constraints' => [
+                'constraints' => $isEdit ? [
+                    new Length([
+                        'min' => 6,
+                        'minMessage' => 'Hasło musi mieć co najmniej {{ limit }} znaków',
+                        'max' => 4096,
+                    ]),
+                ] : [
                     new NotBlank([
                         'message' => 'Proszę podać hasło',
                     ]),
@@ -106,6 +116,7 @@ class UserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'is_edit' => false,
         ]);
     }
 }

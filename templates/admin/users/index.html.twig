@@ -110,14 +110,22 @@ document.addEventListener('DOMContentLoaded', function() {
             "{{ user.position|default('—') }}",
             "{{ user.department|default('—') }}",
             gridjs.html("{% if user.isActive %}<span class='badge bg-success-subtle text-success'>Aktywny</span>{% else %}<span class='badge bg-danger-subtle text-danger'>Nieaktywny</span>{% endif %}"),
-            gridjs.html(`<div class="d-flex gap-2">
+            gridjs.html(`<div class="d-flex gap-1">
                 <div class="edit">
-                    <a href="{{ path('admin_users_roles', {id: user.id}) }}" class="btn btn-sm btn-primary edit-item-btn">Role</a>
+                    <a href="{{ path('admin_users_edit', {id: user.id}) }}" class="btn btn-sm btn-info edit-item-btn" title="Edytuj użytkownika">
+                        <i class="ri-edit-line"></i>
+                    </a>
+                </div>
+                <div class="edit">
+                    <a href="{{ path('admin_users_roles', {id: user.id}) }}" class="btn btn-sm btn-primary edit-item-btn" title="Zarządzaj rolami">
+                        <i class="ri-shield-user-line"></i>
+                    </a>
                 </div>
                 <div class="edit">
                     <button class="btn btn-sm {% if user.isActive %}btn-warning{% else %}btn-success{% endif %} toggle-status-btn" 
-                            onclick="confirmToggleStatus({{ user.id }}, '{{ user.firstName }} {{ user.lastName }}', {{ user.isActive ? 'true' : 'false' }})">
-                        {% if user.isActive %}Dezaktywuj{% else %}Aktywuj{% endif %}
+                            onclick="confirmToggleStatus({{ user.id }}, '{{ user.firstName }} {{ user.lastName }}', {{ user.isActive ? 'true' : 'false' }})"
+                            title="{% if user.isActive %}Dezaktywuj{% else %}Aktywuj{% endif %} użytkownika">
+                        <i class="ri-{% if user.isActive %}user-unfollow{% else %}user-follow{% endif %}-line"></i>
                     </button>
                 </div>
             </div>`)
@@ -157,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             {
                 name: 'Akcje',
-                width: '120px',
+                width: '150px',
                 sort: false
             }
         ],

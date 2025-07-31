@@ -186,6 +186,62 @@ class UserController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}/edit', name: 'admin_users_edit', requirements: ['id' => '\d+'])]
+    public function edit(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $currentUser = $this->getUser();
+        
+        if (!$this->permissionService->hasPermission($currentUser, 'admin', 'EDIT')) {
+            $this->logger->warning('Unauthorized user edit access attempt', [
+                'user' => $currentUser?->getUsername() ?? 'anonymous',
+                'ip' => $request->getClientIp(),
+                'target_user_id' => $user->getId()
+            ]);
+            throw $this->createAccessDeniedException('Brak uprawnień do edycji użytkowników');
+        }
+
+        $form = $this->createForm(UserType::class, $user, [
+            'is_edit' => true
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hash password only if new password was provided
+            $plainPassword = $form->get('plainPassword')->getData();
+            if (!empty($plainPassword)) {
+                $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
+                $user->setPassword($hashedPassword);
+            }
+            
+            $this->entityManager->flush();
+
+            $this->logger->info('User updated successfully', [
+                'user' => $currentUser->getUsername(),
+                'ip' => $request->getClientIp(),
+                'updated_user_id' => $user->getId(),
+                'updated_username' => $user->getUsername(),
+                'updated_email' => $user->getEmail(),
+                'password_changed' => !empty($plainPassword)
+            ]);
+
+            $this->addFlash('success', 'Dane użytkownika zostały zaktualizowane pomyślnie.');
+
+            return $this->redirectToRoute('admin_users_index');
+        }
+
+        $this->logger->info('User edit form accessed', [
+            'user' => $currentUser->getUsername(),
+            'ip' => $request->getClientIp(),
+            'target_user_id' => $user->getId(),
+            'target_username' => $user->getUsername()
+        ]);
+
+        return $this->render('admin/users/edit.html.twig', [
+            'user' => $user,
+            'form' => $form,
+        ]);
+    }
+
     #[Route('/{id}/toggle-status', name: 'admin_users_toggle_status', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function toggleStatus(Request $request, User $user): Response
     {
