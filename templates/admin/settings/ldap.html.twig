@@ -1,0 +1,361 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ustawienia LDAP - {{ app_name() }}{% endblock %}
+
+{% block page_title %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Ustawienia LDAP</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Admin</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_settings') }}">Ustawienia</a></li>
+                    <li class="breadcrumb-item active">LDAP</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h4 class="card-title mb-0">
+                            <i class="ri-group-line me-2"></i>Konfiguracja LDAP / Active Directory
+                        </h4>
+                        <p class="text-muted mb-0 mt-1">Integracja z systemem katalogu użytkowników</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a href="{{ path('admin_settings') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="ri-arrow-left-line me-1"></i>Powrót
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {{ form_start(form) }}
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- Włączenie LDAP -->
+                        <div class="card border border-primary mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-toggle-line me-2"></i>Status integracji
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check form-switch form-switch-lg">
+                                    {{ form_widget(form.ldap_enabled) }}
+                                    {{ form_label(form.ldap_enabled, null, {'label_attr': {'class': 'form-check-label ms-2'}}) }}
+                                    {{ form_errors(form.ldap_enabled) }}
+                                </div>
+                                <div class="form-text mt-2">
+                                    <i class="ri-information-line me-1"></i>
+                                    Włącz, aby umożliwić logowanie przez LDAP i synchronizację użytkowników
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Konfiguracja serwera -->
+                        <div class="card border border-light mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-server-line me-2"></i>Konfiguracja serwera LDAP
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_host, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_host) }}
+                                            {{ form_errors(form.ldap_host) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_port, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_port) }}
+                                            {{ form_errors(form.ldap_port) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.ldap_encryption, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.ldap_encryption) }}
+                                    {{ form_errors(form.ldap_encryption) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        StartTLS (port 389) jest zalecany, SSL (port 636) dla starszych serwerów
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Uwierzytelnianie -->
+                        <div class="card border border-light mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-key-line me-2"></i>Uwierzytelnianie
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form_label(form.ldap_bind_dn, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.ldap_bind_dn) }}
+                                    {{ form_errors(form.ldap_bind_dn) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        Konto serwisowe z uprawnieniami do odczytu katalogu
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.ldap_bind_password, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.ldap_bind_password) }}
+                                    {{ form_errors(form.ldap_bind_password) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        Pozostaw puste, aby zachować obecne hasło
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wyszukiwanie -->
+                        <div class="card border border-light mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-search-line me-2"></i>Konfiguracja wyszukiwania
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form_label(form.ldap_base_dn, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.ldap_base_dn) }}
+                                    {{ form_errors(form.ldap_base_dn) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        Katalog w którym będą wyszukiwani użytkownicy
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.ldap_user_filter, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.ldap_user_filter) }}
+                                    {{ form_errors(form.ldap_user_filter) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        Filtr LDAP określający którzy użytkownicy będą synchronizowani
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mapowanie pól -->
+                        <div class="card border border-info mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-exchange-line me-2"></i>Mapowanie pól
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_map_username, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_map_username) }}
+                                            {{ form_errors(form.ldap_map_username) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_map_email, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_map_email) }}
+                                            {{ form_errors(form.ldap_map_email) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_map_firstname, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_map_firstname) }}
+                                            {{ form_errors(form.ldap_map_firstname) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_map_lastname, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_map_lastname) }}
+                                            {{ form_errors(form.ldap_map_lastname) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form_label(form.ldap_map_displayname, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.ldap_map_displayname) }}
+                                    {{ form_errors(form.ldap_map_displayname) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Opcje synchronizacji -->
+                        <div class="card border border-success mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-refresh-line me-2"></i>Opcje synchronizacji
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    {{ form_widget(form.ldap_auto_create_users) }}
+                                    {{ form_label(form.ldap_auto_create_users, null, {'label_attr': {'class': 'form-check-label ms-2'}}) }}
+                                    {{ form_errors(form.ldap_auto_create_users) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        Nowi użytkownicy z LDAP będą automatycznie dodawani do systemu
+                                    </div>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    {{ form_widget(form.ldap_update_existing_users) }}
+                                    {{ form_label(form.ldap_update_existing_users, null, {'label_attr': {'class': 'form-check-label ms-2'}}) }}
+                                    {{ form_errors(form.ldap_update_existing_users) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        Dane istniejących użytkowników będą aktualizowane z LDAP
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Przyciski akcji -->
+                        <div class="card border border-warning mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-play-line me-2"></i>Akcje
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    {{ form_widget(form.save) }}
+                                    {{ form_widget(form.test) }}
+                                    {{ form_widget(form.sync_existing) }}
+                                    {{ form_widget(form.sync_new) }}
+                                    <a href="{{ path('admin_settings') }}" class="btn btn-outline-secondary">Anuluj</a>
+                                </div>
+                                <div class="form-text mt-2">
+                                    <i class="ri-information-line me-1"></i>
+                                    Najpierw zapisz ustawienia, następnie przetestuj połączenie przed synchronizacją
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <!-- Popularne konfiguracje -->
+                        <div class="card border border-light">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-information-line me-2"></i>Popularne konfiguracje
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="ldapProviders">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#activeDirectory">
+                                                Active Directory (Windows)
+                                            </button>
+                                        </h2>
+                                        <div id="activeDirectory" class="accordion-collapse collapse" data-bs-parent="#ldapProviders">
+                                            <div class="accordion-body">
+                                                <small>
+                                                    <strong>Port:</strong> 389 (LDAP) / 636 (LDAPS)<br>
+                                                    <strong>Szyfrowanie:</strong> StartTLS<br>
+                                                    <strong>Base DN:</strong> OU=Users,DC=company,DC=com<br>
+                                                    <strong>Filtr:</strong> (&(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))<br>
+                                                    <strong>Username:</strong> sAMAccountName<br>
+                                                    <strong>Email:</strong> mail
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#openldap">
+                                                OpenLDAP (Linux)
+                                            </button>
+                                        </h2>
+                                        <div id="openldap" class="accordion-collapse collapse" data-bs-parent="#ldapProviders">
+                                            <div class="accordion-body">
+                                                <small>
+                                                    <strong>Port:</strong> 389 (LDAP) / 636 (LDAPS)<br>
+                                                    <strong>Szyfrowanie:</strong> StartTLS<br>
+                                                    <strong>Base DN:</strong> ou=people,dc=company,dc=com<br>
+                                                    <strong>Filtr:</strong> (&(objectClass=inetOrgPerson))<br>
+                                                    <strong>Username:</strong> uid<br>
+                                                    <strong>Email:</strong> mail
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#azureAd">
+                                                Azure AD
+                                            </button>
+                                        </h2>
+                                        <div id="azureAd" class="accordion-collapse collapse" data-bs-parent="#ldapProviders">
+                                            <div class="accordion-body">
+                                                <small>
+                                                    <strong>Info:</strong> Azure AD wymaga Azure AD Domain Services<br>
+                                                    <strong>Port:</strong> 636 (LDAPS)<br>
+                                                    <strong>Szyfrowanie:</strong> SSL<br>
+                                                    <strong>Host:</strong> yourname.onmicrosoft.com
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wskazówki -->
+                        <div class="alert alert-info mt-3">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="ri-lightbulb-line"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-2">
+                                    <h6 class="alert-heading">Wskazówki</h6>
+                                    <p class="mb-0">
+                                        • Przetestuj połączenie przed synchronizacją<br>
+                                        • Użyj konta serwisowego z minimalnymi uprawnieniami<br>
+                                        • Zawsze twórz kopię zapasową przed pierwszą synchronizacją<br>
+                                        • Sprawdź filtr użytkowników na małej grupie testowej
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
