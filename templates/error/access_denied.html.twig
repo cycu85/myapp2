@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Brak uprawnień - {{ app_name() }}{% endblock %}
+{% block page_title %}Brak uprawnień{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item active">Brak uprawnień</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xxl-6 col-lg-8">
+        <div class="card overflow-hidden">
+            <div class="card-body p-4">
+                <div class="text-center">
+                    <div class="avatar-lg mx-auto mb-4">
+                        <div class="avatar-title bg-danger-subtle text-danger display-4 rounded-circle">
+                            <i class="ri-shield-cross-line"></i>
+                        </div>
+                    </div>
+                    <h1 class="text-danger display-6 fw-medium">403</h1>
+                    <h4 class="text-uppercase">Brak uprawnień</h4>
+                    <p class="text-muted mb-4">
+                        Nie masz uprawnień do przeglądania tej strony.<br>
+                        Skontaktuj się z administratorem, aby uzyskać odpowiednie uprawnienia.
+                    </p>
+                    
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <a href="/" class="btn btn-success">
+                            <i class="ri-home-line me-1"></i>Powrót do strony głównej
+                        </a>
+                        
+                        {% if app.user %}
+                        <a href="{{ path('app_logout') }}" class="btn btn-outline-primary">
+                            <i class="ri-logout-box-line me-1"></i>Wyloguj się
+                        </a>
+                        {% else %}
+                        <a href="{{ path('app_login') }}" class="btn btn-outline-primary">
+                            <i class="ri-login-box-line me-1"></i>Zaloguj się
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional info card -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-4 col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="ri-user-settings-line text-primary fs-20"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Administrator</h6>
+                                <p class="text-muted mb-0">Pełne uprawnienia</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="ri-team-line text-success fs-20"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Zarządzanie</h6>
+                                <p class="text-muted mb-0">Edycja danych</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="ri-eye-line text-info fs-20"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Przeglądanie</h6>
+                                <p class="text-muted mb-0">Tylko odczyt</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+// Auto redirect after 10 seconds
+setTimeout(function() {
+    window.location.href = '/';
+}, 10000);
+
+// Show countdown
+let countdown = 10;
+const countdownElement = document.createElement('p');
+countdownElement.className = 'text-muted mt-3';
+countdownElement.innerHTML = '<i class="ri-time-line me-1"></i>Automatyczne przekierowanie za <span id="countdown">10</span> sekund';
+document.querySelector('.text-center').appendChild(countdownElement);
+
+const countdownInterval = setInterval(function() {
+    countdown--;
+    document.getElementById('countdown').textContent = countdown;
+    
+    if (countdown <= 0) {
+        clearInterval(countdownInterval);
+    }
+}, 1000);
+</script>
+{% endblock %}

@@ -38,7 +38,7 @@ class UserController extends AbstractController
                 'user' => $user?->getUsername() ?? 'anonymous',
                 'ip' => $request->getClientIp()
             ]);
-            throw $this->createAccessDeniedException('Brak uprawnień do przeglądania pracowników');
+            return $this->redirectToRoute('error_access_denied');
         }
 
         $users = $userRepository->findAll();
@@ -72,7 +72,7 @@ class UserController extends AbstractController
                 'ip' => $request->getClientIp(),
                 'target_user_id' => $user->getId()
             ]);
-            throw $this->createAccessDeniedException('Brak uprawnień do zarządzania rolami pracowników');
+            return $this->redirectToRoute('error_access_denied');
         }
 
         if ($request->isMethod('POST')) {
@@ -156,7 +156,7 @@ class UserController extends AbstractController
                 'user' => $currentUser?->getUsername() ?? 'anonymous',
                 'ip' => $request->getClientIp()
             ]);
-            throw $this->createAccessDeniedException('Brak uprawnień do tworzenia pracowników');
+            return $this->redirectToRoute('error_access_denied');
         }
 
         $user = new User();
@@ -207,7 +207,7 @@ class UserController extends AbstractController
                 'ip' => $request->getClientIp(),
                 'target_user_id' => $user->getId()
             ]);
-            throw $this->createAccessDeniedException('Brak uprawnień do edycji pracowników');
+            return $this->redirectToRoute('error_access_denied');
         }
 
         // Determine user's permission level for form options
@@ -272,7 +272,7 @@ class UserController extends AbstractController
                 'ip' => $request->getClientIp(),
                 'target_user_id' => $user->getId()
             ]);
-            throw $this->createAccessDeniedException('Brak uprawnień do zmiany statusu pracowników');
+            return $this->redirectToRoute('error_access_denied');
         }
 
         if ($this->isCsrfTokenValid('toggle_status'.$user->getId(), $request->request->get('_token'))) {
