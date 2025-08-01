@@ -478,5 +478,88 @@ class InstallerController extends AbstractController
         $this->logger->info('Admin user created and assigned admin role successfully', [
             'username' => $data['username']
         ]);
+        
+        // Create test users
+        $this->createTestUsers();
+    }
+
+    private function createTestUsers(): void
+    {
+        $this->logger->info('Creating test users');
+        
+        // Test users data
+        $testUsers = [
+            [
+                'username' => 'hr',
+                'email' => 'hr@assethub.local',
+                'firstName' => 'Anna',
+                'lastName' => 'Nowak',
+                'employeeNumber' => 'EMP002',
+                'position' => 'Specjalista ds. kadr',
+                'department' => 'HR',
+                'password' => 'hr123',
+                'role' => 'EMPLOYEES_EDITOR'
+            ],
+            [
+                'username' => 'user',
+                'email' => 'user@assethub.local',
+                'firstName' => 'Jan',
+                'lastName' => 'Kowalski',
+                'employeeNumber' => 'EMP001',
+                'position' => 'Pracownik',
+                'department' => 'Produkcja',
+                'password' => 'user123',
+                'role' => 'EQUIPMENT_USER'
+            ]
+        ];
+
+        foreach ($testUsers as $userData) {
+            // Check if user already exists
+            $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $userData['username']]);
+            if ($existingUser) {
+                $this->logger->info('Test user already exists, skipping', [
+                    'username' => $userData['username']
+                ]);
+                continue;
+            }
+
+            // Create test user
+            $user = new User();
+            $user->setUsername($userData['username']);
+            $user->setEmail($userData['email']);
+            $user->setFirstName($userData['firstName']);
+            $user->setLastName($userData['lastName']);
+            $user->setEmployeeNumber($userData['employeeNumber']);
+            $user->setPosition($userData['position']);
+            $user->setDepartment($userData['department']);
+            $user->setIsActive(true);
+
+            // Hash password
+            $hashedPassword = $this->passwordHasher->hashPassword($user, $userData['password']);
+            $user->setPassword($hashedPassword);
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
+            // Assign role
+            $role = $this->entityManager->getRepository(Role::class)->findOneBy(['name' => $userData['role']]);
+            if ($role) {
+                $userRole = new UserRole();
+                $userRole->setUser($user);
+                $userRole->setRole($role);
+                $userRole->setAssignedBy($user); // Self-assigned for test users
+                $userRole->setIsActive(true);
+                $this->entityManager->persist($userRole);
+            }
+
+            $this->logger->info('Test user created successfully', [
+                'username' => $userData['username'],
+                'role' => $userData['role']
+            ]);
+        }
+
+        $this->entityManager->flush();
+        
+        $this->logger->info('All test users created successfully');
     }
 }
