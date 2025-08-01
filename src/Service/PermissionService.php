@@ -5,12 +5,14 @@ namespace App\Service;
 use App\Entity\User;
 use App\Repository\ModuleRepository;
 use App\Repository\UserRoleRepository;
+use Psr\Log\LoggerInterface;
 
 class PermissionService
 {
     public function __construct(
         private UserRoleRepository $userRoleRepository,
-        private ModuleRepository $moduleRepository
+        private ModuleRepository $moduleRepository,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -18,14 +20,46 @@ class PermissionService
     {
         $userRoles = $this->userRoleRepository->findActiveByUser($user->getId());
         
+        $this->logger->info('Checking permission', [
+            'user_id' => $user->getId(),
+            'username' => $user->getUsername(),
+            'module' => $module,
+            'permission' => $permission,
+            'user_roles_count' => count($userRoles)
+        ]);
+        
         foreach ($userRoles as $userRole) {
             $role = $userRole->getRole();
-            if ($role->getModule()->getName() === $module) {
+            $roleName = $role->getName();
+            $roleModule = $role->getModule()->getName();
+            $rolePermissions = $role->getPermissions();
+            
+            $this->logger->info('Checking role', [
+                'role_name' => $roleName,
+                'role_module' => $roleModule,
+                'role_permissions' => $rolePermissions,
+                'target_module' => $module,
+                'target_permission' => $permission
+            ]);
+            
+            if ($roleModule === $module) {
                 if ($role->hasPermission($permission)) {
+                    $this->logger->info('Permission granted', [
+                        'user' => $user->getUsername(),
+                        'role' => $roleName,
+                        'module' => $module,
+                        'permission' => $permission
+                    ]);
                     return true;
                 }
             }
         }
+        
+        $this->logger->warning('Permission denied', [
+            'user' => $user->getUsername(),
+            'module' => $module,
+            'permission' => $permission
+        ]);
         
         return false;
     }

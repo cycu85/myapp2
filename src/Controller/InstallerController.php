@@ -344,21 +344,21 @@ class InstallerController extends AbstractController
 
         $roles = [
             [
-                'name' => 'ADMIN',
+                'name' => 'system_admin',
                 'description' => 'Pełny dostęp do panelu administracyjnego',
                 'module' => $adminModule,
                 'permissions' => ['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE', 'EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL'],
                 'is_system' => true
             ],
             [
-                'name' => 'EQUIPMENT_MANAGER',
+                'name' => 'equipment_manager',
                 'description' => 'Menedżer sprzętu - pełny dostęp',
                 'module' => $equipmentModule,
-                'permissions' => ['VIEW', 'CREATE', 'EDIT', 'DELETE'],
+                'permissions' => ['VIEW', 'CREATE', 'EDIT', 'DELETE', 'ASSIGN', 'REVIEW', 'EXPORT'],
                 'is_system' => true
             ],
             [
-                'name' => 'EQUIPMENT_USER',
+                'name' => 'equipment_viewer',
                 'description' => 'Użytkownik sprzętu - tylko podgląd',
                 'module' => $equipmentModule,
                 'permissions' => ['VIEW'],
@@ -463,7 +463,7 @@ class InstallerController extends AbstractController
         $this->entityManager->flush();
 
         // Assign admin role
-        $adminRole = $this->entityManager->getRepository(Role::class)->findOneBy(['name' => 'ADMIN']);
+        $adminRole = $this->entityManager->getRepository(Role::class)->findOneBy(['name' => 'system_admin']);
         if ($adminRole) {
             $userRole = new UserRole();
             $userRole->setUser($user);
@@ -509,7 +509,7 @@ class InstallerController extends AbstractController
                 'position' => 'Pracownik',
                 'department' => 'Produkcja',
                 'password' => 'user123',
-                'role' => 'EQUIPMENT_USER'
+                'role' => 'equipment_viewer'
             ]
         ];
 
