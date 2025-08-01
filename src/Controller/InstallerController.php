@@ -365,21 +365,21 @@ class InstallerController extends AbstractController
                 'is_system' => true
             ],
             [
-                'name' => 'EMPLOYEES_VIEWER',
+                'name' => 'employees_viewer',
                 'description' => 'Przeglądanie listy pracowników',
                 'module' => $adminModule,
                 'permissions' => ['EMPLOYEES_VIEW'],
                 'is_system' => true
             ],
             [
-                'name' => 'EMPLOYEES_EDITOR',
+                'name' => 'employees_editor',
                 'description' => 'Edycja podstawowych danych pracowników',
                 'module' => $adminModule,
                 'permissions' => ['EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC'],
                 'is_system' => true
             ],
             [
-                'name' => 'EMPLOYEES_MANAGER',
+                'name' => 'employees_manager',
                 'description' => 'Pełne zarządzanie pracownikami',
                 'module' => $adminModule,
                 'permissions' => ['EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL'],
@@ -498,7 +498,7 @@ class InstallerController extends AbstractController
                 'position' => 'Specjalista ds. kadr',
                 'department' => 'HR',
                 'password' => 'hr123',
-                'role' => 'EMPLOYEES_EDITOR'
+                'role' => 'employees_editor'
             ],
             [
                 'username' => 'user',
