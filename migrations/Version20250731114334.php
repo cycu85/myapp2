@@ -57,8 +57,7 @@ final class Version20250731114334 extends AbstractMigration
         $this->addSql('ALTER TABLE roles CHANGE description description LONGTEXT DEFAULT NULL');
         $this->addSql('ALTER TABLE roles ADD CONSTRAINT FK_B63E2EC7AFC2B591 FOREIGN KEY (module_id) REFERENCES `modules` (id)');
         $this->addSql('ALTER TABLE roles RENAME INDEX idx_roles_module TO IDX_B63E2EC7AFC2B591');
-        $this->addSql('ALTER TABLE settings CHANGE created_at created_at DATETIME NOT NULL, CHANGE updated_at updated_at DATETIME NOT NULL');
-        $this->addSql('ALTER TABLE settings RENAME INDEX uniq_e545a0c5cc0f3c3c TO UNIQ_E545A0C55FA1E697');
+        // Settings table modifications moved to separate migration to avoid dependency issues
         $this->addSql('ALTER TABLE user_roles ADD CONSTRAINT FK_54FCD59FA76ED395 FOREIGN KEY (user_id) REFERENCES `users` (id)');
         $this->addSql('ALTER TABLE user_roles ADD CONSTRAINT FK_54FCD59FD60322AC FOREIGN KEY (role_id) REFERENCES `roles` (id)');
         $this->addSql('ALTER TABLE user_roles ADD CONSTRAINT FK_54FCD59F6E6F1246 FOREIGN KEY (assigned_by_id) REFERENCES `users` (id)');
@@ -109,8 +108,7 @@ final class Version20250731114334 extends AbstractMigration
         $this->addSql('ALTER TABLE `roles` DROP FOREIGN KEY FK_B63E2EC7AFC2B591');
         $this->addSql('ALTER TABLE `roles` CHANGE description description TEXT DEFAULT NULL');
         $this->addSql('ALTER TABLE `roles` RENAME INDEX idx_b63e2ec7afc2b591 TO IDX_roles_module');
-        $this->addSql('ALTER TABLE settings CHANGE created_at created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', CHANGE updated_at updated_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('ALTER TABLE settings RENAME INDEX uniq_e545a0c55fa1e697 TO UNIQ_E545A0C5CC0F3C3C');
+        // Settings table modifications moved to separate migration to avoid dependency issues
         $this->addSql('ALTER TABLE `user_roles` DROP FOREIGN KEY FK_54FCD59FA76ED395');
         $this->addSql('ALTER TABLE `user_roles` DROP FOREIGN KEY FK_54FCD59FD60322AC');
         $this->addSql('ALTER TABLE `user_roles` DROP FOREIGN KEY FK_54FCD59F6E6F1246');
