@@ -260,13 +260,20 @@ class InstallerController extends AbstractController
             $existingTables = $schemaManager->listTableNames();
             
             if (!empty($existingTables)) {
-                // Drop existing tables in reverse order to handle foreign keys
-                $tablesToDrop = array_reverse($existingTables);
-                foreach ($tablesToDrop as $table) {
+                $connection = $this->entityManager->getConnection();
+                
+                // Disable foreign key checks
+                $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
+                
+                // Drop all tables except migration versions
+                foreach ($existingTables as $table) {
                     if ($table !== 'doctrine_migration_versions') {
-                        $schemaManager->dropTable($table);
+                        $connection->executeStatement('DROP TABLE IF EXISTS `' . $table . '`');
                     }
                 }
+                
+                // Re-enable foreign key checks
+                $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
                 
                 // Clean migration status
                 $this->entityManager->getConnection()->executeStatement('DELETE FROM doctrine_migration_versions');
@@ -340,7 +347,7 @@ class InstallerController extends AbstractController
                 'name' => 'ADMIN',
                 'description' => 'Pełny dostęp do panelu administracyjnego',
                 'module' => $adminModule,
-                'permissions' => ['VIEW', 'CREATE', 'EDIT', 'DELETE'],
+                'permissions' => ['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE', 'EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL'],
                 'is_system' => true
             ],
             [
@@ -355,6 +362,27 @@ class InstallerController extends AbstractController
                 'description' => 'Użytkownik sprzętu - tylko podgląd',
                 'module' => $equipmentModule,
                 'permissions' => ['VIEW'],
+                'is_system' => true
+            ],
+            [
+                'name' => 'EMPLOYEES_VIEWER',
+                'description' => 'Przeglądanie listy pracowników',
+                'module' => $adminModule,
+                'permissions' => ['EMPLOYEES_VIEW'],
+                'is_system' => true
+            ],
+            [
+                'name' => 'EMPLOYEES_EDITOR',
+                'description' => 'Edycja podstawowych danych pracowników',
+                'module' => $adminModule,
+                'permissions' => ['EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC'],
+                'is_system' => true
+            ],
+            [
+                'name' => 'EMPLOYEES_MANAGER',
+                'description' => 'Pełne zarządzanie pracownikami',
+                'module' => $adminModule,
+                'permissions' => ['EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL'],
                 'is_system' => true
             ]
         ];
