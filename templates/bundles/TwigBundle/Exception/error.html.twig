@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Wystąpił błąd - {{ app_name() }}{% endblock %}
+{% block page_title %}Błąd systemu{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item active">Błąd</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xxl-6 col-lg-8">
+        <div class="card overflow-hidden">
+            <div class="card-body p-4">
+                <div class="text-center">
+                    <div class="avatar-lg mx-auto mb-4">
+                        <div class="avatar-title bg-danger-subtle text-danger display-4 rounded-circle">
+                            <i class="ri-error-warning-line"></i>
+                        </div>
+                    </div>
+                    <h1 class="text-danger display-6 fw-medium">{{ status_code|default('500') }}</h1>
+                    <h4 class="text-uppercase">Wystąpił błąd</h4>
+                    <p class="text-muted mb-4">
+                        Przepraszamy! Wystąpił nieoczekiwany błąd.<br>
+                        Nasz zespół techniczny został powiadomiony o problemie.
+                    </p>
+                    
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <a href="/" class="btn btn-success">
+                            <i class="ri-home-line me-1"></i>Powrót do strony głównej
+                        </a>
+                        <button onclick="window.location.reload()" class="btn btn-outline-primary">
+                            <i class="ri-refresh-line me-1"></i>Odśwież stronę
+                        </button>
+                        <button onclick="history.back()" class="btn btn-outline-secondary">
+                            <i class="ri-arrow-left-line me-1"></i>Wstecz
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Help section -->
+        <div class="card mt-4 bg-light border-0">
+            <div class="card-body text-center">
+                <h5 class="card-title text-muted">Problem nie ustępuje?</h5>
+                <p class="card-text text-muted mb-3">
+                    Jeśli błąd powtarza się, skontaktuj się z administratorem systemu<br>
+                    i podaj szczegóły dotyczące wykonywanych czynności.
+                </p>
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <span class="badge bg-primary-subtle text-primary">
+                        <i class="ri-mail-line me-1"></i>admin@assethub.local
+                    </span>
+                    <span class="badge bg-success-subtle text-success">
+                        <i class="ri-phone-line me-1"></i>+48 123 456 789
+                    </span>
+                    {% if app.user %}
+                    <span class="badge bg-info-subtle text-info">
+                        <i class="ri-user-line me-1"></i>{{ app.user.username }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+// Auto refresh after 30 seconds
+setTimeout(function() {
+    const refreshBtn = document.querySelector('.btn-outline-primary');
+    if (refreshBtn) {
+        refreshBtn.innerHTML = '<i class="ri-refresh-line me-1"></i>Odśwież automatycznie (5s)';
+        refreshBtn.classList.add('btn-warning');
+        refreshBtn.classList.remove('btn-outline-primary');
+        
+        let countdown = 5;
+        const countdownInterval = setInterval(function() {
+            countdown--;
+            refreshBtn.innerHTML = `<i class="ri-refresh-line me-1"></i>Odśwież automatycznie (${countdown}s)`;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                window.location.reload();
+            }
+        }, 1000);
+    }
+}, 30000);
+
+// Show error details for debugging (only in dev mode)
+{% if app.debug %}
+document.addEventListener('DOMContentLoaded', function() {
+    const errorInfo = document.createElement('div');
+    errorInfo.className = 'alert alert-warning mt-3';
+    errorInfo.innerHTML = `
+        <strong>Informacje debugowania:</strong><br>
+        <small>Czas: ${new Date().toLocaleString()}</small><br>
+        <small>URL: ${window.location.href}</small><br>
+        <small>User Agent: ${navigator.userAgent}</small>
+    `;
+    document.querySelector('.card-body').appendChild(errorInfo);
+});
+{% endif %}
+</script>
+{% endblock %}

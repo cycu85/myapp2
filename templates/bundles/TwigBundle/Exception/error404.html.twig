@@ -1,0 +1,202 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Strona nie została znaleziona - {{ app_name() }}{% endblock %}
+{% block page_title %}Strona nie znaleziona{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item active">Błąd 404</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xxl-8 col-lg-10">
+        <div class="card overflow-hidden">
+            <div class="card-body p-4">
+                <div class="text-center">
+                    <div class="avatar-xl mx-auto mb-4">
+                        <div class="avatar-title bg-warning-subtle text-warning display-3 rounded-circle">
+                            <i class="ri-search-line"></i>
+                        </div>
+                    </div>
+                    <h1 class="text-warning display-4 fw-bold">404</h1>
+                    <h3 class="text-uppercase mb-3">Ups! Strona nie została znaleziona</h3>
+                    <p class="text-muted mb-4 fs-16">
+                        Strona, której szukasz, mogła zostać przeniesiona, usunięta<br>
+                        lub jest tymczasowo niedostępna.
+                    </p>
+                    
+                    <div class="d-flex justify-content-center gap-2 flex-wrap mb-4">
+                        <a href="/" class="btn btn-success btn-lg">
+                            <i class="ri-home-line me-1"></i>Strona główna
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-primary btn-lg">
+                            <i class="ri-arrow-left-line me-1"></i>Wstecz
+                        </button>
+                    </div>
+
+                    <!-- Search suggestion -->
+                    <div class="mt-4">
+                        <p class="text-muted mb-3">Lub skorzystaj z wyszukiwania:</p>
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Szukaj w systemie..." id="searchInput">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="performSearch()">
+                                        <i class="ri-search-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick links -->
+        <div class="row mt-4">
+            <div class="col-lg-3 col-6">
+                <div class="card text-center border">
+                    <div class="card-body">
+                        <div class="avatar-sm mx-auto mb-3">
+                            <div class="avatar-title bg-primary-subtle text-primary rounded-circle">
+                                <i class="ri-dashboard-line fs-18"></i>
+                            </div>
+                        </div>
+                        <h6 class="mb-1">Dashboard</h6>
+                        <p class="text-muted mb-2 fs-13">Główny panel</p>
+                        <a href="/" class="btn btn-sm btn-outline-primary">Przejdź</a>
+                    </div>
+                </div>
+            </div>
+            
+            {% if app.user %}
+            <div class="col-lg-3 col-6">
+                <div class="card text-center border">
+                    <div class="card-body">
+                        <div class="avatar-sm mx-auto mb-3">
+                            <div class="avatar-title bg-success-subtle text-success rounded-circle">
+                                <i class="ri-team-line fs-18"></i>
+                            </div>
+                        </div>
+                        <h6 class="mb-1">Pracownicy</h6>
+                        <p class="text-muted mb-2 fs-13">Zarządzanie zespołem</p>
+                        <a href="/admin/users" class="btn btn-sm btn-outline-success">Przejdź</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-6">
+                <div class="card text-center border">
+                    <div class="card-body">
+                        <div class="avatar-sm mx-auto mb-3">
+                            <div class="avatar-title bg-info-subtle text-info rounded-circle">
+                                <i class="ri-tools-line fs-18"></i>
+                            </div>
+                        </div>
+                        <h6 class="mb-1">Sprzęt</h6>
+                        <p class="text-muted mb-2 fs-13">Zarządzanie sprzętem</p>
+                        <a href="/equipment" class="btn btn-sm btn-outline-info">Przejdź</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-6">
+                <div class="card text-center border">
+                    <div class="card-body">
+                        <div class="avatar-sm mx-auto mb-3">
+                            <div class="avatar-title bg-warning-subtle text-warning rounded-circle">
+                                <i class="ri-settings-line fs-18"></i>
+                            </div>
+                        </div>
+                        <h6 class="mb-1">Ustawienia</h6>
+                        <p class="text-muted mb-2 fs-13">Konfiguracja systemu</p>
+                        <a href="/admin/settings" class="btn btn-sm btn-outline-warning">Przejdź</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-lg-3 col-6">
+                <div class="card text-center border">
+                    <div class="card-body">
+                        <div class="avatar-sm mx-auto mb-3">
+                            <div class="avatar-title bg-success-subtle text-success rounded-circle">
+                                <i class="ri-login-box-line fs-18"></i>
+                            </div>
+                        </div>
+                        <h6 class="mb-1">Logowanie</h6>
+                        <p class="text-muted mb-2 fs-13">Zaloguj się</p>
+                        <a href="{{ path('app_login') }}" class="btn btn-sm btn-outline-success">Przejdź</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Help section -->
+        <div class="card mt-4 bg-light border-0">
+            <div class="card-body text-center">
+                <h5 class="card-title text-muted">Potrzebujesz pomocy?</h5>
+                <p class="card-text text-muted mb-3">
+                    Jeśli nadal masz problemy z nawigacją, skontaktuj się z administratorem systemu.
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    <span class="badge bg-primary-subtle text-primary">
+                        <i class="ri-mail-line me-1"></i>admin@assethub.local
+                    </span>
+                    <span class="badge bg-success-subtle text-success">
+                        <i class="ri-phone-line me-1"></i>+48 123 456 789
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+// Search functionality
+function performSearch() {
+    const searchTerm = document.getElementById('searchInput').value.trim();
+    if (searchTerm) {
+        // Simple search logic - redirect to main page with search parameter
+        window.location.href = '/?search=' + encodeURIComponent(searchTerm);
+    }
+}
+
+// Enter key search
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        performSearch();
+    }
+});
+
+// Auto focus on search input after 2 seconds
+setTimeout(function() {
+    document.getElementById('searchInput').focus();
+}, 2000);
+
+// Fun animation for the 404 number
+document.addEventListener('DOMContentLoaded', function() {
+    const number404 = document.querySelector('.display-4');
+    if (number404) {
+        number404.style.transform = 'scale(0.8)';
+        number404.style.transition = 'transform 0.5s ease';
+        
+        setTimeout(function() {
+            number404.style.transform = 'scale(1)';
+        }, 300);
+    }
+});
+
+// Show current URL that caused 404 (for debugging)
+const currentUrl = window.location.pathname;
+if (currentUrl !== '/error/not-found') {
+    const urlInfo = document.createElement('div');
+    urlInfo.className = 'mt-3';
+    urlInfo.innerHTML = `<small class="text-muted">Szukana strona: <code>${currentUrl}</code></small>`;
+    document.querySelector('.text-center').appendChild(urlInfo);
+}
+</script>
+{% endblock %}

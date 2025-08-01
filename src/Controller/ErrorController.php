@@ -27,4 +27,18 @@ class ErrorController extends AbstractController
 
         return $this->render('error/access_denied.html.twig');
     }
+
+    #[Route('/error/not-found', name: 'error_not_found')]
+    public function notFound(Request $request): Response
+    {
+        $this->logger->info('404 error page accessed', [
+            'user' => $this->getUser()?->getUsername() ?? 'anonymous',
+            'ip' => $request->getClientIp(),
+            'requested_url' => $request->getUri(),
+            'referrer' => $request->headers->get('referer'),
+            'user_agent' => $request->headers->get('User-Agent')
+        ]);
+
+        return $this->render('bundles/TwigBundle/Exception/error404.html.twig', [], new Response('', 404));
+    }
 }
