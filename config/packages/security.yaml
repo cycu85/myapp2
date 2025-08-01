@@ -33,7 +33,7 @@ security:
         - { path: ^/install, roles: PUBLIC_ACCESS }
         - { path: ^/assets/css/dynamic-theme\.css, roles: PUBLIC_ACCESS }
         - { path: ^/admin/users, roles: [ROLE_SYSTEM_ADMIN, ROLE_EMPLOYEES_VIEWER, ROLE_EMPLOYEES_EDITOR, ROLE_EMPLOYEES_MANAGER] }
-        - { path: ^/admin, roles: ROLE_SYSTEM_ADMIN }
+        - { path: ^/admin, roles: [ROLE_SYSTEM_ADMIN] }
         - { path: ^/, roles: ROLE_USER }
 
 when@test:
