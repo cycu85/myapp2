@@ -548,6 +548,16 @@ class AdminController extends AbstractController
             'ldap_map_firstname' => $this->settingService->get('ldap_map_firstname', 'givenName'),
             'ldap_map_lastname' => $this->settingService->get('ldap_map_lastname', 'sn'),
             'ldap_map_displayname' => $this->settingService->get('ldap_map_displayname', 'displayName'),
+            
+            // Mapowanie pól pracowniczych
+            'ldap_map_employee_number' => $this->settingService->get('ldap_map_employee_number', 'employeeNumber'),
+            'ldap_map_phone' => $this->settingService->get('ldap_map_phone', 'telephoneNumber'),
+            'ldap_map_position' => $this->settingService->get('ldap_map_position', 'title'),
+            'ldap_map_department' => $this->settingService->get('ldap_map_department', 'department'),
+            'ldap_map_office' => $this->settingService->get('ldap_map_office', 'physicalDeliveryOfficeName'),
+            'ldap_map_manager' => $this->settingService->get('ldap_map_manager', 'manager'),
+            'ldap_map_status' => $this->settingService->get('ldap_map_status', 'userAccountControl'),
+            
             'ldap_auto_create_users' => (bool) $this->settingService->get('ldap_auto_create_users', false),
             'ldap_update_existing_users' => (bool) $this->settingService->get('ldap_update_existing_users', false),
         ];
@@ -567,6 +577,16 @@ class AdminController extends AbstractController
         $this->settingService->set('ldap_map_firstname', $data['ldap_map_firstname'], 'ldap', 'text', 'Mapowanie pola imię');
         $this->settingService->set('ldap_map_lastname', $data['ldap_map_lastname'], 'ldap', 'text', 'Mapowanie pola nazwisko');
         $this->settingService->set('ldap_map_displayname', $data['ldap_map_displayname'], 'ldap', 'text', 'Mapowanie pola pełna nazwa');
+        
+        // Mapowanie pól pracowniczych
+        $this->settingService->set('ldap_map_employee_number', $data['ldap_map_employee_number'] ?? '', 'ldap', 'text', 'Mapowanie pola numer pracownika');
+        $this->settingService->set('ldap_map_phone', $data['ldap_map_phone'] ?? '', 'ldap', 'text', 'Mapowanie pola telefon');
+        $this->settingService->set('ldap_map_position', $data['ldap_map_position'] ?? '', 'ldap', 'text', 'Mapowanie pola stanowisko');
+        $this->settingService->set('ldap_map_department', $data['ldap_map_department'] ?? '', 'ldap', 'text', 'Mapowanie pola dział');
+        $this->settingService->set('ldap_map_office', $data['ldap_map_office'] ?? '', 'ldap', 'text', 'Mapowanie pola oddział/biuro');
+        $this->settingService->set('ldap_map_manager', $data['ldap_map_manager'] ?? '', 'ldap', 'text', 'Mapowanie pola przełożony');
+        $this->settingService->set('ldap_map_status', $data['ldap_map_status'] ?? '', 'ldap', 'text', 'Mapowanie pola status');
+        
         $this->settingService->set('ldap_auto_create_users', $data['ldap_auto_create_users'] ? '1' : '0', 'ldap', 'boolean', 'Automatycznie twórz nowych użytkowników');
         $this->settingService->set('ldap_update_existing_users', $data['ldap_update_existing_users'] ? '1' : '0', 'ldap', 'boolean', 'Aktualizuj istniejących użytkowników');
         
