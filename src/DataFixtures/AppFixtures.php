@@ -19,111 +19,149 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        // Create modules
-        $adminModule = new Module();
-        $adminModule->setName('admin')
-            ->setDisplayName('Administracja')
-            ->setDescription('Panel administracyjny systemu')
-            ->setRequiredPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE', 'EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL']);
-        $manager->persist($adminModule);
+        // Check if modules already exist
+        $moduleRepository = $manager->getRepository(Module::class);
+        $adminModule = $moduleRepository->findOneBy(['name' => 'admin']);
+        $equipmentModule = $moduleRepository->findOneBy(['name' => 'equipment']);
 
-        $equipmentModule = new Module();
-        $equipmentModule->setName('equipment')
-            ->setDisplayName('Sprzęt wysokościowy')
-            ->setDescription('Zarządzanie sprzętem wysokościowym')
-            ->setRequiredPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'ASSIGN', 'REVIEW', 'EXPORT']);
-        $manager->persist($equipmentModule);
+        // Create modules only if they don't exist
+        if (!$adminModule) {
+            $adminModule = new Module();
+            $adminModule->setName('admin')
+                ->setDisplayName('Administracja')
+                ->setDescription('Panel administracyjny systemu')
+                ->setRequiredPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE', 'EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL']);
+            $manager->persist($adminModule);
+        }
 
-        // Create roles
-        $adminRole = new Role();
-        $adminRole->setName('system_admin')
-            ->setDescription('Administrator systemu')
-            ->setModule($adminModule)
-            ->setPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE', 'EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL'])
-            ->setIsSystemRole(true);
-        $manager->persist($adminRole);
+        if (!$equipmentModule) {
+            $equipmentModule = new Module();
+            $equipmentModule->setName('equipment')
+                ->setDisplayName('Sprzęt wysokościowy')
+                ->setDescription('Zarządzanie sprzętem wysokościowym')
+                ->setRequiredPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'ASSIGN', 'REVIEW', 'EXPORT']);
+            $manager->persist($equipmentModule);
+        }
+
+        // Create roles only if they don't exist
+        $roleRepository = $manager->getRepository(Role::class);
+        $adminRole = $roleRepository->findOneBy(['name' => 'system_admin']);
+        
+        if (!$adminRole) {
+            $adminRole = new Role();
+            $adminRole->setName('system_admin')
+                ->setDescription('Administrator systemu')
+                ->setModule($adminModule)
+                ->setPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'CONFIGURE', 'EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL'])
+                ->setIsSystemRole(true);
+            $manager->persist($adminRole);
+        }
 
         // Employee management roles
-        $employeesViewRole = new Role();
-        $employeesViewRole->setName('employees_viewer')
-            ->setDescription('Przeglądanie listy pracowników')
-            ->setModule($adminModule)
-            ->setPermissions(['EMPLOYEES_VIEW'])
-            ->setIsSystemRole(true);
-        $manager->persist($employeesViewRole);
+        $employeesViewRole = $roleRepository->findOneBy(['name' => 'employees_viewer']);
+        if (!$employeesViewRole) {
+            $employeesViewRole = new Role();
+            $employeesViewRole->setName('employees_viewer')
+                ->setDescription('Przeglądanie listy pracowników')
+                ->setModule($adminModule)
+                ->setPermissions(['EMPLOYEES_VIEW'])
+                ->setIsSystemRole(true);
+            $manager->persist($employeesViewRole);
+        }
 
-        $employeesEditorRole = new Role();
-        $employeesEditorRole->setName('employees_editor')
-            ->setDescription('Edycja podstawowych danych pracowników')
-            ->setModule($adminModule)
-            ->setPermissions(['EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC'])
-            ->setIsSystemRole(true);
-        $manager->persist($employeesEditorRole);
+        $employeesEditorRole = $roleRepository->findOneBy(['name' => 'employees_editor']);
+        if (!$employeesEditorRole) {
+            $employeesEditorRole = new Role();
+            $employeesEditorRole->setName('employees_editor')
+                ->setDescription('Edycja podstawowych danych pracowników')
+                ->setModule($adminModule)
+                ->setPermissions(['EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC'])
+                ->setIsSystemRole(true);
+            $manager->persist($employeesEditorRole);
+        }
 
-        $employeesManagerRole = new Role();
-        $employeesManagerRole->setName('employees_manager')
-            ->setDescription('Pełne zarządzanie pracownikami')
-            ->setModule($adminModule)
-            ->setPermissions(['EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL'])
-            ->setIsSystemRole(true);
-        $manager->persist($employeesManagerRole);
+        $employeesManagerRole = $roleRepository->findOneBy(['name' => 'employees_manager']);
+        if (!$employeesManagerRole) {
+            $employeesManagerRole = new Role();
+            $employeesManagerRole->setName('employees_manager')
+                ->setDescription('Pełne zarządzanie pracownikami')
+                ->setModule($adminModule)
+                ->setPermissions(['EMPLOYEES_VIEW', 'EMPLOYEES_EDIT_BASIC', 'EMPLOYEES_EDIT_FULL'])
+                ->setIsSystemRole(true);
+            $manager->persist($employeesManagerRole);
+        }
 
-        $equipmentManagerRole = new Role();
-        $equipmentManagerRole->setName('equipment_manager')
-            ->setDescription('Menedżer sprzętu wysokościowego')
-            ->setModule($equipmentModule)
-            ->setPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'ASSIGN', 'REVIEW', 'EXPORT'])
-            ->setIsSystemRole(true);
-        $manager->persist($equipmentManagerRole);
+        $equipmentManagerRole = $roleRepository->findOneBy(['name' => 'equipment_manager']);
+        if (!$equipmentManagerRole) {
+            $equipmentManagerRole = new Role();
+            $equipmentManagerRole->setName('equipment_manager')
+                ->setDescription('Menedżer sprzętu wysokościowego')
+                ->setModule($equipmentModule)
+                ->setPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'ASSIGN', 'REVIEW', 'EXPORT'])
+                ->setIsSystemRole(true);
+            $manager->persist($equipmentManagerRole);
+        }
 
-        $equipmentViewerRole = new Role();
-        $equipmentViewerRole->setName('equipment_viewer')
-            ->setDescription('Przeglądanie sprzętu wysokościowego')
-            ->setModule($equipmentModule)
-            ->setPermissions(['VIEW'])
-            ->setIsSystemRole(true);
-        $manager->persist($equipmentViewerRole);
+        $equipmentViewerRole = $roleRepository->findOneBy(['name' => 'equipment_viewer']);
+        if (!$equipmentViewerRole) {
+            $equipmentViewerRole = new Role();
+            $equipmentViewerRole->setName('equipment_viewer')
+                ->setDescription('Przeglądanie sprzętu wysokościowego')
+                ->setModule($equipmentModule)
+                ->setPermissions(['VIEW'])
+                ->setIsSystemRole(true);
+            $manager->persist($equipmentViewerRole);
+        }
 
-        // Create admin user
-        $adminUser = new User();
-        $adminUser->setUsername('admin')
-            ->setEmail('admin@assethub.local')
-            ->setFirstName('Administrator')
-            ->setLastName('Systemu')
-            ->setPosition('Administrator')
-            ->setDepartment('IT');
+        // Create users only if they don't exist
+        $userRepository = $manager->getRepository(User::class);
+        
+        $adminUser = $userRepository->findOneBy(['username' => 'admin']);
+        if (!$adminUser) {
+            $adminUser = new User();
+            $adminUser->setUsername('admin')
+                ->setEmail('admin@assethub.local')
+                ->setFirstName('Administrator')
+                ->setLastName('Systemu')
+                ->setPosition('Administrator')
+                ->setDepartment('IT');
 
-        $hashedPassword = $this->passwordHasher->hashPassword($adminUser, 'admin123');
-        $adminUser->setPassword($hashedPassword);
-        $manager->persist($adminUser);
+            $hashedPassword = $this->passwordHasher->hashPassword($adminUser, 'admin123');
+            $adminUser->setPassword($hashedPassword);
+            $manager->persist($adminUser);
+        }
 
-        // Create test user
-        $testUser = new User();
-        $testUser->setUsername('user')
-            ->setEmail('user@assethub.local')
-            ->setFirstName('Jan')
-            ->setLastName('Kowalski')
-            ->setEmployeeNumber('EMP001')
-            ->setPosition('Pracownik')
-            ->setDepartment('Produkcja');
+        $testUser = $userRepository->findOneBy(['username' => 'user']);
+        if (!$testUser) {
+            $testUser = new User();
+            $testUser->setUsername('user')
+                ->setEmail('user@assethub.local')
+                ->setFirstName('Jan')
+                ->setLastName('Kowalski')
+                ->setEmployeeNumber('EMP001')
+                ->setPosition('Pracownik')
+                ->setDepartment('Produkcja');
 
-        $hashedPassword = $this->passwordHasher->hashPassword($testUser, 'user123');
-        $testUser->setPassword($hashedPassword);
-        $manager->persist($testUser);
+            $hashedPassword = $this->passwordHasher->hashPassword($testUser, 'user123');
+            $testUser->setPassword($hashedPassword);
+            $manager->persist($testUser);
+        }
 
-        // Create HR user with employee management permissions
-        $hrUser = new User();
-        $hrUser->setUsername('hr')
-            ->setEmail('hr@assethub.local')
-            ->setFirstName('Anna')
-            ->setLastName('Nowak')
-            ->setEmployeeNumber('EMP002')
-            ->setPosition('Specjalista ds. kadr')
-            ->setDepartment('HR');
+        $hrUser = $userRepository->findOneBy(['username' => 'hr']);
+        if (!$hrUser) {
+            $hrUser = new User();
+            $hrUser->setUsername('hr')
+                ->setEmail('hr@assethub.local')
+                ->setFirstName('Anna')
+                ->setLastName('Nowak')
+                ->setEmployeeNumber('EMP002')
+                ->setPosition('Specjalista ds. kadr')
+                ->setDepartment('HR');
 
-        $hashedPassword = $this->passwordHasher->hashPassword($hrUser, 'hr123');
-        $hrUser->setPassword($hashedPassword);
-        $manager->persist($hrUser);
+            $hashedPassword = $this->passwordHasher->hashPassword($hrUser, 'hr123');
+            $hrUser->setPassword($hashedPassword);
+            $manager->persist($hrUser);
+        }
 
         $manager->flush();
 
@@ -166,6 +204,13 @@ class AppFixtures extends Fixture
 
     private function createEmployeeDictionaries(ObjectManager $manager): void
     {
+        $dictionaryRepository = $manager->getRepository(Dictionary::class);
+        
+        // Check if employee dictionaries already exist
+        if ($dictionaryRepository->findOneBy(['type' => 'employee_branches'])) {
+            return; // Skip if dictionaries already exist
+        }
+        
         // Employee branches (oddziały)
         $branches = [
             ['name' => 'Oddział Główny', 'value' => 'main_branch', 'description' => 'Główna siedziba firmy'],
