@@ -232,7 +232,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'admin_users_edit', requirements: ['id' => '\d+'])]
-    public function edit(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response
+    public function edit(Request $request, User $user, UserPasswordHasherInterface $passwordHasher, UserRepository $userRepository): Response
     {
         $currentUser = $this->getUser();
         
@@ -283,18 +283,24 @@ class UserController extends AbstractController
             return $this->redirectToRoute('admin_users_index');
         }
 
+        // Pobierz podwładnych tego użytkownika
+        $subordinates = $userRepository->findSubordinates($user);
+
         $this->logger->info('User edit form accessed', [
             'user' => $currentUser->getUsername(),
             'ip' => $request->getClientIp(),
             'target_user_id' => $user->getId(),
-            'target_username' => $user->getUsername()
+            'target_username' => $user->getUsername(),
+            'subordinates_count' => count($subordinates)
         ]);
 
         return $this->render('admin/users/edit.html.twig', [
             'user' => $user,
             'form' => $form,
+            'subordinates' => $subordinates,
             'has_full_permission' => $hasFullPermission,
             'has_basic_permission' => $hasBasicPermission,
+            'can_edit' => $hasBasicPermission || $hasFullPermission,
         ]);
     }
 

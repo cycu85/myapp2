@@ -130,6 +130,24 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    {{ form_label(form.branch) }}
+                                    {{ form_widget(form.branch) }}
+                                    {{ form_errors(form.branch) }}
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.supervisor) }}
+                                    {{ form_widget(form.supervisor) }}
+                                    {{ form_errors(form.supervisor) }}
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.status) }}
+                                    {{ form_widget(form.status) }}
+                                    {{ form_errors(form.status) }}
+                                </div>
+
+                                <div class="mb-3">
                                     {{ form_label(form.phoneNumber) }}
                                     {{ form_widget(form.phoneNumber) }}
                                     {{ form_errors(form.phoneNumber) }}
@@ -169,6 +187,94 @@
                                         </span>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sekcja Podwładni -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card border border-light">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-team-line me-2"></i>Podwładni
+                                    <span class="badge bg-primary-subtle text-primary ms-2">{{ subordinates|length }}</span>
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                {% if subordinates|length > 0 %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Pracownik</th>
+                                                    <th>Stanowisko</th>
+                                                    <th>Oddział</th>
+                                                    <th>Status</th>
+                                                    <th>Akcje</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for subordinate in subordinates %}
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-xs me-2">
+                                                                <div class="avatar-title bg-soft-primary text-primary rounded-circle">
+                                                                    {{ subordinate.firstName|first|upper }}{{ subordinate.lastName|first|upper }}
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <h6 class="mb-0">{{ subordinate.fullName }}</h6>
+                                                                <p class="text-muted mb-0 small">{{ subordinate.username }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>{{ subordinate.position ?? 'Brak danych' }}</td>
+                                                    <td>
+                                                        {% if subordinate.branch %}
+                                                            <span class="badge bg-info-subtle text-info">
+                                                                {{ subordinate.branch }}
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="text-muted">-</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if subordinate.status %}
+                                                            <span class="badge bg-success-subtle text-success">
+                                                                {{ subordinate.status }}
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="text-muted">-</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if can_edit %}
+                                                        <a href="{{ path('admin_users_edit', {id: subordinate.id}) }}" 
+                                                           class="btn btn-sm btn-outline-primary" 
+                                                           title="Edytuj pracownika">
+                                                            <i class="ri-edit-line"></i>
+                                                        </a>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-4">
+                                        <div class="avatar-lg mx-auto mb-3">
+                                            <div class="avatar-title bg-soft-secondary text-secondary rounded-circle">
+                                                <i class="ri-team-line fs-24"></i>
+                                            </div>
+                                        </div>
+                                        <h5 class="text-muted">Brak podwładnych</h5>
+                                        <p class="text-muted mb-0">Ten pracownik nie ma przypisanych podwładnych.</p>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
