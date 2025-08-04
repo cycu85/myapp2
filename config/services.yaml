@@ -26,3 +26,23 @@ services:
     App\Service\SettingService:
         arguments:
             $publicDir: '%kernel.project_dir%/public'
+
+    Symfony\Component\Ldap\Ldap:
+        arguments: ['@Symfony\Component\Ldap\Adapter\ExtLdap\Adapter']
+        tags:
+            - ldap
+
+    Symfony\Component\Ldap\Adapter\ExtLdap\Adapter:
+        arguments:
+            -   host: '%env(LDAP_HOST)%'
+                port: '%env(int:LDAP_PORT)%'
+                version: 3
+                referrals: false
+
+    App\Security\LdapUserProvider:
+        arguments:
+            $ldap: '@Symfony\Component\Ldap\Ldap'
+            $baseDn: '%env(LDAP_BASE_DN)%'
+            $searchDn: '%env(LDAP_BIND_DN)%'
+            $searchPassword: '%env(LDAP_BIND_PASSWORD)%'
+            $uidKey: '%env(LDAP_UID_KEY)%'
