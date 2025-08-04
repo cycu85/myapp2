@@ -260,11 +260,13 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Hash password only if new password was provided
-            $plainPassword = $form->get('plainPassword')->getData();
-            if (!empty($plainPassword)) {
-                $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
-                $user->setPassword($hashedPassword);
+            // Hash password only if new password was provided and user has permission to change it
+            if ($hasFullPermission && $form->has('plainPassword')) {
+                $plainPassword = $form->get('plainPassword')->getData();
+                if (!empty($plainPassword)) {
+                    $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
+                    $user->setPassword($hashedPassword);
+                }
             }
             
             $this->entityManager->flush();
