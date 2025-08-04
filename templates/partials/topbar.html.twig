@@ -71,7 +71,7 @@
                                     <div class="fs-13">Dashboard</div>
                                 </a>
                             </div>
-                            {% if is_granted_module(app.user, 'employees') %}
+                            {% if is_granted_module('employees') %}
                             <div class="col-6">
                                 <a href="{{ path('admin_users_index') }}" class="dropdown-item text-center p-3">
                                     <i class="ri-team-line fs-24 text-success mb-2"></i>
@@ -79,7 +79,7 @@
                                 </a>
                             </div>
                             {% endif %}
-                            {% if is_granted_module(app.user, 'admin') %}
+                            {% if is_granted_module('admin') %}
                             <div class="col-6">
                                 <a href="{{ path('admin_dashboard') }}" class="dropdown-item text-center p-3">
                                     <i class="ri-admin-line fs-24 text-info mb-2"></i>
@@ -390,10 +390,10 @@
                         <!-- item-->
                         <h6 class="dropdown-header">Witaj {{ app.user.firstName }}!</h6>
                         <a class="dropdown-item" href="{{ path('dashboard') }}"><i class="ri-dashboard-line text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Dashboard</span></a>
-                        {% if is_granted_module(app.user, 'employees') %}
+                        {% if is_granted_module('employees') %}
                         <a class="dropdown-item" href="{{ path('admin_users_index') }}"><i class="ri-team-line text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Pracownicy</span></a>
                         {% endif %}
-                        {% if is_granted_module(app.user, 'admin') %}
+                        {% if is_granted_module('admin') %}
                         <a class="dropdown-item" href="{{ path('admin_settings') }}"><i class="ri-settings-3-line text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Ustawienia</span></a>
                         <a class="dropdown-item" href="{{ path('admin_dashboard') }}"><i class="ri-admin-line text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Panel Admin</span></a>
                         {% endif %}
