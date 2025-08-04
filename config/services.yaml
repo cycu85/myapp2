@@ -42,3 +42,7 @@ services:
     App\Security\LdapUserProvider:
         arguments:
             $logger: '@monolog.logger.security'
+
+    App\Security\LdapAuthenticator:
+        arguments:
+            $logger: '@monolog.logger.security'

@@ -23,20 +23,7 @@ security:
         main:
             lazy: true
             provider: chain_provider
-            entry_point: form_login
-            form_login_ldap:
-                service: Symfony\Component\Ldap\Ldap
-                dn_string: '%env(LDAP_BASE_DN)%'
-                search_dn: '%env(LDAP_BIND_DN)%'
-                search_password: '%env(LDAP_BIND_PASSWORD)%'
-                query_string: '(%env(LDAP_UID_KEY)%={username})'
-                login_path: login
-                check_path: login
-                default_target_path: dashboard
-            form_login:
-                login_path: login
-                check_path: login
-                default_target_path: dashboard
+            custom_authenticator: App\Security\LdapAuthenticator
             logout:
                 path: logout
                 target: login

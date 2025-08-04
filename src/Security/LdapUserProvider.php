@@ -59,7 +59,9 @@ class LdapUserProvider implements UserProviderInterface
                 $result = $query->execute();
                 
                 if ($result->count() > 0) {
-                    $this->logger?->info('LdapUserProvider: LDAP user verified and active', ['username' => $identifier]);
+                    $this->logger?->info('LdapUserProvider: LDAP user found in directory', ['username' => $identifier]);
+                    // Nie uwierzytelniamy hasła tutaj - to robi FormLoginAuthenticator
+                    // Tylko sprawdzamy czy użytkownik istnieje w LDAP
                     return $user;
                 } else {
                     $this->logger?->warning('LdapUserProvider: LDAP user not found in directory', ['username' => $identifier]);
