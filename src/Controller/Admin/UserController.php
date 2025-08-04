@@ -7,6 +7,7 @@ use App\Entity\UserRole;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use App\Repository\RoleRepository;
+use App\Repository\DictionaryRepository;
 use App\Service\PermissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -27,7 +28,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/', name: 'admin_users_index')]
-    public function index(UserRepository $userRepository, Request $request): Response
+    public function index(UserRepository $userRepository, DictionaryRepository $dictionaryRepository, Request $request): Response
     {
         $user = $this->getUser();
         
@@ -42,6 +43,21 @@ class UserController extends AbstractController
         }
 
         $users = $userRepository->findAll();
+
+        // Pobierz słowniki dla oddziałów i statusów
+        $branches = $dictionaryRepository->findByType('employee_branches');
+        $statuses = $dictionaryRepository->findByType('employee_statuses');
+
+        // Stwórz mapy value => name dla łatwego dostępu w szablonie
+        $branchesMap = [];
+        foreach ($branches as $branch) {
+            $branchesMap[$branch->getValue()] = $branch->getName();
+        }
+
+        $statusesMap = [];
+        foreach ($statuses as $status) {
+            $statusesMap[$status->getValue()] = $status->getName();
+        }
 
         $this->logger->info('Admin users index accessed', [
             'user' => $user->getUsername(),
@@ -58,6 +74,8 @@ class UserController extends AbstractController
             'users' => $users,
             'can_edit' => $canEdit,
             'can_edit_full' => $canEditFull,
+            'branches_map' => $branchesMap,
+            'statuses_map' => $statusesMap,
         ]);
     }
 

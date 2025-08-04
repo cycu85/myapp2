@@ -85,8 +85,8 @@ document.addEventListener('DOMContentLoaded', function() {
             "{{ user.position|default('—') }}",
             "{{ user.supervisor ? user.supervisor.fullName : '—' }}",
             "{{ user.department|default('—') }}",
-            "{{ user.branch|default('—') }}",
-            gridjs.html("{% if user.status %}<span class='badge bg-info-subtle text-info'>{{ user.status }}</span>{% else %}<span class='text-muted'>—</span>{% endif %}")
+            "{{ user.branch ? branches_map[user.branch]|default(user.branch) : '—' }}",
+            gridjs.html("{% if user.status %}<span class='badge bg-info-subtle text-info'>{{ statuses_map[user.status]|default(user.status) }}</span>{% else %}<span class='text-muted'>—</span>{% endif %}")
         ]{% if not loop.last %},{% endif %}
         {% endfor %}
     ];
