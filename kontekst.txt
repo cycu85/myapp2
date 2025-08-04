@@ -1,0 +1,331 @@
+# KONTEKS APLIKACJI ASSETHUB - PRZEWODNIK DLA GENERATORÓW AI
+
+## ARCHITEKTURA I KONWENCJE
+
+### Struktura aplikacji
+- **Framework**: Symfony 7.0 + PHP 8.2+
+- **Baza danych**: MySQL/MariaDB z Doctrine ORM
+- **Frontend**: Bootstrap 5.3 + Twig templates + vanilla JavaScript
+- **Autoryzacja**: Custom role-based system z modułami
+- **Logowanie**: Monolog z wieloma kanałami
+
+### Konwencje nazewnictwa
+- **Kontrolery**: `{Module}Controller` (np. EquipmentController)
+- **Encje**: Singular form (User, Equipment, Module)
+- **Repozytoria**: `{Entity}Repository`
+- **Formularze**: `{Purpose}Type` (np. EquipmentCreateType)
+- **Usługi**: `{Purpose}Service` (np. PermissionService)
+- **Szablony**: `{module}/{action}.html.twig`
+
+## SYSTEM MODUŁOWY
+
+### Jak działa system modułów
+1. Każdy moduł ma wpis w tabeli `modules` (nazwa, opis, czy aktywny)
+2. Role są przypisane do modułów w tabeli `roles`
+3. Użytkownicy mają role przez tabelę `user_roles`
+4. Każdy kontroler sprawdza uprawnienia przez `PermissionService`
+
+### Dodawanie nowego modułu - CHECKLIST:
+
+#### 1. BAZA DANYCH
+```sql
+-- Dodaj moduł do tabeli modules
+INSERT INTO modules (name, display_name, description, is_active, sort_order) 
+VALUES ('new_module', 'Nowy Moduł', 'Opis nowego modułu', 1, 100);
+
+-- Dodaj podstawowe role
+INSERT INTO roles (name, display_name, description, permissions, module_id) VALUES
+('NEW_MODULE_ADMIN', 'Administrator Nowego Modułu', 'Pełny dostęp', 'VIEW,CREATE,EDIT,DELETE', (SELECT id FROM modules WHERE name = 'new_module')),
+('NEW_MODULE_USER', 'Użytkownik Nowego Modułu', 'Tylko podgląd', 'VIEW', (SELECT id FROM modules WHERE name = 'new_module'));
+```
+
+#### 2. ENCJE (src/Entity/)
+- Dodaj `createdAt`, `updatedAt` dla auditowania
+- Dodaj relacje do `User` (created_by, updated_by)
+- Użyj Doctrine annotations/attributes
+- Dodaj indeksy dla często wyszukiwanych pól
+
+#### 3. REPOZYTORIA (src/Repository/)
+- Rozszerz `ServiceEntityRepository`
+- Dodaj metodę `save($entity, bool $flush = false)`
+- Dodaj metody wyszukiwania specyficzne dla modułu
+
+#### 4. KONTROLERY (src/Controller/)
+- Użyj `#[Route('/module-path')]` na klasie
+- ZAWSZE sprawdź uprawnienia przez `PermissionService`
+- ZAWSZE loguj operacje przez `LoggerInterface`
+- Użyj Flash messages dla informacji zwrotnych
+
+#### 5. FORMULARZE (src/Form/)
+- Użyj Bootstrap classes: `form-control`, `form-select`
+- Dodaj walidację Symfony Constraints
+- Użyj `required: false` dla opcjonalnych pól
+
+#### 6. USŁUGI (src/Service/)
+- Logika biznesowa oddzielona od kontrolerów
+- Używaj dependency injection
+- Loguj wszystkie ważne operacje
+
+#### 7. SZABLONY (templates/)
+```
+templates/
+├── module_name/
+│   ├── index.html.twig
+│   ├── show.html.twig
+│   ├── edit.html.twig
+│   └── _form.html.twig
+```
+
+#### 8. NAVIGATION (templates/partials/sidebar.html.twig)
+```twig
+{% if is_granted_module('module_name') %}
+<li class="nav-item">
+    <a class="nav-link menu-link" href="{{ path('module_index') }}">
+        <i class="ri-icon-name"></i>
+        <span>Nazwa Modułu</span>
+    </a>
+</li>
+{% endif %}
+```
+
+## SYSTEM LOGOWANIA
+
+### OBOWIĄZKOWE LOGOWANIE
+Każdy kontroler MUSI logować:
+```php
+// Dostęp do modułu
+$this->logger->info('Module accessed', [
+    'module' => 'module_name',
+    'user' => $user->getUsername(),
+    'ip' => $this->getClientIp()
+]);
+
+// Operacje CRUD
+$this->logger->info('Entity created/updated/deleted', [
+    'entity' => 'EntityName',
+    'id' => $entity->getId(),
+    'user' => $user->getUsername(),
+    'ip' => $this->getClientIp()
+]);
+
+// Błędy i ostrzeżenia
+$this->logger->error('Operation failed', [
+    'operation' => 'operation_name',
+    'error' => $e->getMessage(),
+    'user' => $user->getUsername(),
+    'ip' => $this->getClientIp()
+]);
+```
+
+### Kanały logowania
+- `app` - główne operacje aplikacji
+- `security` - bezpieczeństwo i uwierzytelnianie
+- `equipment` - operacje na sprzęcie
+- `dictionary` - operacje na słownikach
+- `{module_name}` - dedykowany kanał dla modułu
+
+## SYSTEM UPRAWNIEŃ
+
+### Sprawdzanie uprawnień
+```php
+// W kontrolerze - ZAWSZE na początku akcji
+if (!$this->permissionService->canAccessModule($user, 'module_name')) {
+    $this->logger->warning('Unauthorized access attempt', [
+        'module' => 'module_name',
+        'user' => $user?->getUsername() ?? 'anonymous',
+        'ip' => $this->getClientIp()
+    ]);
+    throw $this->createAccessDeniedException('Brak dostępu');
+}
+
+// W szablonach
+{% if is_granted_module('module_name') %}
+    <!-- treść dostępna tylko dla uprawnionych -->
+{% endif %}
+```
+
+### Typy uprawnień
+- `VIEW` - podgląd
+- `CREATE` - tworzenie
+- `EDIT` - edycja
+- `DELETE` - usuwanie
+
+## BAZA DANYCH - FIXTURES
+
+### Aktualizacja fixtures (src/DataFixtures/)
+Przy dodawaniu nowego modułu ZAWSZE zaktualizuj:
+
+1. **ModuleFixtures.php** - dodaj nowy moduł
+2. **RoleFixtures.php** - dodaj role dla modułu  
+3. **UserRoleFixtures.php** - przypisz role użytkownikom
+4. **{Module}Fixtures.php** - przykładowe dane dla modułu
+
+## FRONTEND
+
+### Bootstrap 5.3 classes
+- Cards: `card`, `card-header`, `card-body`
+- Forms: `form-control`, `form-select`, `form-check-input`
+- Buttons: `btn btn-primary`, `btn btn-outline-secondary`
+- Tables: `table table-striped table-hover`
+- Alerts: `alert alert-success/danger/warning/info`
+
+### JavaScript
+- Używaj vanilla JavaScript (bez jQuery)
+- Umieść w `{% block javascripts %}`
+- Używaj `DOMContentLoaded` event listener
+
+### Ikony
+- Remix Icons: `ri-{name}-line` lub `ri-{name}-fill`
+- Przykłady: `ri-settings-line`, `ri-user-line`, `ri-delete-bin-line`
+
+## BEZPIECZEŃSTWO
+
+### CSRF Protection
+- Formularze automatycznie chronione przez Symfony
+- API endpoints używają tokenów
+
+### Walidacja danych
+- Używaj Symfony Constraints w formularzach
+- Waliduj również w encjach
+- Sanityzuj dane wejściowe
+
+### Logowanie błędów bezpieczeństwa
+```php
+$this->logger->warning('Security violation', [
+    'type' => 'unauthorized_access',
+    'user' => $user?->getUsername() ?? 'anonymous',
+    'ip' => $this->getClientIp(),
+    'attempted_resource' => 'resource_name'
+]);
+```
+
+## MIGRACJE
+
+### Przy dodawaniu nowego modułu
+```bash
+# Utwórz migrację
+php bin/console make:migration
+
+# Sprawdź migrację
+php bin/console doctrine:migrations:migrate --dry-run
+
+# Wykonaj migrację
+php bin/console doctrine:migrations:migrate
+```
+
+## TESTY
+
+### Struktura testów
+```
+tests/
+├── Controller/
+│   └── {Module}ControllerTest.php
+├── Entity/
+│   └── {Entity}Test.php
+└── Service/
+    └── {Service}Test.php
+```
+
+## PRZYKŁAD KOMPLETNEGO MODUŁU
+
+### 1. Encja (src/Entity/Example.php)
+```php
+#[ORM\Entity(repositoryClass: ExampleRepository::class)]
+class Example
+{
+    #[ORM\Id, ORM\GeneratedValue, ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $name = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\ManyToOne]
+    private ?User $createdBy = null;
+
+    // getters, setters...
+}
+```
+
+### 2. Kontroler (src/Controller/ExampleController.php)
+```php
+#[Route('/example')]
+class ExampleController extends AbstractController
+{
+    public function __construct(
+        private PermissionService $permissionService,
+        private LoggerInterface $logger
+    ) {}
+
+    #[Route('/', name: 'example_index')]
+    public function index(): Response
+    {
+        $user = $this->getUser();
+        
+        if (!$this->permissionService->canAccessModule($user, 'example')) {
+            $this->logger->warning('Unauthorized example access', [
+                'user' => $user?->getUsername() ?? 'anonymous',
+                'ip' => $this->getClientIp()
+            ]);
+            throw $this->createAccessDeniedException();
+        }
+
+        $this->logger->info('Example module accessed', [
+            'user' => $user->getUsername(),
+            'ip' => $this->getClientIp()
+        ]);
+
+        return $this->render('example/index.html.twig');
+    }
+}
+```
+
+## INSTALATOR - AKTUALIZACJA
+
+### Przy dodawaniu modułu zaktualizuj:
+1. **InstallController.php** - dodaj moduł do kreatora
+2. **install/step3.html.twig** - opcja instalacji przykładowych danych
+3. **{Module}Fixtures.php** - przykładowe dane dla kreatora
+
+## KONFIGURACJA SYSTEMU
+
+### Dodaj ustawienia do SettingService jeśli moduł wymaga konfiguracji
+```php
+$this->settingService->set('module_setting', 'value', 'module', 'type', 'description');
+```
+
+## SŁOWNIKI SYSTEMOWE
+
+### Jeśli moduł używa słowników, dodaj typy do DictionaryFixtures:
+```php
+$categoryType = new Dictionary();
+$categoryType->setType('example_categories');
+$categoryType->setKey('active');
+$categoryType->setValue('Aktywny');
+```
+
+## DODATKOWE WSKAZÓWKI
+
+1. **Zawsze używaj transakcji** dla operacji na wielu tabelach
+2. **Paginacja** - użyj KnpPaginatorBundle dla dużych zbiorów danych
+3. **Cache** - używaj Symfony Cache dla często pobieranych danych
+4. **API** - jeśli moduł ma API, używaj ApiPlatform
+5. **Eventy** - używaj Symfony Events dla loose coupling
+6. **Tłumaczenia** - przygotuj klucze dla Symfony Translator
+
+## DEPLOYMENT
+
+### Checklist przed deploymentem nowego modułu:
+- [ ] Migracje bazy danych przetestowane
+- [ ] Fixtures zaktualizowane
+- [ ] Uprawnienia skonfigurowane
+- [ ] Logowanie zaimplementowane
+- [ ] Testy napisane i przechodzące
+- [ ] Dokumentacja zaktualizowana
+- [ ] Cache wyczyszczony na produkcji
+
+---
+
+Ten plik służy jako kompletny przewodnik dla generatorów AI przy rozwijaniu aplikacji AssetHub. Zawiera wszystkie konwencje, wzorce i wymagania niezbędne do prawidłowego dodawania nowych modułów.

@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Dictionary;
 use App\Entity\Module;
 use App\Entity\Role;
 use App\Entity\User;
@@ -153,5 +154,83 @@ class AppFixtures extends Fixture
         $manager->persist($hrUserRole);
 
         $manager->flush();
+
+        // Create employee dictionaries
+        $this->createEmployeeDictionaries($manager);
+
+        // Update users with example data
+        $this->updateUsersWithExampleData($manager, $adminUser, $testUser, $hrUser);
+
+        $manager->flush();
+    }
+
+    private function createEmployeeDictionaries(ObjectManager $manager): void
+    {
+        // Employee branches (oddziały)
+        $branches = [
+            ['name' => 'Oddział Główny', 'value' => 'main_branch', 'description' => 'Główna siedziba firmy'],
+            ['name' => 'Oddział Warszawa', 'value' => 'warsaw_branch', 'description' => 'Oddział w Warszawie'],
+            ['name' => 'Oddział Kraków', 'value' => 'krakow_branch', 'description' => 'Oddział w Krakowie'],
+            ['name' => 'Oddział Gdańsk', 'value' => 'gdansk_branch', 'description' => 'Oddział w Gdańsku'],
+            ['name' => 'Oddział Wrocław', 'value' => 'wroclaw_branch', 'description' => 'Oddział we Wrocławiu'],
+        ];
+
+        foreach ($branches as $index => $branchData) {
+            $branch = new Dictionary();
+            $branch->setType('employee_branches')
+                ->setName($branchData['name'])
+                ->setValue($branchData['value'])
+                ->setDescription($branchData['description'])
+                ->setIsActive(true)
+                ->setIsSystem(true)
+                ->setSortOrder($index + 1)
+                ->setColor('#405189')
+                ->setIcon('ri-building-line');
+            $manager->persist($branch);
+        }
+
+        // Employee statuses (statusy pracowników)
+        $statuses = [
+            ['name' => 'Aktywny', 'value' => 'active', 'description' => 'Pracownik aktywny', 'color' => '#28a745'],
+            ['name' => 'Nieaktywny', 'value' => 'inactive', 'description' => 'Pracownik nieaktywny', 'color' => '#6c757d'],
+            ['name' => 'Urlop', 'value' => 'on_leave', 'description' => 'Pracownik na urlopie', 'color' => '#ffc107'],
+            ['name' => 'Zwolnienie lekarskie', 'value' => 'sick_leave', 'description' => 'Pracownik na zwolnieniu', 'color' => '#fd7e14'],
+            ['name' => 'Wypowiedzenie', 'value' => 'notice_period', 'description' => 'Pracownik w okresie wypowiedzenia', 'color' => '#dc3545'],
+            ['name' => 'Próbny', 'value' => 'probation', 'description' => 'Pracownik w okresie próbnym', 'color' => '#17a2b8'],
+        ];
+
+        foreach ($statuses as $index => $statusData) {
+            $status = new Dictionary();
+            $status->setType('employee_statuses')
+                ->setName($statusData['name'])
+                ->setValue($statusData['value'])
+                ->setDescription($statusData['description'])
+                ->setIsActive(true)
+                ->setIsSystem(true)
+                ->setSortOrder($index + 1)
+                ->setColor($statusData['color'])
+                ->setIcon('ri-user-line');
+            $manager->persist($status);
+        }
+    }
+
+    private function updateUsersWithExampleData(ObjectManager $manager, User $adminUser, User $testUser, User $hrUser): void
+    {
+        // Ustaw przykładowe dane dla użytkowników
+        $adminUser->setBranch('main_branch')
+            ->setStatus('active')
+            ->setSupervisor(null); // Admin nie ma przełożonego
+
+        $hrUser->setBranch('main_branch')
+            ->setStatus('active')
+            ->setSupervisor($adminUser); // HR podlega adminowi
+
+        $testUser->setBranch('warsaw_branch')
+            ->setStatus('active')
+            ->setSupervisor($hrUser); // Zwykły pracownik podlega HR
+
+        $manager->persist($adminUser);
+        $manager->persist($hrUser);
+        $manager->persist($testUser);
     }
 }

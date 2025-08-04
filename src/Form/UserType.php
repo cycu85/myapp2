@@ -3,8 +3,13 @@
 namespace App\Form;
 
 use App\Entity\User;
+use App\Repository\DictionaryRepository;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -15,6 +20,12 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class UserType extends AbstractType
 {
+    public function __construct(
+        private DictionaryRepository $dictionaryRepository,
+        private UserRepository $userRepository
+    ) {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $isEdit = $options['is_edit'] ?? false;
@@ -84,6 +95,51 @@ class UserType extends AbstractType
                     'placeholder' => '+48 123 456 789'
                 ]
             ])
+            ->add('branch', ChoiceType::class, [
+                'label' => 'Oddział',
+                'required' => false,
+                'choices' => $this->getBranchChoices(),
+                'placeholder' => 'Wybierz oddział',
+                'attr' => [
+                    'class' => 'form-select'
+                ]
+            ])
+            ->add('supervisor', EntityType::class, [
+                'label' => 'Przełożony',
+                'class' => User::class,
+                'required' => false,
+                'placeholder' => 'Wybierz przełożonego',
+                'choice_label' => function(User $user) {
+                    return $user->getFullName() . ' (' . $user->getUsername() . ')';
+                },
+                'query_builder' => function (EntityRepository $er) use ($options) {
+                    $qb = $er->createQueryBuilder('u')
+                        ->where('u.isActive = :active')
+                        ->setParameter('active', true)
+                        ->orderBy('u.firstName', 'ASC')
+                        ->addOrderBy('u.lastName', 'ASC');
+                    
+                    // Exclude current user from supervisor list when editing
+                    if (isset($options['current_user_id']) && $options['current_user_id']) {
+                        $qb->andWhere('u.id != :current_user_id')
+                           ->setParameter('current_user_id', $options['current_user_id']);
+                    }
+                    
+                    return $qb;
+                },
+                'attr' => [
+                    'class' => 'form-select'
+                ]
+            ])
+            ->add('status', ChoiceType::class, [
+                'label' => 'Status',
+                'required' => false,
+                'choices' => $this->getStatusChoices(),
+                'placeholder' => 'Wybierz status',
+                'attr' => [
+                    'class' => 'form-select'
+                ]
+            ])
         ;
         
         if ($allowPasswordEdit) {
@@ -135,6 +191,31 @@ class UserType extends AbstractType
             'allow_username_edit' => true,
             'allow_password_edit' => true,
             'allow_status_edit' => true,
+            'current_user_id' => null,
         ]);
+    }
+
+    private function getBranchChoices(): array
+    {
+        $branches = $this->dictionaryRepository->findActiveByType('employee_branches');
+        $choices = [];
+        
+        foreach ($branches as $branch) {
+            $choices[$branch->getName()] = $branch->getValue();
+        }
+        
+        return $choices;
+    }
+
+    private function getStatusChoices(): array
+    {
+        $statuses = $this->dictionaryRepository->findActiveByType('employee_statuses');
+        $choices = [];
+        
+        foreach ($statuses as $status) {
+            $choices[$status->getName()] = $status->getValue();
+        }
+        
+        return $choices;
     }
 }

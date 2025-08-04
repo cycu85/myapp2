@@ -79,4 +79,98 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Znajdź wszystkich podwładnych dla danego przełożonego
+     */
+    public function findSubordinates(User $supervisor): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.supervisor = :supervisor')
+            ->andWhere('u.isActive = :active')
+            ->setParameter('supervisor', $supervisor)
+            ->setParameter('active', true)
+            ->orderBy('u.firstName', 'ASC')
+            ->addOrderBy('u.lastName', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Znajdź wszystkich podwładnych dla danego przełożonego (rekursywnie - wszyscy w hierarchii)
+     */
+    public function findAllSubordinatesRecursive(User $supervisor): array
+    {
+        $directSubordinates = $this->findSubordinates($supervisor);
+        $allSubordinates = $directSubordinates;
+        
+        // Rekursywnie znajdź podwładnych podwładnych
+        foreach ($directSubordinates as $subordinate) {
+            $subSubordinates = $this->findAllSubordinatesRecursive($subordinate);
+            $allSubordinates = array_merge($allSubordinates, $subSubordinates);
+        }
+        
+        return $allSubordinates;
+    }
+
+    /**
+     * Znajdź użytkowników według oddziału
+     */
+    public function findByBranch(string $branch): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.branch = :branch')
+            ->andWhere('u.isActive = :active')
+            ->setParameter('branch', $branch)
+            ->setParameter('active', true)
+            ->orderBy('u.firstName', 'ASC')
+            ->addOrderBy('u.lastName', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Znajdź użytkowników według statusu
+     */
+    public function findByStatus(string $status): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.status = :status')
+            ->andWhere('u.isActive = :active')
+            ->setParameter('status', $status)
+            ->setParameter('active', true)
+            ->orderBy('u.firstName', 'ASC')
+            ->addOrderBy('u.lastName', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Znajdź statystyki pracowników (liczba według statusu, oddziału itp.)
+     */
+    public function getEmployeeStatistics(): array
+    {
+        $statusStats = $this->createQueryBuilder('u')
+            ->select('u.status, COUNT(u.id) as count')
+            ->where('u.isActive = :active')
+            ->setParameter('active', true)
+            ->groupBy('u.status')
+            ->getQuery()
+            ->getResult();
+
+        $branchStats = $this->createQueryBuilder('u')
+            ->select('u.branch, COUNT(u.id) as count')
+            ->where('u.isActive = :active')
+            ->setParameter('active', true)
+            ->groupBy('u.branch')
+            ->getQuery()
+            ->getResult();
+
+        return [
+            'by_status' => $statusStats,
+            'by_branch' => $branchStats,
+            'total_active' => $this->count(['isActive' => true]),
+            'total_inactive' => $this->count(['isActive' => false])
+        ];
+    }
 }

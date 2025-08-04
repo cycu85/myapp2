@@ -59,6 +59,14 @@ class DictionaryRepository extends ServiceEntityRepository
     }
 
     /**
+     * Find active dictionaries by type (alias for findByType with activeOnly = true)
+     */
+    public function findActiveByType(string $type): array
+    {
+        return $this->findByType($type, true);
+    }
+
+    /**
      * Find all dictionary types
      */
     public function findAllTypes(): array

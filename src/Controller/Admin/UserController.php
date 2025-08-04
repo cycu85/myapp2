@@ -195,6 +195,42 @@ class UserController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}', name: 'admin_users_show', requirements: ['id' => '\d+'])]
+    public function show(Request $request, User $user, UserRepository $userRepository): Response
+    {
+        $currentUser = $this->getUser();
+        
+        if (!$this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_VIEW') && 
+            !$this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_BASIC') && 
+            !$this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_FULL')) {
+            $this->logger->warning('Unauthorized user show access attempt', [
+                'user' => $currentUser?->getUsername() ?? 'anonymous',
+                'ip' => $request->getClientIp(),
+                'target_user_id' => $user->getId()
+            ]);
+            return $this->redirectToRoute('error_access_denied');
+        }
+
+        // Pobierz podwładnych tego użytkownika
+        $subordinates = $userRepository->findSubordinates($user);
+
+        $this->logger->info('User details viewed', [
+            'user' => $currentUser->getUsername(),
+            'ip' => $request->getClientIp(),
+            'viewed_user_id' => $user->getId(),
+            'viewed_username' => $user->getUsername(),
+            'subordinates_count' => count($subordinates)
+        ]);
+
+        return $this->render('admin/users/show.html.twig', [
+            'user' => $user,
+            'subordinates' => $subordinates,
+            'can_edit' => $this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_BASIC') ||
+                         $this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_FULL'),
+            'can_edit_full' => $this->permissionService->hasPermission($currentUser, 'admin', 'EMPLOYEES_EDIT_FULL'),
+        ]);
+    }
+
     #[Route('/{id}/edit', name: 'admin_users_edit', requirements: ['id' => '\d+'])]
     public function edit(Request $request, User $user, UserPasswordHasherInterface $passwordHasher): Response
     {
@@ -216,6 +252,7 @@ class UserController extends AbstractController
         
         $form = $this->createForm(UserType::class, $user, [
             'is_edit' => true,
+            'current_user_id' => $user->getId(), // Exclude current user from supervisor list
             'allow_username_edit' => $hasFullPermission,
             'allow_password_edit' => $hasFullPermission,
             'allow_status_edit' => $hasFullPermission

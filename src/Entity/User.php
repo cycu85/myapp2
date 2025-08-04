@@ -53,6 +53,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $ldapDn = null;
 
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $branch = null;
+
+    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $supervisor = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $status = null;
+
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $isActive = true;
 
@@ -280,5 +290,52 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    public function getBranch(): ?string
+    {
+        return $this->branch;
+    }
+
+    public function setBranch(?string $branch): static
+    {
+        $this->branch = $branch;
+        return $this;
+    }
+
+    public function getSupervisor(): ?self
+    {
+        return $this->supervisor;
+    }
+
+    public function setSupervisor(?self $supervisor): static
+    {
+        $this->supervisor = $supervisor;
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): static
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    /**
+     * Zwraca listę podwładnych (pracowników, dla których ten użytkownik jest przełożonym)
+     * Ta metoda będzie używana głównie w szablonach i controllerach
+     * Faktyczne zapytanie jest wykonywane w UserRepository::findSubordinates()
+     * 
+     * @return Collection<int, User>
+     */
+    public function getSubordinates(): Collection
+    {
+        // Ta metoda jest pomocnicza - faktyczne dane pobieramy przez repozytorium
+        // w kontrolerze używając: $userRepository->findSubordinates($user)
+        return new ArrayCollection();
     }
 }
