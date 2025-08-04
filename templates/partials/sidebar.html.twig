@@ -40,47 +40,54 @@
                 </li>
 
                 <!-- AssetHub Modules -->
-                {% set hasModules = false %}
-                {% set displayedModules = [] %}
-                {% for userRole in app.user.userRoles %}
-                    {% if userRole.isActive and userRole.role.module.isEnabled %}
+                {% set userModules = get_user_modules() %}
+                {% if userModules|length > 0 %}
+                    <li class="menu-title"><span data-key="t-modules">Moduły</span></li>
+                    
+                    {% for userRole in userModules %}
                         {% set module = userRole.role.module %}
-                        {% if module.name not in displayedModules %}
-                            {% if not hasModules %}
-                                <li class="menu-title"><span data-key="t-modules">Moduły</span></li>
-                                {% set hasModules = true %}
-                            {% endif %}
-                            
-                            {% if module.name == 'admin' %}
-                            <li class="nav-item">
-                                <a class="nav-link menu-link {{ app.request.get('_route') starts with 'admin_' ? 'active' : '' }}" href="#sidebarAdmin" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAdmin">
-                                    <i class="ri-settings-3-line"></i> <span>{{ module.displayName }}</span>
-                                </a>
-                                <div class="collapse menu-dropdown" id="sidebarAdmin">
-                                    <ul class="nav nav-sm flex-column">
-                                        <li class="nav-item">
-                                            <a href="/admin" class="nav-link">Panel główny</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="/admin/roles" class="nav-link">Role i uprawnienia</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="/admin/modules" class="nav-link">Moduły</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="{{ path('admin_dictionaries') }}" class="nav-link">Słowniki</a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="/admin/settings" class="nav-link">Ustawienia</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </li>
-                            {% endif %}
-                            {% set displayedModules = displayedModules|merge([module.name]) %}
+                        
+                        {% if module.name == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ app.request.get('_route') starts with 'admin_' ? 'active' : '' }}" href="#sidebarAdmin" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAdmin">
+                                <i class="ri-settings-3-line"></i> <span>{{ module.displayName }}</span>
+                            </a>
+                            <div class="collapse menu-dropdown" id="sidebarAdmin">
+                                <ul class="nav nav-sm flex-column">
+                                    <li class="nav-item">
+                                        <a href="{{ path('admin_dashboard') }}" class="nav-link">Panel główny</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ path('admin_roles_index') }}" class="nav-link">Role i uprawnienia</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ path('admin_modules') }}" class="nav-link">Moduły</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ path('admin_dictionaries') }}" class="nav-link">Słowniki</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ path('admin_settings') }}" class="nav-link">Ustawienia</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        {% elseif module.name == 'equipment' %}
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ app.request.get('_route') starts with 'equipment_' ? 'active' : '' }}" href="{{ path('equipment_index') }}">
+                                <i class="ri-tools-line"></i> <span>{{ module.displayName }}</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        {# Generic module handler - dla przyszłych modułów #}
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ app.request.get('_route') starts with module.name ~ '_' ? 'active' : '' }}" href="{{ path(module.name ~ '_index') }}">
+                                <i class="ri-apps-line"></i> <span>{{ module.displayName }}</span>
+                            </a>
+                        </li>
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
+                    {% endfor %}
+                {% endif %}
 
                 <!-- Pracownicy -->
                 <li class="nav-item">
