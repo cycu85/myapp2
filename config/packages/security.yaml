@@ -28,8 +28,7 @@ security:
                 dn_string: '%env(LDAP_BASE_DN)%'
                 search_dn: '%env(LDAP_BIND_DN)%'
                 search_password: '%env(LDAP_BIND_PASSWORD)%'
-                query_string: '({uid_key}={username})'
-                query_string_key: uid_key
+                query_string: '(%env(LDAP_UID_KEY)%={username})'
                 login_path: login
                 check_path: login
                 default_target_path: dashboard
