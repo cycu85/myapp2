@@ -576,30 +576,67 @@ class AdminController extends AbstractController
 
     private function testLdapConnection(array $ldapSettings): array
     {
+        // Walidacja podstawowych parametrów
+        if (empty($ldapSettings['ldap_host'])) {
+            throw new \Exception('Host LDAP jest wymagany');
+        }
+        
+        if (empty($ldapSettings['ldap_port']) || !is_numeric($ldapSettings['ldap_port'])) {
+            throw new \Exception('Port LDAP musi być liczbą');
+        }
+        
+        if (empty($ldapSettings['ldap_bind_dn'])) {
+            throw new \Exception('Bind DN jest wymagany');
+        }
+        
+        if (empty($ldapSettings['ldap_base_dn'])) {
+            throw new \Exception('Base DN jest wymagany');
+        }
+        
+        if (empty($ldapSettings['ldap_user_filter'])) {
+            throw new \Exception('Filtr użytkowników jest wymagany');
+        }
+
         // Pobierz hasło z bazy danych jeśli nie zostało podane w formularzu
         $password = $ldapSettings['ldap_bind_password'];
         if (empty($password)) {
             $password = $this->settingService->get('ldap_bind_password', '');
+        }
+        
+        if (empty($password)) {
+            throw new \Exception('Hasło bind użytkownika jest wymagane');
         }
 
         // Utwórz połączenie LDAP
         $ldap = $this->createLdapConnection($ldapSettings, $password);
         
         // Testuj bind (uwierzytelnianie)
-        $ldap->bind($ldapSettings['ldap_bind_dn'], $password);
+        try {
+            $ldap->bind($ldapSettings['ldap_bind_dn'], $password);
+        } catch (\Exception $e) {
+            throw new \Exception('Błąd uwierzytelniania LDAP: ' . $e->getMessage());
+        }
         
         // Testuj wyszukiwanie użytkowników
-        $query = $ldap->query(
-            $ldapSettings['ldap_base_dn'],
-            $ldapSettings['ldap_user_filter'],
-            [
-                'maxItems' => 1000,
-                'timeout' => 30
-            ]
-        );
-        
-        $results = $query->execute();
-        $userCount = count($results);
+        try {
+            $query = $ldap->query(
+                $ldapSettings['ldap_base_dn'],
+                $ldapSettings['ldap_user_filter'],
+                [
+                    'maxItems' => 1000,
+                    'timeout' => 30
+                ]
+            );
+            
+            $results = $query->execute();
+            $userCount = count($results);
+            
+            if ($userCount === 0) {
+                throw new \Exception('Nie znaleziono użytkowników spełniających kryteria filtra');
+            }
+        } catch (\Exception $e) {
+            throw new \Exception('Błąd wyszukiwania LDAP: ' . $e->getMessage());
+        }
         
         // Pobierz przykładowych użytkowników dla podglądu
         $sampleUsers = [];
@@ -884,20 +921,58 @@ class AdminController extends AbstractController
 
     private function createLdapConnection(array $ldapSettings, string $password): LdapInterface
     {
+        // Przygotuj host - usuń prefiks protokołu jeśli istnieje
+        $host = $ldapSettings['ldap_host'];
+        $host = preg_replace('/^(ldaps?:\/\/)/', '', $host);
+        
         // Przygotuj opcje połączenia
         $options = [
-            'host' => $ldapSettings['ldap_host'],
-            'port' => $ldapSettings['ldap_port'],
+            'host' => $host,
+            'port' => intval($ldapSettings['ldap_port']),
         ];
         
         // Dodaj szyfrowanie jeśli skonfigurowane
-        if ($ldapSettings['ldap_encryption'] === 'ssl') {
-            $options['encryption'] = 'ssl';
-        } elseif ($ldapSettings['ldap_encryption'] === 'starttls') {
-            $options['encryption'] = 'tls';
+        if (isset($ldapSettings['ldap_encryption'])) {
+            if ($ldapSettings['ldap_encryption'] === 'ssl') {
+                $options['encryption'] = 'ssl';
+            } elseif ($ldapSettings['ldap_encryption'] === 'starttls') {
+                $options['encryption'] = 'tls';
+            }
         }
         
-        return Ldap::create('ext_ldap', $options);
+        // Dodaj dodatkowe opcje dla lepszej kompatybilności
+        $options['options'] = [
+            LDAP_OPT_PROTOCOL_VERSION => 3,
+            LDAP_OPT_REFERRALS => 0,
+            LDAP_OPT_NETWORK_TIMEOUT => 30,
+        ];
+        
+        try {
+            // Sprawdź dostępne adaptery
+            $this->logger->info('Creating LDAP connection', [
+                'host' => $host,
+                'port' => $options['port'],
+                'encryption' => $ldapSettings['ldap_encryption'] ?? 'none',
+                'options' => $options
+            ]);
+            
+            // Sprawdź czy rozszerzenie LDAP jest zainstalowane
+            if (!extension_loaded('ldap')) {
+                throw new \Exception('Rozszerzenie PHP LDAP nie jest zainstalowane');
+            }
+            
+            return Ldap::create('ext_ldap', $options);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to create LDAP connection', [
+                'error' => $e->getMessage(),
+                'host' => $host,
+                'port' => $options['port'],
+                'encryption' => $ldapSettings['ldap_encryption'] ?? 'none',
+                'ldap_extension_loaded' => extension_loaded('ldap'),
+                'options' => $options
+            ]);
+            throw new \Exception('Błąd połączenia LDAP: ' . $e->getMessage());
+        }
     }
     
     private function getLdapAttribute($entry, string $attributeName): ?string
