@@ -46,3 +46,4 @@ services:
             $searchDn: '%env(LDAP_BIND_DN)%'
             $searchPassword: '%env(LDAP_BIND_PASSWORD)%'
             $uidKey: '%env(LDAP_UID_KEY)%'
+            $logger: '@monolog.logger.security'
