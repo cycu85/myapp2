@@ -188,6 +188,64 @@ class LdapSettingsType extends AbstractType
                 'required' => false
             ])
             
+            // Mapowanie dodatkowych pól pracowniczych
+            ->add('ldap_map_employee_number', TextType::class, [
+                'label' => 'Pole numer pracownika',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'employeeNumber'
+                ],
+                'required' => false
+            ])
+            ->add('ldap_map_phone', TextType::class, [
+                'label' => 'Pole telefon',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'telephoneNumber'
+                ],
+                'required' => false
+            ])
+            ->add('ldap_map_position', TextType::class, [
+                'label' => 'Pole stanowisko',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'title'
+                ],
+                'required' => false
+            ])
+            ->add('ldap_map_department', TextType::class, [
+                'label' => 'Pole dział',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'department'
+                ],
+                'required' => false
+            ])
+            ->add('ldap_map_office', TextType::class, [
+                'label' => 'Pole lokalizacja/oddział',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'physicalDeliveryOfficeName'
+                ],
+                'required' => false
+            ])
+            ->add('ldap_map_manager', TextType::class, [
+                'label' => 'Pole przełożony',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'manager'
+                ],
+                'required' => false
+            ])
+            ->add('ldap_map_status', TextType::class, [
+                'label' => 'Pole status pracownika',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'userAccountControl'
+                ],
+                'required' => false
+            ])
+            
             // Opcje synchronizacji
             ->add('ldap_auto_create_users', CheckboxType::class, [
                 'label' => 'Automatycznie twórz nowych użytkowników',
@@ -229,6 +287,13 @@ class LdapSettingsType extends AbstractType
                 'label' => 'Synchronizuj nowych',
                 'attr' => [
                     'class' => 'btn btn-success ms-2',
+                    'formnovalidate' => true
+                ]
+            ])
+            ->add('sync_hierarchy', SubmitType::class, [
+                'label' => 'Synchronizuj hierarchię',
+                'attr' => [
+                    'class' => 'btn btn-secondary ms-2',
                     'formnovalidate' => true
                 ]
             ]);

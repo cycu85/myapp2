@@ -303,6 +303,7 @@ class AdminController extends AbstractController
             $isTestConnection = $form->get('test')->isClicked();
             $isSyncExisting = $form->get('sync_existing')->isClicked();
             $isSyncNew = $form->get('sync_new')->isClicked();
+            $isSyncHierarchy = $form->get('sync_hierarchy')->isClicked();
             
             if ($isTestConnection) {
                 // Testowanie połączenia LDAP
@@ -381,6 +382,31 @@ class AdminController extends AbstractController
                     $this->addFlash('error', 'Błąd synchronizacji: ' . $e->getMessage());
                     
                     $this->logger->error('LDAP new users sync failed', [
+                        'user' => $user->getUsername(),
+                        'error' => $e->getMessage(),
+                        'ip' => $this->getClientIp()
+                    ]);
+                }
+            } elseif ($isSyncHierarchy) {
+                // Synchronizacja hierarchii przełożonych
+                try {
+                    $result = $this->syncManagerHierarchy($data);
+                    $message = 'Zaktualizowano hierarchię dla ' . $result['updated'] . ' użytkowników.';
+                    if ($result['errors'] > 0) {
+                        $message .= ' Błędy: ' . $result['errors'] . ' użytkowników.';
+                    }
+                    $this->addFlash('success', $message);
+                    
+                    $this->logger->info('LDAP hierarchy sync completed', [
+                        'user' => $user->getUsername(),
+                        'updated_relationships' => $result['updated'],
+                        'errors' => $result['errors'],
+                        'ip' => $this->getClientIp()
+                    ]);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Błąd synchronizacji hierarchii: ' . $e->getMessage());
+                    
+                    $this->logger->error('LDAP hierarchy sync failed', [
                         'user' => $user->getUsername(),
                         'error' => $e->getMessage(),
                         'ip' => $this->getClientIp()
@@ -640,8 +666,64 @@ class AdminController extends AbstractController
                     $lastname = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_lastname']);
                     $displayname = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_displayname']);
                     
+                    // Nowe pola pracownicze
+                    $employeeNumber = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_employee_number'] ?? '');
+                    $phone = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_phone'] ?? '');
+                    $position = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_position'] ?? '');
+                    $department = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_department'] ?? '');
+                    $office = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_office'] ?? '');
+                    $manager = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_manager'] ?? '');
+                    $status = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_status'] ?? '');
+                    
+                    // Aktualizuj podstawowe pola
                     if ($email && $email !== $user->getEmail()) {
                         $user->setEmail($email);
+                    }
+                    
+                    if ($firstname && $firstname !== $user->getFirstName()) {
+                        $user->setFirstName($firstname);
+                    }
+                    
+                    if ($lastname && $lastname !== $user->getLastName()) {
+                        $user->setLastName($lastname);
+                    }
+                    
+                    // Aktualizuj pola pracownicze
+                    if ($employeeNumber && $employeeNumber !== $user->getEmployeeNumber()) {
+                        $user->setEmployeeNumber($employeeNumber);
+                    }
+                    
+                    if ($phone && $phone !== $user->getPhoneNumber()) {
+                        $user->setPhoneNumber($phone);
+                    }
+                    
+                    if ($position && $position !== $user->getPosition()) {
+                        $user->setPosition($position);
+                    }
+                    
+                    if ($department && $department !== $user->getDepartment()) {
+                        $user->setDepartment($department);
+                    }
+                    
+                    // Mapowanie lokalizacji na oddział (może wymagać logiki mapowania)
+                    if ($office) {
+                        $branchValue = $this->mapOfficeToBranch($office);
+                        if ($branchValue && $branchValue !== $user->getBranch()) {
+                            $user->setBranch($branchValue);
+                        }
+                    }
+                    
+                    // Mapowanie statusu LDAP na status pracownika
+                    if ($status) {
+                        $statusValue = $this->mapLdapStatusToEmployeeStatus($status);
+                        if ($statusValue && $statusValue !== $user->getStatus()) {
+                            $user->setStatus($statusValue);
+                        }
+                    }
+                    
+                    // Zapisz DN do późniejszej synchronizacji hierarchii
+                    if ($user->getLdapDn() !== $entry->getDn()) {
+                        $user->setLdapDn($entry->getDn());
                     }
                     
                     // Zapisz zmiany
@@ -708,6 +790,15 @@ class AdminController extends AbstractController
                     $lastname = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_lastname']);
                     $displayname = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_displayname']);
                     
+                    // Nowe pola pracownicze
+                    $employeeNumber = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_employee_number'] ?? '');
+                    $phone = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_phone'] ?? '');
+                    $position = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_position'] ?? '');
+                    $department = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_department'] ?? '');
+                    $office = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_office'] ?? '');
+                    $manager = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_manager'] ?? '');
+                    $status = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_status'] ?? '');
+                    
                     // Walidacja wymaganych pól
                     if (empty($username) || empty($email)) {
                         $errors++;
@@ -720,6 +811,50 @@ class AdminController extends AbstractController
                     $newUser->setEmail($email);
                     $newUser->setIsActive(true);
                     $newUser->setCreatedAt(new \DateTimeImmutable());
+                    
+                    // Ustaw podstawowe pola
+                    if ($firstname) {
+                        $newUser->setFirstName($firstname);
+                    }
+                    if ($lastname) {
+                        $newUser->setLastName($lastname);
+                    }
+                    
+                    // Ustaw pola pracownicze
+                    if ($employeeNumber) {
+                        $newUser->setEmployeeNumber($employeeNumber);
+                    }
+                    if ($phone) {
+                        $newUser->setPhoneNumber($phone);
+                    }
+                    if ($position) {
+                        $newUser->setPosition($position);
+                    }
+                    if ($department) {
+                        $newUser->setDepartment($department);
+                    }
+                    
+                    // Mapowanie lokalizacji na oddział
+                    if ($office) {
+                        $branchValue = $this->mapOfficeToBranch($office);
+                        if ($branchValue) {
+                            $newUser->setBranch($branchValue);
+                        }
+                    }
+                    
+                    // Mapowanie statusu LDAP na status pracownika
+                    if ($status) {
+                        $statusValue = $this->mapLdapStatusToEmployeeStatus($status);
+                        if ($statusValue) {
+                            $newUser->setStatus($statusValue);
+                        }
+                    } else {
+                        // Domyślny status dla nowych użytkowników
+                        $newUser->setStatus('active');
+                    }
+                    
+                    // Zapisz DN dla hierarchii przełożonych
+                    $newUser->setLdapDn($entry->getDn());
                     
                     // Ustaw domyślne hasło (użytkownik będzie logował się przez LDAP)
                     $newUser->setPassword(password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT));
@@ -777,6 +912,148 @@ class AdminController extends AbstractController
         }
         
         return null;
+    }
+
+    /**
+     * Mapuje lokalizację z LDAP na wartość oddziału ze słownika
+     */
+    private function mapOfficeToBranch(string $office): ?string
+    {
+        // Podstawowe mapowanie - możesz dostosować według potrzeb
+        $officeMapping = [
+            'main office' => 'main_branch',
+            'headquarters' => 'main_branch',
+            'warsaw' => 'warsaw_branch',
+            'kraków' => 'krakow_branch',
+            'krakow' => 'krakow_branch',
+            'gdańsk' => 'gdansk_branch',
+            'gdansk' => 'gdansk_branch',
+            'wrocław' => 'wroclaw_branch',
+            'wroclaw' => 'wroclaw_branch',
+        ];
+        
+        $officeLower = strtolower(trim($office));
+        
+        // Sprawdź bezpośrednie mapowanie
+        if (isset($officeMapping[$officeLower])) {
+            return $officeMapping[$officeLower];
+        }
+        
+        // Sprawdź czy zawiera klucz
+        foreach ($officeMapping as $key => $value) {
+            if (strpos($officeLower, $key) !== false) {
+                return $value;
+            }
+        }
+        
+        // Jeśli nie znaleziono mapowania, zwróć domyślny oddział
+        return 'main_branch';
+    }
+
+    /**
+     * Mapuje status z LDAP na status pracownika ze słownika
+     */
+    private function mapLdapStatusToEmployeeStatus(string $ldapStatus): ?string
+    {
+        // Active Directory userAccountControl values
+        $userAccountControl = intval($ldapStatus);
+        
+        // Sprawdź czy konto jest wyłączone (bit 2)
+        if ($userAccountControl & 2) {
+            return 'inactive';
+        }
+        
+        // Sprawdź inne bity
+        if ($userAccountControl & 16) { // Account locked
+            return 'inactive';
+        }
+        
+        if ($userAccountControl & 8388608) { // Password expired
+            return 'notice_period';
+        }
+        
+        // Domyślnie aktywny
+        return 'active';
+    }
+
+    /**
+     * Synchronizuje hierarchię przełożonych na podstawie danych LDAP
+     */
+    private function syncManagerHierarchy(array $ldapSettings): array
+    {
+        if (empty($ldapSettings['ldap_map_manager'])) {
+            return ['updated' => 0, 'errors' => 0];
+        }
+
+        $password = $ldapSettings['ldap_bind_password'];
+        if (empty($password)) {
+            $password = $this->settingService->get('ldap_bind_password', '');
+        }
+
+        $ldap = $this->createLdapConnection($ldapSettings, $password);
+        $ldap->bind($ldapSettings['ldap_bind_dn'], $password);
+        
+        // Pobierz wszystkich użytkowników z LDAP wraz z informacjami o przełożonych
+        $query = $ldap->query(
+            $ldapSettings['ldap_base_dn'],
+            $ldapSettings['ldap_user_filter'],
+            ['maxItems' => 5000, 'timeout' => 60]
+        );
+        
+        $ldapResults = $query->execute();
+        
+        // Utwórz mapę DN -> User
+        $allUsers = $this->userRepository->findAll();
+        $usersByDn = [];
+        $usersByUsername = [];
+        
+        foreach ($allUsers as $user) {
+            if ($user->getLdapDn()) {
+                $usersByDn[$user->getLdapDn()] = $user;
+            }
+            $usersByUsername[strtolower($user->getUsername())] = $user;
+        }
+        
+        $updated = 0;
+        $errors = 0;
+        
+        foreach ($ldapResults as $entry) {
+            try {
+                $username = strtolower($this->getLdapAttribute($entry, $ldapSettings['ldap_map_username']));
+                $managerDn = $this->getLdapAttribute($entry, $ldapSettings['ldap_map_manager']);
+                
+                if (isset($usersByUsername[$username]) && $managerDn) {
+                    $user = $usersByUsername[$username];
+                    
+                    // Znajdź przełożonego na podstawie DN
+                    if (isset($usersByDn[$managerDn])) {
+                        $manager = $usersByDn[$managerDn];
+                        
+                        if ($user->getSupervisor() !== $manager) {
+                            $user->setSupervisor($manager);
+                            $this->userRepository->save($user, true);
+                            $updated++;
+                            
+                            $this->logger->info('Updated manager hierarchy from LDAP', [
+                                'user' => $username,
+                                'manager' => $manager->getUsername()
+                            ]);
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                $errors++;
+                $this->logger->error('Error updating manager hierarchy from LDAP', [
+                    'username' => $username ?? 'unknown',
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+        
+        return [
+            'updated' => $updated,
+            'errors' => $errors
+        ];
     }
 
     private function getClientIp(): ?string

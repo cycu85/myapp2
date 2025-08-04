@@ -209,6 +209,82 @@
                             </div>
                         </div>
 
+                        <!-- Mapowanie pól pracowniczych -->
+                        <div class="card border border-warning mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-user-settings-line me-2"></i>Mapowanie pól pracowniczych
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_map_employee_number, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_map_employee_number) }}
+                                            {{ form_errors(form.ldap_map_employee_number) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_map_phone, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_map_phone) }}
+                                            {{ form_errors(form.ldap_map_phone) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_map_position, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_map_position) }}
+                                            {{ form_errors(form.ldap_map_position) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_map_department, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_map_department) }}
+                                            {{ form_errors(form.ldap_map_department) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_map_office, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_map_office) }}
+                                            {{ form_errors(form.ldap_map_office) }}
+                                            <div class="form-text">
+                                                <i class="ri-information-line me-1"></i>
+                                                Będzie mapowane na oddział ze słownika
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.ldap_map_manager, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.ldap_map_manager) }}
+                                            {{ form_errors(form.ldap_map_manager) }}
+                                            <div class="form-text">
+                                                <i class="ri-information-line me-1"></i>
+                                                DN przełożonego (manager attribute)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form_label(form.ldap_map_status, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.ldap_map_status) }}
+                                    {{ form_errors(form.ldap_map_status) }}
+                                    <div class="form-text">
+                                        <i class="ri-information-line me-1"></i>
+                                        Dla AD: userAccountControl (mapowane automatycznie)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Opcje synchronizacji -->
                         <div class="card border border-success mb-4">
                             <div class="card-header">
@@ -252,6 +328,7 @@
                                     {{ form_widget(form.test) }}
                                     {{ form_widget(form.sync_existing) }}
                                     {{ form_widget(form.sync_new) }}
+                                    {{ form_widget(form.sync_hierarchy) }}
                                     <a href="{{ path('admin_settings') }}" class="btn btn-outline-secondary">Anuluj</a>
                                 </div>
                                 <div class="form-text mt-2">
@@ -286,7 +363,13 @@
                                                     <strong>Base DN:</strong> OU=Users,DC=company,DC=com<br>
                                                     <strong>Filtr:</strong> (&(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))<br>
                                                     <strong>Username:</strong> sAMAccountName<br>
-                                                    <strong>Email:</strong> mail
+                                                    <strong>Email:</strong> mail<br>
+                                                    <strong>Telefon:</strong> telephoneNumber<br>
+                                                    <strong>Stanowisko:</strong> title<br>
+                                                    <strong>Dział:</strong> department<br>
+                                                    <strong>Oddział:</strong> physicalDeliveryOfficeName<br>
+                                                    <strong>Przełożony:</strong> manager<br>
+                                                    <strong>Status:</strong> userAccountControl
                                                 </small>
                                             </div>
                                         </div>
@@ -306,7 +389,12 @@
                                                     <strong>Base DN:</strong> ou=people,dc=company,dc=com<br>
                                                     <strong>Filtr:</strong> (&(objectClass=inetOrgPerson))<br>
                                                     <strong>Username:</strong> uid<br>
-                                                    <strong>Email:</strong> mail
+                                                    <strong>Email:</strong> mail<br>
+                                                    <strong>Telefon:</strong> telephoneNumber<br>
+                                                    <strong>Stanowisko:</strong> title<br>
+                                                    <strong>Dział:</strong> ou<br>
+                                                    <strong>Oddział:</strong> physicalDeliveryOfficeName<br>
+                                                    <strong>Przełożony:</strong> manager
                                                 </small>
                                             </div>
                                         </div>
@@ -345,7 +433,9 @@
                                         • Przetestuj połączenie przed synchronizacją<br>
                                         • Użyj konta serwisowego z minimalnymi uprawnieniami<br>
                                         • Zawsze twórz kopię zapasową przed pierwszą synchronizacją<br>
-                                        • Sprawdź filtr użytkowników na małej grupie testowej
+                                        • Sprawdź filtr użytkowników na małej grupie testowej<br>
+                                        • Skonfiguruj mapowania pól pracowniczych dla pełnej synchronizacji<br>
+                                        • Synchronizacja hierarchii wymaga pola "przełożony" (manager DN)
                                     </p>
                                 </div>
                             </div>
