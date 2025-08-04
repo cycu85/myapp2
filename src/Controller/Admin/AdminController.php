@@ -941,11 +941,9 @@ class AdminController extends AbstractController
         }
         
         // Dodaj dodatkowe opcje dla lepszej kompatybilności
-        $options['options'] = [
-            LDAP_OPT_PROTOCOL_VERSION => 3,
-            LDAP_OPT_REFERRALS => 0,
-            LDAP_OPT_NETWORK_TIMEOUT => 30,
-        ];
+        $options['protocol_version'] = 3;
+        $options['referrals'] = false;
+        $options['network_timeout'] = 30;
         
         try {
             // Sprawdź dostępne adaptery
