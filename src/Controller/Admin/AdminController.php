@@ -941,9 +941,8 @@ class AdminController extends AbstractController
         }
         
         // Dodaj dodatkowe opcje dla lepszej kompatybilności
-        $options['protocol_version'] = 3;
+        $options['version'] = 3;
         $options['referrals'] = false;
-        $options['network_timeout'] = 30;
         
         try {
             // Sprawdź dostępne adaptery
