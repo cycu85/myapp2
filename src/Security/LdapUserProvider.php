@@ -33,7 +33,7 @@ class LdapUserProvider implements UserProviderInterface
             $this->logger?->info('LdapUserProvider: Found LDAP user in database', ['username' => $identifier, 'ldapDn' => $user->getLdapDn()]);
             
             // Sprawdź czy LDAP jest włączony
-            $ldapEnabled = $this->settingService->get('ldap_enabled', 'false') === 'true';
+            $ldapEnabled = $this->settingService->get('ldap_enabled', '0') === '1';
             if (!$ldapEnabled) {
                 $this->logger?->info('LdapUserProvider: LDAP disabled, falling back to local auth', ['username' => $identifier]);
                 if ($user->getPassword()) {
