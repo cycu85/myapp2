@@ -4,8 +4,10 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\SettingService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Ldap\Entry;
+use Symfony\Component\Ldap\Ldap;
 use Symfony\Component\Ldap\LdapInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
@@ -16,11 +18,7 @@ class LdapUserProvider implements UserProviderInterface
 {
     public function __construct(
         private UserRepository $userRepository,
-        private LdapInterface $ldap,
-        private string $baseDn,
-        private string $searchDn,
-        private string $searchPassword,
-        private string $uidKey = 'sAMAccountName',
+        private SettingService $settingService,
         private ?LoggerInterface $logger = null
     ) {}
 
@@ -33,10 +31,31 @@ class LdapUserProvider implements UserProviderInterface
         
         if ($user && $user->getLdapDn()) {
             $this->logger?->info('LdapUserProvider: Found LDAP user in database', ['username' => $identifier, 'ldapDn' => $user->getLdapDn()]);
+            
+            // Sprawdź czy LDAP jest włączony
+            $ldapEnabled = $this->settingService->get('ldap_enabled', 'false') === 'true';
+            if (!$ldapEnabled) {
+                $this->logger?->info('LdapUserProvider: LDAP disabled, falling back to local auth', ['username' => $identifier]);
+                if ($user->getPassword()) {
+                    return $user;
+                }
+                throw new UserNotFoundException(sprintf('LDAP user "%s" cannot authenticate - LDAP disabled and no local password.', $identifier));
+            }
+            
             // Użytkownik istnieje i ma DN LDAP - sprawdź czy jest aktywny w LDAP
             try {
-                $this->ldap->bind($this->searchDn, $this->searchPassword);
-                $query = $this->ldap->query($this->baseDn, "({$this->uidKey}={$identifier})");
+                $ldap = $this->createLdapConnection();
+                $baseDn = $this->settingService->get('ldap_base_dn');
+                $searchDn = $this->settingService->get('ldap_bind_dn');
+                $searchPassword = $this->settingService->get('ldap_bind_password');
+                $uidKey = $this->settingService->get('ldap_map_username', 'sAMAccountName');
+                
+                if (!$baseDn || !$searchDn || !$searchPassword) {
+                    throw new \Exception('LDAP configuration incomplete');
+                }
+                
+                $ldap->bind($searchDn, $searchPassword);
+                $query = $ldap->query($baseDn, "({$uidKey}={$identifier})");
                 $result = $query->execute();
                 
                 if ($result->count() > 0) {
@@ -47,8 +66,9 @@ class LdapUserProvider implements UserProviderInterface
                 }
             } catch (\Exception $e) {
                 $this->logger?->error('LdapUserProvider: LDAP error, falling back to local auth', ['username' => $identifier, 'error' => $e->getMessage()]);
-                // Błąd LDAP - pozwól na logowanie przez bazę danych
+                // Błąd LDAP - pozwól na logowanie przez bazę danych jeśli ma hasło
                 if ($user->getPassword()) {
+                    $this->logger?->info('LdapUserProvider: Using local password fallback', ['username' => $identifier]);
                     return $user;
                 }
             }
@@ -61,6 +81,30 @@ class LdapUserProvider implements UserProviderInterface
         }
 
         throw new UserNotFoundException(sprintf('User "%s" not found.', $identifier));
+    }
+
+    private function createLdapConnection(): LdapInterface
+    {
+        $host = $this->settingService->get('ldap_host');
+        $port = (int) $this->settingService->get('ldap_port', '389');
+        
+        if (!$host) {
+            throw new \Exception('LDAP host not configured');
+        }
+        
+        // Usuń ewentualny prefix protokołu
+        $host = preg_replace('/^(ldaps?:\/\/)/', '', $host);
+        
+        $options = [
+            'host' => $host,
+            'port' => $port,
+            'version' => 3,
+            'referrals' => false,
+        ];
+        
+        $this->logger?->info('LdapUserProvider: Creating LDAP connection', ['host' => $host, 'port' => $port]);
+        
+        return Ldap::create('ext_ldap', $options);
     }
 
     public function refreshUser(UserInterface $user): UserInterface

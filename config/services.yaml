@@ -41,9 +41,4 @@ services:
 
     App\Security\LdapUserProvider:
         arguments:
-            $ldap: '@Symfony\Component\Ldap\Ldap'
-            $baseDn: '%env(LDAP_BASE_DN)%'
-            $searchDn: '%env(LDAP_BIND_DN)%'
-            $searchPassword: '%env(LDAP_BIND_PASSWORD)%'
-            $uidKey: '%env(LDAP_UID_KEY)%'
             $logger: '@monolog.logger.security'
