@@ -313,8 +313,8 @@ class AdminController extends AbstractController
                     if (!empty($result['sample_users'])) {
                         $message .= ' Przykładowi użytkownicy: ';
                         $examples = [];
-                        foreach ($result['sample_users'] as $user) {
-                            $examples[] = $user['username'] . ' (' . $user['email'] . ')';
+                        foreach ($result['sample_users'] as $sampleUser) {
+                            $examples[] = $sampleUser['username'] . ' (' . $sampleUser['email'] . ')';
                         }
                         $message .= implode(', ', array_slice($examples, 0, 3));
                         if (count($examples) > 3) {
