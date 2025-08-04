@@ -1,0 +1,207 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil użytkownika - {{ app_name() }}{% endblock %}
+
+{% block page_title %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Profil użytkownika</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Profil</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-xxl-3">
+        <div class="card mt-n5">
+            <div class="card-body p-4">
+                <div class="text-center">
+                    <div class="profile-user position-relative d-inline-block mx-auto mb-4">
+                        <img src="{{ asset('assets/images/users/avatar-1.jpg') }}" class="rounded-circle avatar-xl img-thumbnail user-profile-image" alt="user-profile-image">
+                        <div class="avatar-xs p-0 rounded-circle profile-photo-edit">
+                            <input id="profile-img-file-input" type="file" class="profile-img-file-input" style="display: none;">
+                            <label for="profile-img-file-input" class="profile-photo-edit avatar-xs">
+                                <span class="avatar-title rounded-circle bg-light text-body">
+                                    <i class="ri-camera-fill"></i>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    <h5 class="fs-16 mb-1">{{ user.fullName }}</h5>
+                    <p class="text-muted mb-0">{{ user.position|default('') }}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if isLdapUser %}
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-0">Konto LDAP</h5>
+                    </div>
+                </div>
+                <div class="mb-3 d-flex">
+                    <div class="avatar-xs d-block flex-shrink-0 me-3">
+                        <span class="avatar-title rounded-circle fs-16 bg-info text-white">
+                            <i class="ri-shield-user-line"></i>
+                        </span>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <p class="text-muted mb-2">Twoje konto jest zarządzane przez Active Directory. Aby zmienić hasło, skontaktuj się z administratorem IT.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-xxl-9">
+        <div class="card mt-xxl-n5">
+            <div class="card-header">
+                <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#personalDetails" role="tab">
+                            <i class="fas fa-home"></i> Dane osobowe
+                        </a>
+                    </li>
+                    {% if not isLdapUser %}
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#changePassword" role="tab">
+                            <i class="far fa-user"></i> Zmień hasło
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="card-body p-4">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="personalDetails" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="firstnameInput" class="form-label">Imię</label>
+                                    <input type="text" class="form-control" id="firstnameInput" placeholder="Wprowadź imię" value="{{ user.firstName }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="lastnameInput" class="form-label">Nazwisko</label>
+                                    <input type="text" class="form-control" id="lastnameInput" placeholder="Wprowadź nazwisko" value="{{ user.lastName }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="emailInput" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="emailInput" placeholder="Wprowadź email" value="{{ user.email }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="usernameInput" class="form-label">Nazwa użytkownika</label>
+                                    <input type="text" class="form-control" id="usernameInput" placeholder="Wprowadź nazwę użytkownika" value="{{ user.username }}" readonly>
+                                </div>
+                            </div>
+                            {% if user.employeeNumber %}
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="employeeNumberInput" class="form-label">Numer pracownika</label>
+                                    <input type="text" class="form-control" id="employeeNumberInput" placeholder="Numer pracownika" value="{{ user.employeeNumber }}" readonly>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if user.phoneNumber %}
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="phoneInput" class="form-label">Telefon</label>
+                                    <input type="text" class="form-control" id="phoneInput" placeholder="Numer telefonu" value="{{ user.phoneNumber }}" readonly>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if user.position %}
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="positionInput" class="form-label">Stanowisko</label>
+                                    <input type="text" class="form-control" id="positionInput" placeholder="Stanowisko" value="{{ user.position }}" readonly>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if user.department %}
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="departmentInput" class="form-label">Dział</label>
+                                    <input type="text" class="form-control" id="departmentInput" placeholder="Dział" value="{{ user.department }}" readonly>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if user.supervisor %}
+                            <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <label for="supervisorInput" class="form-label">Przełożony</label>
+                                    <input type="text" class="form-control" id="supervisorInput" placeholder="Przełożony" value="{{ user.supervisor.fullName }}" readonly>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-muted mb-2"><i class="ri-information-line me-1"></i> Dane osobowe są zarządzane przez {{ isLdapUser ? 'Active Directory' : 'administratora systemu' }}. Aby dokonać zmian, skontaktuj się z działem HR lub IT.</p>
+                        </div>
+                    </div>
+
+                    {% if not isLdapUser %}
+                    <div class="tab-pane" id="changePassword" role="tabpanel">
+                        <div class="row g-2">
+                            <div class="col-lg-4">
+                                <div>
+                                    <label for="oldpasswordInput" class="form-label">Obecne hasło*</label>
+                                    {{ form_widget(changePasswordForm.currentPassword) }}
+                                    {{ form_errors(changePasswordForm.currentPassword) }}
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div>
+                                    <label for="newpasswordInput" class="form-label">Nowe hasło*</label>
+                                    {{ form_widget(changePasswordForm.newPassword.first) }}
+                                    {{ form_errors(changePasswordForm.newPassword.first) }}
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div>
+                                    <label for="confirmpasswordInput" class="form-label">Potwierdź hasło*</label>
+                                    {{ form_widget(changePasswordForm.newPassword.second) }}
+                                    {{ form_errors(changePasswordForm.newPassword.second) }}
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="mb-3">
+                                    <a href="javascript:void(0);" class="link-primary text-decoration-underline">Zapomniałeś hasła?</a>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="text-end">
+                                    {{ form_start(changePasswordForm) }}
+                                    {{ form_widget(changePasswordForm.submit) }}
+                                    {{ form_end(changePasswordForm) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
