@@ -764,7 +764,8 @@ class AdminController extends AbstractController
                     }
                     
                     // Zapisz zmiany
-                    $this->userRepository->save($user, true);
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
                     $updated++;
                     
                     $this->logger->info('Updated user from LDAP', [
@@ -896,7 +897,8 @@ class AdminController extends AbstractController
                     // Ustaw domyślne hasło (użytkownik będzie logował się przez LDAP)
                     $newUser->setPassword(password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT));
                     
-                    $this->userRepository->save($newUser, true);
+                    $this->entityManager->persist($newUser);
+                    $this->entityManager->flush();
                     $created++;
                     
                     $this->logger->info('Created new user from LDAP', [
@@ -1103,7 +1105,8 @@ class AdminController extends AbstractController
                         
                         if ($user->getSupervisor() !== $manager) {
                             $user->setSupervisor($manager);
-                            $this->userRepository->save($user, true);
+                            $this->entityManager->persist($user);
+                            $this->entityManager->flush();
                             $updated++;
                             
                             $this->logger->info('Updated manager hierarchy from LDAP', [
