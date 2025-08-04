@@ -850,7 +850,7 @@ class AdminController extends AbstractController
                     $newUser->setUsername($username);
                     $newUser->setEmail($email);
                     $newUser->setIsActive(true);
-                    $newUser->setCreatedAt(new \DateTimeImmutable());
+                    $newUser->setCreatedAt(new \DateTime());
                     
                     // Ustaw podstawowe pola
                     if ($firstname) {
