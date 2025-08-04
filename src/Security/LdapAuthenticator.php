@@ -36,8 +36,8 @@ class LdapAuthenticator extends AbstractLoginFormAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $username = $request->getPayload()->getString('username');
-        $password = $request->getPayload()->getString('password');
+        $username = $request->getPayload()->getString('_username');
+        $password = $request->getPayload()->getString('_password');
 
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $username);
 
@@ -50,7 +50,7 @@ class LdapAuthenticator extends AbstractLoginFormAuthenticator
                 $password
             ),
             [
-                new CsrfTokenBadge('authenticate', $request->getPayload()->getString('_token')),
+                new CsrfTokenBadge('authenticate', $request->getPayload()->getString('_csrf_token')),
             ]
         );
     }
