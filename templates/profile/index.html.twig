@@ -162,6 +162,7 @@
 
                     {% if not isLdapUser %}
                     <div class="tab-pane" id="changePassword" role="tabpanel">
+                        {{ form_start(changePasswordForm) }}
                         <div class="row g-2">
                             <div class="col-lg-4">
                                 <div>
@@ -185,18 +186,12 @@
                                 </div>
                             </div>
                             <div class="col-lg-12">
-                                <div class="mb-3">
-                                    <a href="javascript:void(0);" class="link-primary text-decoration-underline">Zapomniałeś hasła?</a>
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
                                 <div class="text-end">
-                                    {{ form_start(changePasswordForm) }}
                                     {{ form_widget(changePasswordForm.submit) }}
-                                    {{ form_end(changePasswordForm) }}
                                 </div>
                             </div>
                         </div>
+                        {{ form_end(changePasswordForm) }}
                     </div>
                     {% endif %}
                 </div>
