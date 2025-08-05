@@ -53,6 +53,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 500, nullable: true)]
     private ?string $ldapDn = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $avatar = null;
+
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $branch = null;
 
@@ -322,6 +325,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setStatus(?string $status): static
     {
         $this->status = $status;
+        return $this;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?string $avatar): static
+    {
+        $this->avatar = $avatar;
         return $this;
     }
 

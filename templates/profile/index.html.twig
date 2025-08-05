@@ -16,14 +16,13 @@
             <div class="card-body p-4">
                 <div class="text-center">
                     <div class="profile-user position-relative d-inline-block mx-auto mb-4">
-                        <img src="{{ asset('assets/images/users/avatar-1.jpg') }}" class="rounded-circle avatar-xl img-thumbnail user-profile-image" alt="user-profile-image">
+                        <img src="{{ user.avatar ? asset('uploads/avatars/' ~ user.avatar) : asset('assets/images/users/avatar-1.jpg') }}" class="rounded-circle avatar-xl img-thumbnail user-profile-image" alt="user-profile-image">
                         <div class="avatar-xs p-0 rounded-circle profile-photo-edit">
-                            <input id="profile-img-file-input" type="file" class="profile-img-file-input" style="display: none;">
-                            <label for="profile-img-file-input" class="profile-photo-edit avatar-xs">
+                            <button type="button" class="btn p-0 profile-photo-edit avatar-xs" data-bs-toggle="modal" data-bs-target="#avatarUploadModal">
                                 <span class="avatar-title rounded-circle bg-light text-body">
                                     <i class="ri-camera-fill"></i>
                                 </span>
-                            </label>
+                            </button>
                         </div>
                     </div>
                     <h5 class="fs-16 mb-1">{{ user.fullName }}</h5>
@@ -218,6 +217,35 @@
         </div>
     </div>
 </div>
+
+<!-- Avatar Upload Modal -->
+<div class="modal fade" id="avatarUploadModal" tabindex="-1" aria-labelledby="avatarUploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="avatarUploadModalLabel">Zmień zdjęcie profilowe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            {{ form_start(avatarUploadForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <img src="{{ user.avatar ? asset('uploads/avatars/' ~ user.avatar) : asset('assets/images/users/avatar-1.jpg') }}" class="rounded-circle avatar-lg img-thumbnail" alt="current-avatar" id="avatar-preview">
+                </div>
+                <div class="mb-3">
+                    {{ form_label(avatarUploadForm.avatar) }}
+                    {{ form_widget(avatarUploadForm.avatar, {'attr': {'onchange': 'previewAvatar(this)'}}) }}
+                    {{ form_errors(avatarUploadForm.avatar) }}
+                    <div class="form-text">Maksymalny rozmiar: 2MB. Dozwolone formaty: JPG, PNG, GIF, WebP</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                {{ form_widget(avatarUploadForm.submit) }}
+            </div>
+            {{ form_end(avatarUploadForm) }}
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block javascript %}
@@ -258,5 +286,16 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmPassword.addEventListener('input', validatePasswords);
     }
 });
+
+// Avatar preview function
+function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('avatar-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
 </script>
 {% endblock %}
