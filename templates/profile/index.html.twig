@@ -219,3 +219,44 @@
     </div>
 </div>
 {% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[name="change_password"]');
+    if (form) {
+        const newPassword = form.querySelector('#change_password_newPassword_first');
+        const confirmPassword = form.querySelector('#change_password_newPassword_second');
+        
+        function validatePasswords() {
+            if (newPassword.value && confirmPassword.value) {
+                if (newPassword.value !== confirmPassword.value) {
+                    confirmPassword.setCustomValidity('Hasła muszą być identyczne');
+                    confirmPassword.classList.add('is-invalid');
+                    
+                    // Dodaj komunikat błędu jeśli go nie ma
+                    let errorDiv = confirmPassword.parentNode.querySelector('.invalid-feedback');
+                    if (!errorDiv) {
+                        errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback';
+                        confirmPassword.parentNode.appendChild(errorDiv);
+                    }
+                    errorDiv.textContent = 'Hasła muszą być identyczne';
+                } else {
+                    confirmPassword.setCustomValidity('');
+                    confirmPassword.classList.remove('is-invalid');
+                    
+                    const errorDiv = confirmPassword.parentNode.querySelector('.invalid-feedback');
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                }
+            }
+        }
+        
+        newPassword.addEventListener('input', validatePasswords);
+        confirmPassword.addEventListener('input', validatePasswords);
+    }
+});
+</script>
+{% endblock %}
