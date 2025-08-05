@@ -14,25 +14,85 @@ final class Version20250805134254 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Dodaj pole avatar i inne brakujące kolumny do tabeli users (tylko jeśli nie istnieją)';
+        return 'Dodaj pole avatar i inne brakujące kolumny do tabeli users (sprawdza INFORMATION_SCHEMA)';
     }
 
     public function up(Schema $schema): void
     {
-        // Dodaj kolumny tylko jeśli nie istnieją
-        $this->addSql('ALTER TABLE users 
-            ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) DEFAULT NULL,
-            ADD COLUMN IF NOT EXISTS branch VARCHAR(100) DEFAULT NULL, 
-            ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT NULL, 
-            ADD COLUMN IF NOT EXISTS supervisor_id INT DEFAULT NULL');
+        $connection = $this->connection;
+        $databaseName = $connection->getDatabase();
         
-        // Dodaj klucz obcy tylko jeśli nie istnieje
-        $this->addSql('ALTER TABLE users 
-            ADD CONSTRAINT IF NOT EXISTS FK_1483A5E919E9AC5F 
-            FOREIGN KEY (supervisor_id) REFERENCES `users` (id)');
+        // Sprawdź które kolumny nie istnieją i dodaj je
+        $columnsToAdd = [];
         
-        // Dodaj indeks tylko jeśli nie istnieje  
-        $this->addSql('CREATE INDEX IF NOT EXISTS IDX_1483A5E919E9AC5F ON users (supervisor_id)');
+        // Sprawdź kolumnę avatar
+        $result = $connection->fetchOne(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'avatar'",
+            [$databaseName]
+        );
+        if ($result == 0) {
+            $columnsToAdd[] = 'ADD avatar VARCHAR(255) DEFAULT NULL';
+        }
+        
+        // Sprawdź kolumnę branch
+        $result = $connection->fetchOne(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'branch'",
+            [$databaseName]
+        );
+        if ($result == 0) {
+            $columnsToAdd[] = 'ADD branch VARCHAR(100) DEFAULT NULL';
+        }
+        
+        // Sprawdź kolumnę status
+        $result = $connection->fetchOne(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'status'",
+            [$databaseName]
+        );
+        if ($result == 0) {
+            $columnsToAdd[] = 'ADD status VARCHAR(50) DEFAULT NULL';
+        }
+        
+        // Sprawdź kolumnę supervisor_id
+        $result = $connection->fetchOne(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'supervisor_id'",
+            [$databaseName]
+        );
+        if ($result == 0) {
+            $columnsToAdd[] = 'ADD supervisor_id INT DEFAULT NULL';
+        }
+        
+        // Dodaj kolumny jeśli są jakieś do dodania
+        if (!empty($columnsToAdd)) {
+            $this->addSql('ALTER TABLE users ' . implode(', ', $columnsToAdd));
+        }
+        
+        // Sprawdź czy klucz obcy już istnieje
+        $constraintExists = $connection->fetchOne(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' 
+             AND CONSTRAINT_NAME = 'FK_1483A5E919E9AC5F'",
+            [$databaseName]
+        );
+        
+        if ($constraintExists == 0) {
+            $this->addSql('ALTER TABLE users ADD CONSTRAINT FK_1483A5E919E9AC5F FOREIGN KEY (supervisor_id) REFERENCES `users` (id)');
+        }
+        
+        // Sprawdź czy indeks już istnieje
+        $indexExists = $connection->fetchOne(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS 
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' 
+             AND INDEX_NAME = 'IDX_1483A5E919E9AC5F'",
+            [$databaseName]
+        );
+        
+        if ($indexExists == 0) {
+            $this->addSql('CREATE INDEX IDX_1483A5E919E9AC5F ON users (supervisor_id)');
+        }
     }
 
     public function down(Schema $schema): void
