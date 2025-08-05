@@ -23,23 +23,28 @@ class ProfileController extends AbstractController
             $changePasswordForm = $this->createForm(ChangePasswordType::class);
             $changePasswordForm->handleRequest($request);
 
-            if ($changePasswordForm->isSubmitted() && $changePasswordForm->isValid()) {
-                $data = $changePasswordForm->getData();
-                
-                // Sprawdź obecne hasło
-                if (!$passwordHasher->isPasswordValid($user, $data['currentPassword'])) {
-                    $this->addFlash('error', 'Obecne hasło jest nieprawidłowe.');
+            if ($changePasswordForm->isSubmitted()) {
+                if ($changePasswordForm->isValid()) {
+                    $data = $changePasswordForm->getData();
+                    
+                    // Sprawdź obecne hasło
+                    if (!$passwordHasher->isPasswordValid($user, $data['currentPassword'])) {
+                        $this->addFlash('error', 'Obecne hasło jest nieprawidłowe.');
+                    } else {
+                        // Ustaw nowe hasło
+                        $encodedPassword = $passwordHasher->hashPassword($user, $data['newPassword']);
+                        $user->setPassword($encodedPassword);
+                        
+                        $entityManager->persist($user);
+                        $entityManager->flush();
+                        
+                        $this->addFlash('success', 'Hasło zostało pomyślnie zmienione.');
+                        
+                        return $this->redirectToRoute('profile');
+                    }
                 } else {
-                    // Ustaw nowe hasło
-                    $encodedPassword = $passwordHasher->hashPassword($user, $data['newPassword']);
-                    $user->setPassword($encodedPassword);
-                    
-                    $entityManager->persist($user);
-                    $entityManager->flush();
-                    
-                    $this->addFlash('success', 'Hasło zostało pomyślnie zmienione.');
-                    
-                    return $this->redirectToRoute('profile');
+                    // Formularz ma błędy walidacji
+                    $this->addFlash('error', 'Formularz zawiera błędy. Sprawdź wprowadzone dane.');
                 }
             }
         }

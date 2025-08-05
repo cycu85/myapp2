@@ -154,6 +154,34 @@
                     {% if not isLdapUser %}
                     <div class="tab-pane" id="changePassword" role="tabpanel">
                         {{ form_start(changePasswordForm) }}
+                        
+                        <!-- Form Errors -->
+                        {% set hasErrors = changePasswordForm.vars.errors|length > 0 or changePasswordForm.newPassword.vars.errors|length > 0 or changePasswordForm.currentPassword.vars.errors|length > 0 or changePasswordForm.newPassword.first.vars.errors|length > 0 or changePasswordForm.newPassword.second.vars.errors|length > 0 %}
+                        {% if hasErrors %}
+                            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                                <i class="ri-error-warning-line me-2"></i>
+                                <strong>Błędy walidacji:</strong>
+                                <ul class="mb-0 mt-2">
+                                    {% for error in changePasswordForm.vars.errors %}
+                                        <li>{{ error.message }}</li>
+                                    {% endfor %}
+                                    {% for error in changePasswordForm.currentPassword.vars.errors %}
+                                        <li>{{ error.message }}</li>
+                                    {% endfor %}
+                                    {% for error in changePasswordForm.newPassword.vars.errors %}
+                                        <li>{{ error.message }}</li>
+                                    {% endfor %}
+                                    {% for error in changePasswordForm.newPassword.first.vars.errors %}
+                                        <li>{{ error.message }}</li>
+                                    {% endfor %}
+                                    {% for error in changePasswordForm.newPassword.second.vars.errors %}
+                                        <li>{{ error.message }}</li>
+                                    {% endfor %}
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+                        
                         <div class="row g-2">
                             <div class="col-lg-4">
                                 <div>
