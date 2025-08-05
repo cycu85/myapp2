@@ -14,15 +14,25 @@ final class Version20250805134254 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Dodaj pole avatar i inne brakujące kolumny do tabeli users (tylko jeśli nie istnieją)';
     }
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE users ADD avatar VARCHAR(255) DEFAULT NULL, ADD branch VARCHAR(100) DEFAULT NULL, ADD status VARCHAR(50) DEFAULT NULL, ADD supervisor_id INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE users ADD CONSTRAINT FK_1483A5E919E9AC5F FOREIGN KEY (supervisor_id) REFERENCES `users` (id)');
-        $this->addSql('CREATE INDEX IDX_1483A5E919E9AC5F ON users (supervisor_id)');
+        // Dodaj kolumny tylko jeśli nie istnieją
+        $this->addSql('ALTER TABLE users 
+            ADD COLUMN IF NOT EXISTS avatar VARCHAR(255) DEFAULT NULL,
+            ADD COLUMN IF NOT EXISTS branch VARCHAR(100) DEFAULT NULL, 
+            ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT NULL, 
+            ADD COLUMN IF NOT EXISTS supervisor_id INT DEFAULT NULL');
+        
+        // Dodaj klucz obcy tylko jeśli nie istnieje
+        $this->addSql('ALTER TABLE users 
+            ADD CONSTRAINT IF NOT EXISTS FK_1483A5E919E9AC5F 
+            FOREIGN KEY (supervisor_id) REFERENCES `users` (id)');
+        
+        // Dodaj indeks tylko jeśli nie istnieje  
+        $this->addSql('CREATE INDEX IF NOT EXISTS IDX_1483A5E919E9AC5F ON users (supervisor_id)');
     }
 
     public function down(Schema $schema): void
