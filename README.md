@@ -66,7 +66,7 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 
 ### 👨‍💼 Panel Administracyjny
 - Zarządzanie użytkownikami i rolami
-- Konfiguracja modułów systemu
+- Konfiguracja modułów systemu  
 - Generowanie raportów i analiz
 - Ustawienia systemowe i bezpieczeństwa
 - **System logowania** - Kompleksowe logowanie aktywności użytkowników
@@ -76,6 +76,12 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 - **⚙️ Panel ustawień** - Kompleksowy system konfiguracji aplikacji
 - **📧 Konfiguracja Email** - System SMTP z testowaniem połączenia
 - **🔗 Integracja LDAP/AD** - Synchronizacja użytkowników z Active Directory
+
+### 👤 System Profili Użytkowników
+- **Profil użytkownika** - Przeglądanie i edycja danych osobowych
+- **Zmiana hasła** - Bezpieczna zmiana hasła dla użytkowników lokalnych
+- **Avatary użytkowników** - Upload i zarządzanie zdjęciami profilowymi (JPG, PNG, GIF, WebP)
+- **Integracja LDAP** - Automatyczna synchronizacja danych z Active Directory
 
 ## 💻 Wymagania Systemowe
 
@@ -88,7 +94,7 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 | **Serwer Web** | Apache 2.4+ / Nginx 1.18+ |
 | **Baza Danych** | MySQL 8.0+ (domyślnie) / PostgreSQL 13+ / SQLite 3.35+ |
 | **Pamięć RAM** | Minimum 512MB, zalecane 2GB+ |
-| **Przestrzeń Dyskowa** | Minimum 1GB, zalecane 5GB+ |
+| **Przestrzeń Dyskowa** | Minimum 1GB, zalecane 10GB+ (w tym miejsce na avatary użytkowników) |
 | **PHP Extensions** | mysql, pdo, intl, mbstring, xml, curl, gd, ldap |
 
 ### Zalecane Wymagania Produkcyjne
@@ -187,6 +193,11 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    
    # Tworzenie katalogów logów (system automatycznie utworzy pliki logów)
    sudo -u www-data mkdir -p var/log
+   
+   # Tworzenie katalogu dla avatarów użytkowników
+   sudo -u www-data mkdir -p public/uploads/avatars
+   sudo chmod 755 public/uploads/avatars
+   sudo chown -R www-data:www-data public/uploads/avatars
    ```
 
 5. **Konfiguracja Apache**
