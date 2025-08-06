@@ -90,6 +90,20 @@
 .gridjs-sort-desc::after {
     content: "\f0dd" !important;
 }
+
+/* Fix text wrapping in permissions column */
+.gridjs-td:nth-child(5) {
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    max-width: 280px !important;
+    overflow-wrap: break-word !important;
+}
+
+/* Ensure table has proper layout */
+.gridjs-table {
+    table-layout: fixed !important;
+}
 </style>
 {% endblock %}
 
@@ -129,23 +143,23 @@ document.addEventListener('DOMContentLoaded', function() {
         columns: [
             {
                 name: 'Nazwa',
-                width: '150px'
+                width: '140px'
             },
             {
                 name: 'Moduł',
-                width: '120px'
+                width: '110px'
             },
             {
                 name: 'Opis',
-                width: '200px'
+                width: '180px'
             },
             {
                 name: 'Typ',
-                width: '100px'
+                width: '90px'
             },
             {
                 name: 'Uprawnienia',
-                width: '200px'
+                width: '280px'
             },
             {
                 name: 'Akcje',
