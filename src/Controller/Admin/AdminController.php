@@ -1388,16 +1388,16 @@ class AdminController extends AbstractController
         
         // Pobierz parametry połączenia z DATABASE_URL
         $databaseUrl = $_ENV['DATABASE_URL'] ?? '';
-        if (preg_match('/mysql:\/\/([^:]+):([^@]+)@([^:]+):?(\d+)?\/(.+)/', $databaseUrl, $matches)) {
+        if (preg_match('/mysql:\/\/([^:]+):([^@]+)@([^:]+):?(\d+)?\/([^?]+)(?:\?.*)?/', $databaseUrl, $matches)) {
             $username = $matches[1];
             $password = $matches[2];
             $host = $matches[3];
             $port = $matches[4] ?: '3306';
-            $database = $matches[5];
+            $database = $matches[5]; // Teraz ignoruje parametry po znaku ?
             
-            // Wykonaj mysqldump
+            // Wykonaj mysqldump - używamy 2>&1 żeby przechwycić błędy
             $command = sprintf(
-                'mysqldump -h%s -P%s -u%s -p%s --single-transaction --routines --triggers %s > %s',
+                'mysqldump -h%s -P%s -u%s -p%s --single-transaction --routines --triggers %s > %s 2>&1',
                 escapeshellarg($host),
                 escapeshellarg($port),
                 escapeshellarg($username),
@@ -1406,15 +1406,45 @@ class AdminController extends AbstractController
                 escapeshellarg($filepath)
             );
             
+            // Loguj komendę (bez hasła) do debugowania
+            $debugCommand = sprintf(
+                'mysqldump -h%s -P%s -u%s -p*** --single-transaction --routines --triggers %s > %s',
+                $host, $port, $username, $database, $filepath
+            );
+            $this->logger->info('Executing backup command', ['command' => $debugCommand]);
+            
             exec($command, $output, $returnCode);
             
             if ($returnCode !== 0) {
-                throw new \Exception('Błąd podczas tworzenia kopii zapasowej: ' . implode("\n", $output));
+                $errorMsg = implode("\n", $output);
+                $this->logger->error('Backup command failed', [
+                    'return_code' => $returnCode,
+                    'output' => $errorMsg,
+                    'database' => $database,
+                    'host' => $host,
+                    'port' => $port
+                ]);
+                throw new \Exception('Błąd podczas tworzenia kopii zapasowej: ' . $errorMsg);
             }
             
-            // Sprawdź czy plik został utworzony
-            if (!file_exists($filepath) || filesize($filepath) === 0) {
-                throw new \Exception('Kopia zapasowa nie została utworzona poprawnie');
+            // Sprawdź czy plik został utworzony i ma rozsądny rozmiar
+            if (!file_exists($filepath)) {
+                throw new \Exception('Plik kopii zapasowej nie został utworzony');
+            }
+            
+            $fileSize = filesize($filepath);
+            if ($fileSize === 0) {
+                throw new \Exception('Plik kopii zapasowej jest pusty');
+            }
+            
+            // Sprawdź czy plik zawiera jakieś dane (powinien mieć więcej niż sam nagłówek)
+            if ($fileSize < 1000) { // Mniej niż 1KB to prawdopodobnie tylko nagłówek
+                $fileContent = file_get_contents($filepath);
+                $this->logger->warning('Backup file seems too small', [
+                    'file_size' => $fileSize,
+                    'content_preview' => substr($fileContent, 0, 500)
+                ]);
+                throw new \Exception('Kopia zapasowa wydaje się niepełna (rozmiar: ' . $fileSize . ' bajtów). Sprawdź logi dla szczegółów.');
             }
             
         } else {
