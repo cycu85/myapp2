@@ -279,6 +279,96 @@ class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/settings/database', name: 'admin_settings_database')]
+    public function databaseSettings(Request $request): Response
+    {
+        $user = $this->getUser();
+        
+        if (!$this->permissionService->canAccessModule($user, 'admin')) {
+            $this->logger->warning('Unauthorized admin database settings access attempt', [
+                'user' => $user?->getUsername() ?? 'anonymous',
+                'ip' => $request->getClientIp()
+            ]);
+            throw $this->createAccessDeniedException('Brak dostępu do panelu administracyjnego');
+        }
+
+        // Pobierz informacje o bazie danych
+        $databaseInfo = $this->getDatabaseInfo();
+        
+        // Sprawdź który przycisk został kliknięty
+        if ($request->isMethod('POST')) {
+            $action = $request->request->get('action');
+            
+            try {
+                switch ($action) {
+                    case 'backup':
+                        $filename = $this->createDatabaseBackup();
+                        $this->addFlash('success', 'Kopia zapasowa została utworzona: ' . $filename);
+                        
+                        $this->logger->info('Database backup created successfully', [
+                            'user' => $user->getUsername(),
+                            'filename' => $filename,
+                            'ip' => $request->getClientIp()
+                        ]);
+                        break;
+                        
+                    case 'optimize':
+                        $result = $this->optimizeDatabase();
+                        $this->addFlash('success', 'Baza danych została zoptymalizowana. Zoptymalizowano ' . $result['optimized'] . ' tabel.');
+                        
+                        $this->logger->info('Database optimized successfully', [
+                            'user' => $user->getUsername(),
+                            'optimized_tables' => $result['optimized'],
+                            'ip' => $request->getClientIp()
+                        ]);
+                        break;
+                        
+                    case 'analyze':
+                        $result = $this->analyzeDatabase();
+                        $this->addFlash('success', 'Analiza bazy danych została zakończona. Przeanalizowano ' . $result['analyzed'] . ' tabel.');
+                        
+                        $this->logger->info('Database analyzed successfully', [
+                            'user' => $user->getUsername(),
+                            'analyzed_tables' => $result['analyzed'],
+                            'ip' => $request->getClientIp()
+                        ]);
+                        break;
+                        
+                    case 'clear_logs':
+                        $result = $this->clearOldLogs();
+                        $this->addFlash('success', 'Stare logi zostały wyczyszczone. Usunięto ' . $result['deleted'] . ' wpisów.');
+                        
+                        $this->logger->info('Old logs cleared successfully', [
+                            'user' => $user->getUsername(),
+                            'deleted_logs' => $result['deleted'],
+                            'ip' => $request->getClientIp()
+                        ]);
+                        break;
+                }
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Błąd podczas wykonywania operacji: ' . $e->getMessage());
+                
+                $this->logger->error('Database operation failed', [
+                    'user' => $user->getUsername(),
+                    'action' => $action,
+                    'error' => $e->getMessage(),
+                    'ip' => $request->getClientIp()
+                ]);
+            }
+            
+            return $this->redirectToRoute('admin_settings_database');
+        }
+
+        $this->logger->info('Admin database settings page accessed', [
+            'user' => $user->getUsername(),
+            'ip' => $request->getClientIp()
+        ]);
+
+        return $this->render('admin/settings/database.html.twig', [
+            'database_info' => $databaseInfo,
+        ]);
+    }
+
     #[Route('/settings/ldap', name: 'admin_settings_ldap')]
     public function ldapSettings(Request $request): Response
     {
@@ -1151,6 +1241,334 @@ class AdminController extends AbstractController
             'updated' => $updated,
             'errors' => $errors
         ];
+    }
+
+    /**
+     * Pobiera informacje o bazie danych
+     */
+    private function getDatabaseInfo(): array
+    {
+        $connection = $this->entityManager->getConnection();
+        
+        try {
+            // Informacje podstawowe
+            $databaseName = $connection->getDatabase();
+            
+            // Sprawdź typ bazy danych
+            $platform = $connection->getDatabasePlatform();
+            $databaseType = $platform->getName();
+            
+            // Pobierz rozmiar bazy danych (MySQL)
+            $databaseSize = 0;
+            $tableCount = 0;
+            $tables = [];
+            
+            if ($databaseType === 'mysql') {
+                // Rozmiar bazy danych
+                $sizeResult = $connection->fetchAssociative("
+                    SELECT 
+                        ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) as size_mb
+                    FROM information_schema.tables 
+                    WHERE table_schema = ?
+                ", [$databaseName]);
+                
+                $databaseSize = $sizeResult['size_mb'] ?? 0;
+                
+                // Lista tabel z informacjami
+                $tablesResult = $connection->fetchAllAssociative("
+                    SELECT 
+                        table_name,
+                        table_rows,
+                        ROUND((data_length + index_length) / 1024 / 1024, 2) as size_mb,
+                        ROUND(data_length / 1024 / 1024, 2) as data_mb,
+                        ROUND(index_length / 1024 / 1024, 2) as index_mb
+                    FROM information_schema.tables 
+                    WHERE table_schema = ?
+                    ORDER BY (data_length + index_length) DESC
+                ", [$databaseName]);
+                
+                $tableCount = count($tablesResult);
+                $tables = $tablesResult;
+            }
+            
+            // Wersja bazy danych
+            $version = $connection->fetchOne("SELECT VERSION()");
+            
+            // Status połączenia
+            $connectionStatus = 'connected';
+            
+            // Sprawdź katalog backupów
+            $backupDir = $this->getParameter('kernel.project_dir') . '/var/backups';
+            if (!file_exists($backupDir)) {
+                mkdir($backupDir, 0755, true);
+            }
+            
+            // Lista backupów
+            $backups = [];
+            if (is_dir($backupDir)) {
+                $backupFiles = glob($backupDir . '/backup_*.sql');
+                foreach ($backupFiles as $file) {
+                    $backups[] = [
+                        'filename' => basename($file),
+                        'size' => round(filesize($file) / 1024 / 1024, 2), // MB
+                        'created' => date('Y-m-d H:i:s', filemtime($file))
+                    ];
+                }
+                // Sortuj po dacie malejąco
+                usort($backups, function($a, $b) {
+                    return strcmp($b['created'], $a['created']);
+                });
+            }
+            
+            return [
+                'name' => $databaseName,
+                'type' => $databaseType,
+                'version' => $version,
+                'size_mb' => $databaseSize,
+                'table_count' => $tableCount,
+                'tables' => $tables,
+                'connection_status' => $connectionStatus,
+                'backups' => $backups,
+                'backup_dir' => $backupDir
+            ];
+            
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get database info', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'name' => 'unknown',
+                'type' => 'unknown',
+                'version' => 'unknown',
+                'size_mb' => 0,
+                'table_count' => 0,
+                'tables' => [],
+                'connection_status' => 'error',
+                'error' => $e->getMessage(),
+                'backups' => [],
+                'backup_dir' => ''
+            ];
+        }
+    }
+    
+    /**
+     * Tworzy kopię zapasową bazy danych
+     */
+    private function createDatabaseBackup(): string
+    {
+        $connection = $this->entityManager->getConnection();
+        $databaseName = $connection->getDatabase();
+        
+        // Sprawdź czy to MySQL
+        if ($connection->getDatabasePlatform()->getName() !== 'mysql') {
+            throw new \Exception('Kopie zapasowe są obsługiwane tylko dla MySQL');
+        }
+        
+        // Przygotuj katalog
+        $backupDir = $this->getParameter('kernel.project_dir') . '/var/backups';
+        if (!file_exists($backupDir)) {
+            mkdir($backupDir, 0755, true);
+        }
+        
+        // Nazwa pliku
+        $filename = 'backup_' . $databaseName . '_' . date('Y-m-d_H-i-s') . '.sql';
+        $filepath = $backupDir . '/' . $filename;
+        
+        // Pobierz parametry połączenia z DATABASE_URL
+        $databaseUrl = $_ENV['DATABASE_URL'] ?? '';
+        if (preg_match('/mysql:\/\/([^:]+):([^@]+)@([^:]+):?(\d+)?\/(.+)/', $databaseUrl, $matches)) {
+            $username = $matches[1];
+            $password = $matches[2];
+            $host = $matches[3];
+            $port = $matches[4] ?: '3306';
+            $database = $matches[5];
+            
+            // Wykonaj mysqldump
+            $command = sprintf(
+                'mysqldump -h%s -P%s -u%s -p%s --single-transaction --routines --triggers %s > %s',
+                escapeshellarg($host),
+                escapeshellarg($port),
+                escapeshellarg($username),
+                escapeshellarg($password),
+                escapeshellarg($database),
+                escapeshellarg($filepath)
+            );
+            
+            exec($command, $output, $returnCode);
+            
+            if ($returnCode !== 0) {
+                throw new \Exception('Błąd podczas tworzenia kopii zapasowej: ' . implode("\n", $output));
+            }
+            
+            // Sprawdź czy plik został utworzony
+            if (!file_exists($filepath) || filesize($filepath) === 0) {
+                throw new \Exception('Kopia zapasowa nie została utworzona poprawnie');
+            }
+            
+        } else {
+            throw new \Exception('Nie można odczytać parametrów połączenia z bazą danych');
+        }
+        
+        return $filename;
+    }
+    
+    /**
+     * Optymalizuje tabele bazy danych
+     */
+    private function optimizeDatabase(): array
+    {
+        $connection = $this->entityManager->getConnection();
+        
+        if ($connection->getDatabasePlatform()->getName() !== 'mysql') {
+            throw new \Exception('Optymalizacja jest obsługiwana tylko dla MySQL');
+        }
+        
+        $databaseName = $connection->getDatabase();
+        
+        // Pobierz listę tabel
+        $tables = $connection->fetchFirstColumn("
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = ?
+        ", [$databaseName]);
+        
+        $optimized = 0;
+        
+        foreach ($tables as $table) {
+            try {
+                $connection->executeStatement("OPTIMIZE TABLE `{$table}`");
+                $optimized++;
+            } catch (\Exception $e) {
+                $this->logger->warning('Failed to optimize table', [
+                    'table' => $table,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+        
+        return ['optimized' => $optimized];
+    }
+    
+    /**
+     * Analizuje tabele bazy danych
+     */
+    private function analyzeDatabase(): array
+    {
+        $connection = $this->entityManager->getConnection();
+        
+        if ($connection->getDatabasePlatform()->getName() !== 'mysql') {
+            throw new \Exception('Analiza jest obsługiwana tylko dla MySQL');
+        }
+        
+        $databaseName = $connection->getDatabase();
+        
+        // Pobierz listę tabel
+        $tables = $connection->fetchFirstColumn("
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = ?
+        ", [$databaseName]);
+        
+        $analyzed = 0;
+        
+        foreach ($tables as $table) {
+            try {
+                $connection->executeStatement("ANALYZE TABLE `{$table}`");
+                $analyzed++;
+            } catch (\Exception $e) {
+                $this->logger->warning('Failed to analyze table', [
+                    'table' => $table,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+        
+        return ['analyzed' => $analyzed];
+    }
+    
+    /**
+     * Czyści stare logi (starsze niż 30 dni)
+     */
+    private function clearOldLogs(): array
+    {
+        $logDir = $this->getParameter('kernel.project_dir') . '/var/log';
+        $deleted = 0;
+        
+        if (!is_dir($logDir)) {
+            return ['deleted' => 0];
+        }
+        
+        // Data graniczna - 30 dni wstecz
+        $cutoffDate = new \DateTime('-30 days');
+        
+        // Przeglądaj pliki logów
+        $logFiles = glob($logDir . '/*.log');
+        foreach ($logFiles as $logFile) {
+            $fileDate = new \DateTime('@' . filemtime($logFile));
+            
+            if ($fileDate < $cutoffDate) {
+                try {
+                    // Nie usuwaj obecnych plików logów, tylko wyczyść zawartość
+                    if (basename($logFile) !== 'prod.log' && basename($logFile) !== 'dev.log') {
+                        unlink($logFile);
+                        $deleted++;
+                    } else {
+                        // Dla głównych plików logów tylko usuń stare wpisy
+                        $this->truncateLogFile($logFile, $cutoffDate);
+                        $deleted++;
+                    }
+                } catch (\Exception $e) {
+                    $this->logger->warning('Failed to clear log file', [
+                        'file' => $logFile,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+        }
+        
+        return ['deleted' => $deleted];
+    }
+    
+    /**
+     * Skraca plik loga usuwając stare wpisy
+     */
+    private function truncateLogFile(string $logFile, \DateTime $cutoffDate): void
+    {
+        if (!file_exists($logFile)) {
+            return;
+        }
+        
+        $tempFile = $logFile . '.tmp';
+        $cutoffTimestamp = $cutoffDate->getTimestamp();
+        
+        $input = fopen($logFile, 'r');
+        $output = fopen($tempFile, 'w');
+        
+        if (!$input || !$output) {
+            return;
+        }
+        
+        while (($line = fgets($input)) !== false) {
+            // Sprawdź czy linia zawiera timestamp
+            if (preg_match('/^\[(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[^\]]*)\]/', $line, $matches)) {
+                $lineTimestamp = strtotime($matches[1]);
+                
+                // Zachowaj linie nowsze niż data graniczna
+                if ($lineTimestamp >= $cutoffTimestamp) {
+                    fwrite($output, $line);
+                }
+            } else {
+                // Zachowaj linie bez timestamp (mogą być częścią poprzedniego wpisu)
+                fwrite($output, $line);
+            }
+        }
+        
+        fclose($input);
+        fclose($output);
+        
+        // Zamień pliki
+        rename($tempFile, $logFile);
     }
 
     private function getClientIp(): ?string

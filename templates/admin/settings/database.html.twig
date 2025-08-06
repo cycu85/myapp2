@@ -1,0 +1,320 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ustawienia Bazy Danych - {{ app_name() }}{% endblock %}
+
+{% block page_title %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Ustawienia Bazy Danych</h4>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="{{ path('dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Admin</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('admin_settings') }}">Ustawienia</a></li>
+                    <li class="breadcrumb-item active">Baza Danych</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h4 class="card-title mb-0">
+                        <i class="ri-database-line me-2"></i>Zarządzanie Bazą Danych
+                    </h4>
+                    <div class="flex-shrink-0 ms-auto">
+                        {% if database_info.connection_status == 'connected' %}
+                            <span class="badge bg-success">Połączono</span>
+                        {% else %}
+                            <span class="badge bg-danger">Błąd połączenia</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Informacje o bazie danych -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-sm-6">
+                        <div class="p-3 border border-dashed rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-3">
+                                    <div class="avatar-title rounded bg-primary-subtle text-primary fs-18">
+                                        <i class="ri-database-line"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-1">Nazwa bazy</p>
+                                    <h6 class="mb-0">{{ database_info.name }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-sm-6">
+                        <div class="p-3 border border-dashed rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-3">
+                                    <div class="avatar-title rounded bg-info-subtle text-info fs-18">
+                                        <i class="ri-settings-line"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-1">Typ / Wersja</p>
+                                    <h6 class="mb-0">{{ database_info.type|title }} {{ database_info.version|slice(0, 6) }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-sm-6">
+                        <div class="p-3 border border-dashed rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-3">
+                                    <div class="avatar-title rounded bg-success-subtle text-success fs-18">
+                                        <i class="ri-hard-drive-line"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-1">Rozmiar</p>
+                                    <h6 class="mb-0">{{ database_info.size_mb }} MB</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-sm-6">
+                        <div class="p-3 border border-dashed rounded">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-3">
+                                    <div class="avatar-title rounded bg-warning-subtle text-warning fs-18">
+                                        <i class="ri-table-line"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="text-muted mb-1">Liczba tabel</p>
+                                    <h6 class="mb-0">{{ database_info.table_count }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Operacje na bazie danych -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="mb-3">Operacje na bazie danych</h5>
+                    </div>
+                    
+                    <div class="col-lg-3 col-sm-6 mb-3">
+                        <div class="card border card-border-primary h-100">
+                            <div class="card-body text-center">
+                                <div class="avatar-md mx-auto mb-3">
+                                    <div class="avatar-title bg-primary-subtle text-primary rounded fs-24">
+                                        <i class="ri-download-cloud-line"></i>
+                                    </div>
+                                </div>
+                                <h6 class="card-title">Kopia zapasowa</h6>
+                                <p class="card-text text-muted">Utwórz kopię zapasową bazy danych</p>
+                                <form method="post" class="d-inline">
+                                    <input type="hidden" name="action" value="backup">
+                                    <button type="submit" class="btn btn-primary btn-sm" onclick="return confirm('Czy na pewno chcesz utworzyć kopię zapasową?')">
+                                        <i class="ri-download-cloud-line me-1"></i>Utwórz backup
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-sm-6 mb-3">
+                        <div class="card border card-border-success h-100">
+                            <div class="card-body text-center">
+                                <div class="avatar-md mx-auto mb-3">
+                                    <div class="avatar-title bg-success-subtle text-success rounded fs-24">
+                                        <i class="ri-speed-up-line"></i>
+                                    </div>
+                                </div>
+                                <h6 class="card-title">Optymalizacja</h6>
+                                <p class="card-text text-muted">Optymalizuj wszystkie tabele</p>
+                                <form method="post" class="d-inline">
+                                    <input type="hidden" name="action" value="optimize">
+                                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Czy na pewno chcesz zoptymalizować bazę danych?')">
+                                        <i class="ri-speed-up-line me-1"></i>Optymalizuj
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-sm-6 mb-3">
+                        <div class="card border card-border-info h-100">
+                            <div class="card-body text-center">
+                                <div class="avatar-md mx-auto mb-3">
+                                    <div class="avatar-title bg-info-subtle text-info rounded fs-24">
+                                        <i class="ri-search-line"></i>
+                                    </div>
+                                </div>
+                                <h6 class="card-title">Analiza</h6>
+                                <p class="card-text text-muted">Przeanalizuj strukturę tabel</p>
+                                <form method="post" class="d-inline">
+                                    <input type="hidden" name="action" value="analyze">
+                                    <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('Czy na pewno chcesz przeanalizować bazę danych?')">
+                                        <i class="ri-search-line me-1"></i>Analizuj
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-sm-6 mb-3">
+                        <div class="card border card-border-warning h-100">
+                            <div class="card-body text-center">
+                                <div class="avatar-md mx-auto mb-3">
+                                    <div class="avatar-title bg-warning-subtle text-warning rounded fs-24">
+                                        <i class="ri-delete-bin-line"></i>
+                                    </div>
+                                </div>
+                                <h6 class="card-title">Wyczyść logi</h6>
+                                <p class="card-text text-muted">Usuń stare pliki logów (>30 dni)</p>
+                                <form method="post" class="d-inline">
+                                    <input type="hidden" name="action" value="clear_logs">
+                                    <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Czy na pewno chcesz usunąć stare logi?')">
+                                        <i class="ri-delete-bin-line me-1"></i>Wyczyść
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista kopii zapasowych -->
+                {% if database_info.backups|length > 0 %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border border-light">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-file-list-line me-2"></i>Kopie zapasowe
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Nazwa pliku</th>
+                                                <th>Data utworzenia</th>
+                                                <th>Rozmiar</th>
+                                                <th class="text-end">Akcje</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for backup in database_info.backups %}
+                                            <tr>
+                                                <td>
+                                                    <i class="ri-file-text-line text-primary me-2"></i>
+                                                    {{ backup.filename }}
+                                                </td>
+                                                <td>{{ backup.created }}</td>
+                                                <td>{{ backup.size }} MB</td>
+                                                <td class="text-end">
+                                                    <a href="{{ asset('var/backups/' ~ backup.filename) }}" 
+                                                       class="btn btn-sm btn-outline-primary" 
+                                                       download="{{ backup.filename }}">
+                                                        <i class="ri-download-line me-1"></i>Pobierz
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Lista tabel -->
+                {% if database_info.tables|length > 0 %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border border-light">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-table-line me-2"></i>Tabele bazy danych ({{ database_info.table_count }})
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Nazwa tabeli</th>
+                                                <th>Liczba wierszy</th>
+                                                <th>Rozmiar danych</th>
+                                                <th>Rozmiar indeksów</th>
+                                                <th>Rozmiar całkowity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for table in database_info.tables %}
+                                            <tr>
+                                                <td>
+                                                    <i class="ri-table-line text-info me-2"></i>
+                                                    {{ table.table_name }}
+                                                </td>
+                                                <td>{{ table.table_rows|number_format }}</td>
+                                                <td>{{ table.data_mb }} MB</td>
+                                                <td>{{ table.index_mb }} MB</td>
+                                                <td><strong>{{ table.size_mb }} MB</strong></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Informacje dodatkowe -->
+                <div class="alert alert-info mt-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="ri-information-line"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-2">
+                            <h6 class="alert-heading">Informacje</h6>
+                            <ul class="mb-0">
+                                <li><strong>Kopie zapasowe</strong> są tworzone za pomocą mysqldump i zapisywane w katalogu var/backups</li>
+                                <li><strong>Optymalizacja</strong> wykonuje OPTIMIZE TABLE na wszystkich tabelach (może zająć więcej czasu)</li>
+                                <li><strong>Analiza</strong> wykonuje ANALYZE TABLE aby zaktualizować statystyki indeksów</li>
+                                <li><strong>Czyszczenie logów</strong> usuwa pliki logów starsze niż 30 dni</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh informacji o bazie danych co 30 sekund (opcjonalne)
+    // setInterval(function() {
+    //     location.reload();
+    // }, 30000);
+});
+</script>
+{% endblock %}
