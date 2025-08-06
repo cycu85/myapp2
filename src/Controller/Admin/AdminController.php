@@ -1277,8 +1277,8 @@ class AdminController extends AbstractController
                 // Lista tabel z informacjami
                 $tablesResult = $connection->fetchAllAssociative("
                     SELECT 
-                        table_name,
-                        table_rows,
+                        table_name AS table_name,
+                        table_rows AS table_rows,
                         ROUND((data_length + index_length) / 1024 / 1024, 2) as size_mb,
                         ROUND(data_length / 1024 / 1024, 2) as data_mb,
                         ROUND(index_length / 1024 / 1024, 2) as index_mb
@@ -1287,8 +1287,19 @@ class AdminController extends AbstractController
                     ORDER BY (data_length + index_length) DESC
                 ", [$databaseName]);
                 
-                $tableCount = count($tablesResult);
-                $tables = $tablesResult;
+                // Normalizuj klucze do małych liter
+                $tables = [];
+                foreach ($tablesResult as $row) {
+                    $tables[] = [
+                        'table_name' => $row['table_name'] ?? $row['TABLE_NAME'] ?? '',
+                        'table_rows' => $row['table_rows'] ?? $row['TABLE_ROWS'] ?? 0,
+                        'size_mb' => $row['size_mb'] ?? 0,
+                        'data_mb' => $row['data_mb'] ?? 0,
+                        'index_mb' => $row['index_mb'] ?? 0,
+                    ];
+                }
+                
+                $tableCount = count($tables);
             }
             
             // Wersja bazy danych
@@ -1427,11 +1438,17 @@ class AdminController extends AbstractController
         $databaseName = $connection->getDatabase();
         
         // Pobierz listę tabel
-        $tables = $connection->fetchFirstColumn("
+        $tablesResult = $connection->fetchAllAssociative("
             SELECT table_name 
             FROM information_schema.tables 
             WHERE table_schema = ?
         ", [$databaseName]);
+        
+        // Normalizuj nazwy tabel
+        $tables = [];
+        foreach ($tablesResult as $row) {
+            $tables[] = $row['table_name'] ?? $row['TABLE_NAME'] ?? '';
+        }
         
         $optimized = 0;
         
@@ -1464,11 +1481,17 @@ class AdminController extends AbstractController
         $databaseName = $connection->getDatabase();
         
         // Pobierz listę tabel
-        $tables = $connection->fetchFirstColumn("
+        $tablesResult = $connection->fetchAllAssociative("
             SELECT table_name 
             FROM information_schema.tables 
             WHERE table_schema = ?
         ", [$databaseName]);
+        
+        // Normalizuj nazwy tabel
+        $tables = [];
+        foreach ($tablesResult as $row) {
+            $tables[] = $row['table_name'] ?? $row['TABLE_NAME'] ?? '';
+        }
         
         $analyzed = 0;
         
