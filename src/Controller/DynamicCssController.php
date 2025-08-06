@@ -36,13 +36,25 @@ class DynamicCssController extends AbstractController
     --bs-primary-bg-subtle: rgba({$rgbString}, 0.1);
     --bs-primary-border-subtle: rgba({$rgbString}, 0.2);
     --bs-primary-text-emphasis: {$darkerColor};
-    
-    /* Override vertical menu CSS variables */
-    --vz-vertical-menu-item-color: {$sidebarTextColor};
-    --vz-vertical-menu-item-active-color: {$sidebarTextColor};
-    --vz-vertical-menu-item-hover-color: {$sidebarTextColor};
-    --vz-vertical-menu-sub-item-color: {$sidebarTextColor};
-    --vz-vertical-menu-sub-item-hover-color: {$sidebarTextColor};
+}
+
+/* Override vertical menu CSS variables in all contexts */
+:root,
+:root[data-sidebar=light],
+:root[data-sidebar=dark], 
+:root[data-bs-theme=dark],
+:root[data-bs-theme=dark][data-sidebar=dark],
+:root[data-bs-theme=light],
+:root[data-bs-theme=light][data-sidebar=light],
+:root[data-sidebar=gradient],
+:root[data-sidebar=gradient-2], 
+:root[data-sidebar=gradient-3],
+:root[data-sidebar=gradient-4] {
+    --vz-vertical-menu-item-color: {$sidebarTextColor} !important;
+    --vz-vertical-menu-item-active-color: {$sidebarTextColor} !important;
+    --vz-vertical-menu-item-hover-color: {$sidebarTextColor} !important;
+    --vz-vertical-menu-sub-item-color: {$sidebarTextColor} !important;
+    --vz-vertical-menu-sub-item-hover-color: {$sidebarTextColor} !important;
 }
 
 /* Apply primary color to various elements */
@@ -158,18 +170,21 @@ html[data-sidebar=\"dark\"] .vertical-menu {
     background-color: {$sidebarBgColor} !important;
 }
 
-/* Menu items styling - używa niestandardowego koloru tekstu */
+/* Menu items styling - używa niestandardowego koloru tekstu z wysoką specyficznością */
+.navbar-menu .navbar-nav .nav-link,
 .vertical-menu .navbar-nav .nav-item .nav-link {
     color: {$sidebarTextColor} !important;
     opacity: 0.8;
 }
 
+.navbar-menu .navbar-nav .nav-link:hover,
 .vertical-menu .navbar-nav .nav-item .nav-link:hover {
     background-color: rgba(" . implode(', ', $this->hexToRgb($sidebarTextColor)) . ", 0.1) !important;
     color: {$sidebarTextColor} !important;
     opacity: 1;
 }
 
+.navbar-menu .navbar-nav .nav-link.active,
 .vertical-menu .navbar-nav .nav-item .nav-link.active {
     background-color: {$sidebarActiveColor} !important;
     color: {$sidebarTextColor} !important;
