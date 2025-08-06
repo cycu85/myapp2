@@ -36,6 +36,13 @@ class DynamicCssController extends AbstractController
     --bs-primary-bg-subtle: rgba({$rgbString}, 0.1);
     --bs-primary-border-subtle: rgba({$rgbString}, 0.2);
     --bs-primary-text-emphasis: {$darkerColor};
+    
+    /* Override vertical menu CSS variables */
+    --vz-vertical-menu-item-color: {$sidebarTextColor};
+    --vz-vertical-menu-item-active-color: {$sidebarTextColor};
+    --vz-vertical-menu-item-hover-color: {$sidebarTextColor};
+    --vz-vertical-menu-sub-item-color: {$sidebarTextColor};
+    --vz-vertical-menu-sub-item-hover-color: {$sidebarTextColor};
 }
 
 /* Apply primary color to various elements */
