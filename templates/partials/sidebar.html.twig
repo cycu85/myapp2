@@ -47,7 +47,7 @@
                     {% for userRole in userModules %}
                         {% set module = userRole.role.module %}
                         
-                        {% if module.name == 'admin' %}
+                        {% if module.name == 'admin' and userRole.role.name == 'system_admin' %}
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ app.request.get('_route') starts with 'admin_' ? 'active' : '' }}" href="#sidebarAdmin" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAdmin">
                                 <i class="ri-settings-3-line"></i> <span>{{ module.displayName }}</span>
@@ -72,6 +72,13 @@
                                 </ul>
                             </div>
                         </li>
+                        {% elseif module.name == 'admin' and userRole.role.name in ['employees_viewer', 'employees_editor', 'employees_manager'] %}
+                        <!-- Menu Pracownicy dla ról zarządzania pracownikami -->
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ app.request.get('_route') starts with 'admin_users' ? 'active' : '' }}" href="{{ path('admin_users_index') }}">
+                                <i class="ri-team-line"></i> <span>Pracownicy</span>
+                            </a>
+                        </li>
                         {% elseif module.name == 'equipment' %}
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ app.request.get('_route') starts with 'equipment_' ? 'active' : '' }}" href="{{ path('equipment_index') }}">
@@ -88,13 +95,6 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-
-                <!-- Pracownicy -->
-                <li class="nav-item">
-                    <a class="nav-link menu-link {{ app.request.get('_route') starts with 'admin_users' ? 'active' : '' }}" href="/admin/users">
-                        <i class="ri-team-line"></i> <span data-key="t-employees">Pracownicy</span>
-                    </a>
-                </li>
 
                 <!-- Additional modules would go here -->
                 <li class="menu-title"><span data-key="t-system">System</span></li>
