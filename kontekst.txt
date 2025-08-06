@@ -347,6 +347,35 @@ class ExampleController extends AbstractController
 $this->settingService->set('module_setting', 'value', 'module', 'type', 'description');
 ```
 
+### System dynamicznego CSS (DynamicCssController)
+```php
+// Pobieranie ustawień kolorów
+$primaryColor = $this->settingService->get('primary_color', '#405189');
+$sidebarBgColor = $this->settingService->get('sidebar_bg_color', '#2a3042');
+$sidebarTextColor = $this->settingService->get('sidebar_text_color', '#ffffff');
+$sidebarActiveColor = $this->settingService->get('sidebar_active_color', '#405189');
+
+// Generowanie CSS z ETag caching
+$etag = md5($primaryColor . $sidebarBgColor . $sidebarTextColor . $sidebarActiveColor);
+$response->setEtag($etag);
+$response->setMaxAge(60); // 1 minuta cache
+```
+
+#### CSS Variables + Direct Selectors Pattern
+```css
+/* Podwójne podejście dla kompatybilności */
+:root, :root[data-sidebar=light], :root[data-sidebar=dark] {
+    --vz-vertical-menu-item-color: {$sidebarTextColor} !important;
+    --vz-vertical-menu-item-active-color: {$sidebarTextColor} !important;
+}
+
+/* Direct selectors dla wysokiej specyficzności */
+.navbar-menu .navbar-nav .nav-link.active {
+    background-color: {$sidebarActiveColor} !important;
+    color: {$sidebarTextColor} !important;
+}
+```
+
 ## SŁOWNIKI SYSTEMOWE
 
 ### Jeśli moduł używa słowników, dodaj typy do DictionaryFixtures:
@@ -364,6 +393,30 @@ $categoryType->setValue('Aktywny');
 - **Zmiana hasła** - dla użytkowników lokalnych (nie LDAP)
 - **Upload avatarów** - JPG, PNG, GIF, WebP (max 2MB), przechowywane w `public/uploads/avatars/`
 - **Integracja LDAP** - synchronizacja danych z Active Directory
+
+### Pattern Uploadów Avatarów
+```php
+// Walidacja uploadów
+new File([
+    'maxSize' => '2M',
+    'mimeTypes' => ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+    'mimeTypesMessage' => 'Proszę wybrać prawidłowy plik obrazu (JPG, PNG, GIF, WebP)',
+])
+
+// Upload i cleanup
+if ($avatarFile = $form->get('avatar')->getData()) {
+    // Usuń stary avatar
+    $oldAvatar = $user->getAvatar();
+    if ($oldAvatar && file_exists($avatarPath . '/' . $oldAvatar)) {
+        unlink($avatarPath . '/' . $oldAvatar);
+    }
+    
+    // Zapisz nowy
+    $fileName = 'avatar_' . $user->getId() . '_avatar.' . $avatarFile->guessExtension();
+    $avatarFile->move($avatarPath, $fileName);
+    $user->setAvatar($fileName);
+}
+```
 
 ## SYSTEM ZARZĄDZANIA BAZĄ DANYCH
 
@@ -556,6 +609,73 @@ foreach ($tablesResult as $row) {
 }
 ```
 
+## WZORCE FUNKCJONALNOŚCI
+
+### Reset do Domyślnych Ustawień Pattern
+```php
+// Modal potwierdzenia z podglądem wartości
+<div class="modal-body">
+    <div class="text-start bg-light p-3 rounded mb-3">
+        <ul class="mb-0 list-unstyled">
+            <li><strong>Nazwa aplikacji:</strong> AssetHub</li>
+            <li><strong>Główny kolor:</strong> <span class="badge" style="background-color: #405189; color: white;">#405189</span></li>
+            <!-- ... inne wartości ... -->
+        </ul>
+    </div>
+</div>
+
+// Kontroler z CSRF protection i cleanup
+public function resetGeneralSettings(Request $request): Response
+{
+    // CSRF validation
+    if (!$this->isCsrfTokenValid('reset_general_settings', $request->request->get('_token'))) {
+        $this->addFlash('error', 'Nieprawidłowy token bezpieczeństwa.');
+        return $this->redirectToRoute('admin_settings_general');
+    }
+    
+    // Reset wartości + cleanup plików
+    $defaultSettings = [
+        'app_name' => 'AssetHub',
+        'primary_color' => '#405189',
+        // ...
+    ];
+    
+    // Usuń niestandardowe logo
+    $currentLogo = $this->settingService->get('company_logo');
+    if ($currentLogo && $currentLogo !== '/assets/images/logo-dark.png') {
+        $logoPath = $this->getParameter('kernel.project_dir') . '/public' . $currentLogo;
+        if (file_exists($logoPath) && strpos($currentLogo, '/uploads/logos/') !== false) {
+            unlink($logoPath);
+        }
+    }
+}
+```
+
+### Dual Color Input Pattern (Color Picker + HEX)
+```javascript
+// Synchronizacja dwukierunkowa
+colorText.addEventListener('input', function() {
+    const color = this.value;
+    if (isValidHexColor(color)) {
+        colorPreview.style.backgroundColor = color;
+        // Sync z color picker przez wydarzenia
+    }
+});
+
+// Inteligentna walidacja HEX
+function normalizeHexColor(color) {
+    color = color.trim();
+    if (color && !color.startsWith('#')) {
+        color = '#' + color;
+    }
+    // Rozszerz 3 znaki do 6
+    if (/^#[0-9A-Fa-f]{3}$/.test(color)) {
+        color = '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+    }
+    return color;
+}
+```
+
 ## DODATKOWE WSKAZÓWKI
 
 1. **Zawsze używaj transakcji** dla operacji na wielu tabelach
@@ -566,6 +686,10 @@ foreach ($tablesResult as $row) {
 6. **Tłumaczenia** - przygotuj klucze dla Symfony Translator
 7. **Pliki uploads** - zawsze sprawdzaj typ MIME i wielkość pliku
 8. **MySQL migracje** - używaj INFORMATION_SCHEMA zamiast IF NOT EXISTS
+9. **CSS Conflicts** - użyj CSS Variables + Direct Selectors z !important
+10. **Color Inputs** - implementuj dual approach: picker + text field z synchronizacją
+11. **Reset Functionality** - zawsze z modalem potwierdzenia i cleanup plików
+12. **Dynamic CSS** - użyj ETag caching i response headers
 
 ## DEPLOYMENT
 

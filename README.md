@@ -73,7 +73,12 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 - **System słowników** - Zarządzanie słownikami systemowymi dla wszystkich modułów
 
 #### 🎨 Ustawienia Systemu
-- **Ogólne** - Dynamiczne ustawienia nazwy aplikacji, logo firmy i kolorystyki (color picker + HEX input)
+- **Ogólne** - Dynamiczne ustawienia nazwy aplikacji, logo firmy i kolorystyki z zaawansowanym systemem kollorów:
+  - **Niezależna konfiguracja kolorów**: główny kolor aplikacji, tło menu, tekst menu, aktywny element menu
+  - **Dual color picker + HEX**: wizualny selektor i pole tekstowe z synchronizacją dwukierunkową
+  - **Podgląd na żywo**: wszystkie zmiany widoczne natychmiast w prawym panelu
+  - **Inteligentna walidacja**: automatyczne poprawki formatu HEX (dodawanie #, rozszerzanie z 3 do 6 znaków)
+  - **Reset do domyślnych**: przycisk przywracający wszystkie ustawienia do wartości fabrycznych z modalem potwierdzenia
 - **📧 Email** - Kompletna konfiguracja SMTP z testowaniem połączenia i wysyłaniem wiadomości testowych
 - **🔗 LDAP/Active Directory** - Pełna integracja z AD: synchronizacja użytkowników, mapowanie pól, hierarchia przełożonych
 - **💾 Baza Danych** - Zarządzanie bazą danych: kopie zapasowe (mysqldump), optymalizacja tabel, analiza, czyszczenie logów
@@ -375,12 +380,19 @@ MAILER_DSN=gmail://username:password@default
    - Panel Administracyjny → Ustawienia → Ogólne
    - **Zmiana nazwy aplikacji** - wyświetlana w całym systemie
    - **Upload logo firmy** - formaty: JPG, PNG, GIF, WebP, SVG (max 2MB)
-   - **Wybór koloru głównego** - dwa sposoby:
+   - **Zaawansowana konfiguracja kolorów** - niezależne ustawienia dla:
+     - **Główny kolor aplikacji** - przycisiki, linki, elementy UI
+     - **Kolor tła menu bocznego** - tło całego menu nawigacyjnego
+     - **Kolor tekstu w menu** - kolor wszystkich pozycji menu
+     - **Kolor aktywnego elementu** - wyróżnienie zaznaczonej pozycji menu
+   - **Dual input system** - każdy kolor można ustawić:
      - Color picker (wizualny selektor kolorów)
      - Pole tekstowe HEX (ręczne wpisywanie, np. #ff0000, #abc)
-   - **Podgląd na żywo** - wszystkie zmiany widoczne natychmiast
+   - **Podgląd na żywo** - wszystkie zmiany widoczne natychmiast w prawym panelu z podglądem menu
    - **Synchronizacja dwukierunkowa** - color picker ↔ pole tekstowe
-   - **Inteligentna walidacja** - automatyczne poprawki formatu HEX
+   - **Inteligentna walidacja** - automatyczne poprawki formatu HEX (dodawanie #, rozszerzanie z 3 do 6 znaków)
+   - **Reset do domyślnych** - przycisk przywracający wszystkie ustawienia z modalem potwierdzenia:
+     - AssetHub, #405189, #2a3042, #ffffff, #405189, logo domyślne
 
 7. **🔗 Integracja LDAP/Active Directory**
    - Panel Administracyjny → Ustawienia → LDAP
@@ -436,6 +448,43 @@ MAILER_DSN=gmail://username:password@default
    - Ustaw uprawnienia (VIEW, CREATE, EDIT, DELETE)
    - Opisz rolę
    ```
+
+## 🎨 System Dynamicznego CSS
+
+### Dynamiczna Kolorystyka
+System oferuje zaawansowaną dynamiczną zmianę kolorystyki aplikacji:
+
+#### Architektura CSS
+- **DynamicCssController** - generuje CSS na podstawie ustawień z bazy danych
+- **Route**: `/assets/css/dynamic-theme.css` - automatycznie includowany w każdej stronie
+- **Cache**: ETag based caching (1 minuta) dla wydajności
+- **CSS Variables**: Nowoczesne zmienne CSS z fallback dla starszych przeglądarek
+
+#### Rozdzielone Kolory Menu
+```css
+/* Niezależne kolory dla różnych elementów menu */
+:root {
+    --vz-vertical-menu-bg: #2a3042;           /* Tło menu */
+    --vz-vertical-menu-item-color: #ffffff;    /* Tekst menu */
+    --vz-vertical-menu-item-active-bg: #405189; /* Tło aktywnego elementu */
+}
+
+/* Specyficzność CSS - nadpisywanie app.min.css */
+.navbar-menu .navbar-nav .nav-link.active {
+    background-color: var(--sidebar-active-color) !important;
+    color: var(--sidebar-text-color) !important;
+}
+```
+
+#### Rozwiązywanie Konfliktów CSS
+System wykorzystuje podwójne podejście dla maksymalnej kompatybilności:
+1. **CSS Variables** - nowoczesne zmienne CSS dla wszystkich kontekstów (light/dark theme, różne warianty sidebar)
+2. **Direct Selectors** - bezpośrednie selektory z `!important` dla nadpisywania zewnętrznych arkuszy (Velzon template)
+
+#### Podgląd na Żywo
+- **JavaScript sync** - dwukierunkowa synchronizacja między color picker a polem tekstowym
+- **Live preview** - natychmiastowy podgląd w prawym panelu z miniaturą menu
+- **Hex validation** - inteligentna walidacja i konwersja formatów kolorów
 
 ## 🔌 API i Integracje
 
