@@ -206,6 +206,84 @@ class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/settings/general/reset', name: 'admin_settings_general_reset', methods: ['POST'])]
+    public function resetGeneralSettings(Request $request): Response
+    {
+        $user = $this->getUser();
+        
+        if (!$this->permissionService->canAccessModule($user, 'admin')) {
+            $this->logger->warning('Unauthorized admin general settings reset attempt', [
+                'user' => $user?->getUsername() ?? 'anonymous',
+                'ip' => $this->getClientIp()
+            ]);
+            throw $this->createAccessDeniedException('Brak dostępu do panelu administracyjnego');
+        }
+
+        // Verify CSRF token
+        $submittedToken = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('reset_general_settings', $submittedToken)) {
+            $this->addFlash('error', 'Nieprawidłowy token bezpieczeństwa.');
+            return $this->redirectToRoute('admin_settings_general');
+        }
+
+        try {
+            // Reset to default values
+            $defaultSettings = [
+                'app_name' => 'AssetHub',
+                'primary_color' => '#405189',
+                'sidebar_bg_color' => '#2a3042',
+                'sidebar_text_color' => '#ffffff',
+                'sidebar_active_color' => '#405189',
+            ];
+
+            // Remove company logo if exists (reset to default)
+            $currentLogo = $this->settingService->get('company_logo');
+            if ($currentLogo && $currentLogo !== '/assets/images/logo-dark.png') {
+                $logoPath = $this->getParameter('kernel.project_dir') . '/public' . $currentLogo;
+                if (file_exists($logoPath) && strpos($currentLogo, '/uploads/logos/') !== false) {
+                    unlink($logoPath);
+                }
+                $defaultSettings['company_logo'] = '/assets/images/logo-dark.png';
+            }
+
+            // Save all default settings
+            foreach ($defaultSettings as $key => $value) {
+                if ($key === 'app_name') {
+                    $this->settingService->set($key, $value, 'general', 'text', 'Nazwa aplikacji');
+                } elseif ($key === 'company_logo') {
+                    $this->settingService->set($key, $value, 'general', 'file', 'Logo firmy');
+                } else {
+                    $this->settingService->set($key, $value, 'general', 'color', match($key) {
+                        'primary_color' => 'Główny kolor aplikacji',
+                        'sidebar_bg_color' => 'Kolor tła menu',
+                        'sidebar_text_color' => 'Kolor tekstu w menu',
+                        'sidebar_active_color' => 'Kolor aktywnego elementu w menu',
+                        default => 'Kolor'
+                    });
+                }
+            }
+
+            $this->addFlash('success', 'Ustawienia zostały przywrócone do wartości domyślnych!');
+            
+            $this->logger->info('General settings reset to defaults', [
+                'user' => $user->getUsername(),
+                'ip' => $this->getClientIp(),
+                'defaults' => $defaultSettings
+            ]);
+
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Wystąpił błąd podczas przywracania domyślnych ustawień: ' . $e->getMessage());
+            
+            $this->logger->error('Failed to reset general settings to defaults', [
+                'user' => $user->getUsername(),
+                'error' => $e->getMessage(),
+                'ip' => $this->getClientIp()
+            ]);
+        }
+
+        return $this->redirectToRoute('admin_settings_general');
+    }
+
     #[Route('/settings/email', name: 'admin_settings_email')]
     public function emailSettings(Request $request): Response
     {

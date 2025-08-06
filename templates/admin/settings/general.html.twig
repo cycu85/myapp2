@@ -124,9 +124,16 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-start">
-                            {{ form_widget(form.save, {'attr': {'class': 'btn btn-primary'}}) }}
-                            <a href="{{ path('admin_settings') }}" class="btn btn-outline-secondary ms-2">Anuluj</a>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {{ form_widget(form.save, {'attr': {'class': 'btn btn-primary'}}) }}
+                                <a href="{{ path('admin_settings') }}" class="btn btn-outline-secondary ms-2">Anuluj</a>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#resetDefaultsModal">
+                                    <i class="ri-restart-line me-1"></i>Przywróć domyślne
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -199,6 +206,55 @@
                 </div>
 
                 {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Defaults Modal -->
+<div class="modal fade" id="resetDefaultsModal" tabindex="-1" aria-labelledby="resetDefaultsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetDefaultsModalLabel">
+                    <i class="ri-restart-line me-2"></i>Przywróć ustawienia domyślne
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <div class="avatar-md mx-auto mb-4">
+                        <div class="avatar-title bg-warning-subtle text-warning fs-24 rounded-circle">
+                            <i class="ri-restart-line"></i>
+                        </div>
+                    </div>
+                    <h5 class="mb-3">Czy na pewno chcesz przywrócić domyślne ustawienia?</h5>
+                    <p class="text-muted mb-4">
+                        Ta akcja przywróci następujące wartości domyślne:
+                    </p>
+                    <div class="text-start bg-light p-3 rounded mb-3">
+                        <ul class="mb-0 list-unstyled">
+                            <li><strong>Nazwa aplikacji:</strong> AssetHub</li>
+                            <li><strong>Główny kolor:</strong> <span class="badge" style="background-color: #405189; color: white;">#405189</span></li>
+                            <li><strong>Kolor tła menu:</strong> <span class="badge" style="background-color: #2a3042; color: white;">#2a3042</span></li>
+                            <li><strong>Kolor tekstu w menu:</strong> <span class="badge" style="background-color: #ffffff; color: black;">#ffffff</span></li>
+                            <li><strong>Kolor aktywnego elementu:</strong> <span class="badge" style="background-color: #405189; color: white;">#405189</span></li>
+                            <li><strong>Logo:</strong> Logo domyślne</li>
+                        </ul>
+                    </div>
+                    <p class="text-muted">
+                        <strong>Uwaga:</strong> Wszystkie obecne ustawienia zostaną utracone. Ta akcja jest nieodwracalna.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                <form action="{{ path('admin_settings_general_reset') }}" method="post" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('reset_general_settings') }}">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="ri-restart-line me-1"></i>Tak, przywróć domyślne
+                    </button>
+                </form>
             </div>
         </div>
     </div>
