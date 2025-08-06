@@ -165,6 +165,11 @@ class AdminController extends AbstractController
             if ($sidebarTextFromText && preg_match('/^#[0-9A-Fa-f]{6}$/', $sidebarTextFromText)) {
                 $data['sidebar_text_color'] = $sidebarTextFromText;
             }
+            
+            $sidebarActiveFromText = $form->get('sidebar_active_color_text')->getData();
+            if ($sidebarActiveFromText && preg_match('/^#[0-9A-Fa-f]{6}$/', $sidebarActiveFromText)) {
+                $data['sidebar_active_color'] = $sidebarActiveFromText;
+            }
 
             try {
                 $this->settingService->saveGeneralSettings($data, $logoFile);

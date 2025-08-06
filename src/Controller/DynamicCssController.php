@@ -216,8 +216,8 @@ html[data-sidebar=\"dark\"] .vertical-menu {
         $response = new Response($css);
         $response->headers->set('Content-Type', 'text/css');
         
-        // Cache krótszy - 10 minut, żeby zmiany były szybciej widoczne
-        $response->setMaxAge(600);
+        // Cache krótszy - 1 minuta, żeby zmiany były szybciej widoczne
+        $response->setMaxAge(60);
         $response->setPublic();
         
         // Dodaj ETag bazując na ustawieniach kolorów
