@@ -18,6 +18,8 @@ class DynamicCssController extends AbstractController
     public function generateCss(): Response
     {
         $primaryColor = $this->settingService->get('primary_color', '#405189');
+        $sidebarBgColor = $this->settingService->get('sidebar_bg_color', '#2a3042');
+        $sidebarTextColor = $this->settingService->get('sidebar_text_color', '#ffffff');
         
         // Konwertuj hex na RGB
         $rgb = $this->hexToRgb($primaryColor);
@@ -107,88 +109,119 @@ class DynamicCssController extends AbstractController
     border-color: var(--bs-primary) !important;
 }
 
-/* Sidebar styling - kompletne przepisanie */
+/* Sidebar styling - używa niestandardowych kolorów */
 .navbar-brand-box {
-    background: var(--bs-primary) !important;
+    background: {$sidebarBgColor} !important;
 }
 
 .app-menu {
-    background-color: var(--bs-primary) !important;
+    background-color: {$sidebarBgColor} !important;
 }
 
 .app-menu.navbar-menu {
-    background-color: var(--bs-primary) !important;
+    background-color: {$sidebarBgColor} !important;
 }
 
 .vertical-menu {
-    background-color: var(--bs-primary) !important;
+    background-color: {$sidebarBgColor} !important;
 }
 
 [data-sidebar=\"dark\"] .app-menu {
-    background-color: var(--bs-primary) !important;
+    background-color: {$sidebarBgColor} !important;
 }
 
 [data-sidebar=\"dark\"] .vertical-menu {
-    background-color: var(--bs-primary) !important;
+    background-color: {$sidebarBgColor} !important;
 }
 
 html[data-sidebar=\"dark\"] .app-menu {
-    background: var(--bs-primary) !important;
+    background: {$sidebarBgColor} !important;
 }
 
 html[data-sidebar=\"dark\"] .vertical-menu {
-    background: var(--bs-primary) !important;
+    background: {$sidebarBgColor} !important;
 }
 
 #layout-wrapper .app-menu {
-    background: var(--bs-primary) !important;
+    background: {$sidebarBgColor} !important;
 }
 
 .sidebar-enable .app-menu {
-    background-color: var(--bs-primary) !important;
+    background-color: {$sidebarBgColor} !important;
 }
 
-/* Menu items styling */
+/* Menu items styling - używa niestandardowego koloru tekstu */
 .vertical-menu .navbar-nav .nav-item .nav-link {
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: {$sidebarTextColor} !important;
+    opacity: 0.8;
 }
 
 .vertical-menu .navbar-nav .nav-item .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    color: white !important;
+    background-color: rgba(" . implode(', ', $this->hexToRgb($sidebarTextColor)) . ", 0.1) !important;
+    color: {$sidebarTextColor} !important;
+    opacity: 1;
 }
 
 .vertical-menu .navbar-nav .nav-item .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.2) !important;
-    color: white !important;
+    background-color: rgba(" . implode(', ', $this->hexToRgb($sidebarTextColor)) . ", 0.2) !important;
+    color: {$sidebarTextColor} !important;
+    opacity: 1;
 }
 
 .vertical-menu .navbar-nav .menu-title {
-    color: rgba(255, 255, 255, 0.6) !important;
+    color: {$sidebarTextColor} !important;
+    opacity: 0.6;
 }
 
 .vertical-menu .navbar-nav .nav-item .nav-link i {
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: {$sidebarTextColor} !important;
+    opacity: 0.8;
 }
 
 .vertical-menu .navbar-nav .nav-item .nav-link.active i {
-    color: white !important;
+    color: {$sidebarTextColor} !important;
+    opacity: 1;
+}
+
+.vertical-menu .navbar-nav .nav-item .nav-link:hover i {
+    color: {$sidebarTextColor} !important;
+    opacity: 1;
 }
 
 #scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2) !important;
+    background-color: rgba(" . implode(', ', $this->hexToRgb($sidebarTextColor)) . ", 0.2) !important;
 }
 
 .navbar-brand-box:hover {
-    background-color: var(--bs-primary-text-emphasis) !important;
+    background-color: " . $this->darkenColor($sidebarBgColor, 10) . " !important;
+}
+
+/* Dropdown menu styling */
+.vertical-menu .navbar-nav .nav-item .menu-dropdown {
+    background-color: rgba(" . implode(', ', $this->hexToRgb($sidebarTextColor)) . ", 0.05) !important;
+}
+
+.vertical-menu .navbar-nav .nav-item .menu-dropdown .nav-link {
+    color: {$sidebarTextColor} !important;
+    opacity: 0.7;
+    padding-left: 3rem;
+}
+
+.vertical-menu .navbar-nav .nav-item .menu-dropdown .nav-link:hover {
+    background-color: rgba(" . implode(', ', $this->hexToRgb($sidebarTextColor)) . ", 0.1) !important;
+    opacity: 1;
 }";
 
         $response = new Response($css);
         $response->headers->set('Content-Type', 'text/css');
         
-        // Cache na 1 godzinę
-        $response->setMaxAge(3600);
+        // Cache krótszy - 10 minut, żeby zmiany były szybciej widoczne
+        $response->setMaxAge(600);
         $response->setPublic();
+        
+        // Dodaj ETag bazując na ustawieniach kolorów
+        $etag = md5($primaryColor . $sidebarBgColor . $sidebarTextColor);
+        $response->setEtag($etag);
         
         return $response;
     }

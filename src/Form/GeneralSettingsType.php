@@ -74,6 +74,34 @@ class GeneralSettingsType extends AbstractType
                     'maxlength' => 7
                 ]
             ])
+            ->add('sidebar_bg_color', HiddenType::class, [
+                'required' => false
+            ])
+            ->add('sidebar_bg_color_text', TextType::class, [
+                'label' => 'Kolor tła menu',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => '#2a3042',
+                    'pattern' => '^#[0-9A-Fa-f]{6}$',
+                    'maxlength' => 7
+                ]
+            ])
+            ->add('sidebar_text_color', HiddenType::class, [
+                'required' => false
+            ])
+            ->add('sidebar_text_color_text', TextType::class, [
+                'label' => 'Kolor tekstu w menu',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => '#ffffff',
+                    'pattern' => '^#[0-9A-Fa-f]{6}$',
+                    'maxlength' => 7
+                ]
+            ])
             ->add('save', SubmitType::class, [
                 'label' => 'Zapisz ustawienia',
                 'attr' => [

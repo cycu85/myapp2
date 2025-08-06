@@ -63,6 +63,16 @@ class SettingService
             $this->set('primary_color', $data['primary_color'], 'general', 'color', 'Główny kolor aplikacji');
         }
 
+        // Zapisz kolor tła sidebar
+        if (isset($data['sidebar_bg_color'])) {
+            $this->set('sidebar_bg_color', $data['sidebar_bg_color'], 'general', 'color', 'Kolor tła menu');
+        }
+
+        // Zapisz kolor tekstu sidebar
+        if (isset($data['sidebar_text_color'])) {
+            $this->set('sidebar_text_color', $data['sidebar_text_color'], 'general', 'color', 'Kolor tekstu w menu');
+        }
+
         // Obsługa uploadu logo
         if ($logoFile) {
             $logoPath = $this->handleLogoUpload($logoFile);

@@ -69,6 +69,36 @@
                             </div>
                         </div>
 
+                        <div class="mb-3">
+                            {{ form_widget(form.sidebar_bg_color) }}
+                            {{ form_label(form.sidebar_bg_color_text, null, {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                {{ form_widget(form.sidebar_bg_color_text, {'value': current_settings.sidebar_bg_color|default('#2a3042')}) }}
+                                <span class="input-group-text" id="sidebar-bg-preview" style="background-color: {{ current_settings.sidebar_bg_color|default('#2a3042') }}; width: 40px; border-left: none;"></span>
+                            </div>
+                            {{ form_errors(form.sidebar_bg_color) }}
+                            {{ form_errors(form.sidebar_bg_color_text) }}
+                            <div class="form-text">
+                                <i class="ri-information-line me-1"></i>
+                                Kolor tła menu bocznego (np. #2a3042, #1e293b)
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_widget(form.sidebar_text_color) }}
+                            {{ form_label(form.sidebar_text_color_text, null, {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                {{ form_widget(form.sidebar_text_color_text, {'value': current_settings.sidebar_text_color|default('#ffffff')}) }}
+                                <span class="input-group-text" id="sidebar-text-preview" style="background-color: {{ current_settings.sidebar_text_color|default('#ffffff') }}; width: 40px; border-left: none;"></span>
+                            </div>
+                            {{ form_errors(form.sidebar_text_color) }}
+                            {{ form_errors(form.sidebar_text_color_text) }}
+                            <div class="form-text">
+                                <i class="ri-information-line me-1"></i>
+                                Kolor tekstu w menu bocznym (np. #ffffff, #e2e8f0)
+                            </div>
+                        </div>
+
                         <div class="mb-4">
                             {{ form_label(form.company_logo, null, {'label_attr': {'class': 'form-label'}}) }}
                             {{ form_widget(form.company_logo) }}
@@ -102,14 +132,32 @@
                                              id="logo-preview">
                                     </div>
                                     <h5 class="mb-2" id="app-name-preview">{{ current_settings.app_name }}</h5>
-                                    <div class="mb-2">
+                                    <div class="mb-3">
                                         <span class="badge" 
                                               style="background-color: {{ current_settings.primary_color }}; color: white;"
                                               id="color-badge-preview">
-                                            Przykładowy element
+                                            Przycisk główny
                                         </span>
                                     </div>
-                                    <small class="text-muted">Tak będzie wyglądać w aplikacji</small>
+                                    
+                                    <!-- Podgląd menu -->
+                                    <div class="border rounded p-2 mb-3" style="max-width: 200px; margin: 0 auto;">
+                                        <div class="small text-muted mb-2">Podgląd menu:</div>
+                                        <div class="rounded p-2" 
+                                             id="menu-preview" 
+                                             style="background-color: {{ current_settings.sidebar_bg_color|default('#2a3042') }};">
+                                            <div style="color: {{ current_settings.sidebar_text_color|default('#ffffff') }}; font-size: 12px;" 
+                                                 id="menu-text-preview">
+                                                <i class="ri-dashboard-line me-1"></i>Dashboard
+                                            </div>
+                                            <div style="color: {{ current_settings.sidebar_text_color|default('#ffffff') }}; font-size: 12px; opacity: 0.7;" 
+                                                 id="menu-text-preview-2">
+                                                <i class="ri-settings-line me-1"></i>Ustawienia
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <small class="text-muted">Podgląd na żywo</small>
                                 </div>
                             </div>
                         </div>
@@ -208,11 +256,109 @@ document.addEventListener('DOMContentLoaded', function() {
                 const textColor = colorText.value.trim();
                 if (isValidHexColor(textColor)) {
                     colorInput.value = textColor;
-                } else {
+                } else if (textColor) {
                     // Jeśli kolor nieprawidłowy, zatrzymaj submit
                     e.preventDefault();
                     colorText.focus();
-                    alert('Proszę wprowadzić prawidłowy kolor w formacie HEX (np. #405189)');
+                    alert('Proszę wprowadzić prawidłowy kolor główny w formacie HEX (np. #405189)');
+                    return;
+                }
+            });
+        }
+    }
+
+    // Obsługa kolorów sidebar
+    const sidebarBgInput = document.getElementById('{{ form.sidebar_bg_color.vars.id }}');
+    const sidebarBgPreview = document.getElementById('sidebar-bg-preview');
+    const sidebarBgText = document.getElementById('{{ form.sidebar_bg_color_text.vars.id }}');
+    const menuPreview = document.getElementById('menu-preview');
+    
+    const sidebarTextInput = document.getElementById('{{ form.sidebar_text_color.vars.id }}');
+    const sidebarTextPreview = document.getElementById('sidebar-text-preview');
+    const sidebarTextText = document.getElementById('{{ form.sidebar_text_color_text.vars.id }}');
+    const menuTextPreview = document.getElementById('menu-text-preview');
+    const menuTextPreview2 = document.getElementById('menu-text-preview-2');
+    
+    function updateSidebarPreview() {
+        const bgColor = sidebarBgText.value || '#2a3042';
+        const textColor = sidebarTextText.value || '#ffffff';
+        
+        if (isValidHexColor(bgColor)) {
+            sidebarBgPreview.style.backgroundColor = bgColor;
+            menuPreview.style.backgroundColor = bgColor;
+            sidebarBgText.classList.remove('is-invalid');
+            sidebarBgText.classList.add('is-valid');
+        } else {
+            sidebarBgText.classList.remove('is-valid');
+            sidebarBgText.classList.add('is-invalid');
+        }
+        
+        if (isValidHexColor(textColor)) {
+            sidebarTextPreview.style.backgroundColor = textColor;
+            menuTextPreview.style.color = textColor;
+            menuTextPreview2.style.color = textColor;
+            sidebarTextText.classList.remove('is-invalid');
+            sidebarTextText.classList.add('is-valid');
+        } else {
+            sidebarTextText.classList.remove('is-valid');
+            sidebarTextText.classList.add('is-invalid');
+        }
+    }
+    
+    if (sidebarBgText && sidebarTextText) {
+        // Sidebar background color
+        sidebarBgText.addEventListener('input', updateSidebarPreview);
+        sidebarBgText.addEventListener('blur', function() {
+            let color = this.value.trim();
+            if (color && !color.startsWith('#')) {
+                color = '#' + color;
+                this.value = color;
+            }
+            if (/^#[0-9A-Fa-f]{3}$/.test(color)) {
+                color = '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+                this.value = color;
+            }
+            updateSidebarPreview();
+        });
+        
+        // Sidebar text color
+        sidebarTextText.addEventListener('input', updateSidebarPreview);
+        sidebarTextText.addEventListener('blur', function() {
+            let color = this.value.trim();
+            if (color && !color.startsWith('#')) {
+                color = '#' + color;
+                this.value = color;
+            }
+            if (/^#[0-9A-Fa-f]{3}$/.test(color)) {
+                color = '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+                this.value = color;
+            }
+            updateSidebarPreview();
+        });
+        
+        // Submit form handling dla sidebar
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Sidebar bg color
+                const bgColor = sidebarBgText.value.trim();
+                if (bgColor && isValidHexColor(bgColor) && sidebarBgInput) {
+                    sidebarBgInput.value = bgColor;
+                } else if (bgColor) {
+                    e.preventDefault();
+                    sidebarBgText.focus();
+                    alert('Proszę wprowadzić prawidłowy kolor tła menu w formacie HEX (np. #2a3042)');
+                    return;
+                }
+                
+                // Sidebar text color
+                const textColor = sidebarTextText.value.trim();
+                if (textColor && isValidHexColor(textColor) && sidebarTextInput) {
+                    sidebarTextInput.value = textColor;
+                } else if (textColor) {
+                    e.preventDefault();
+                    sidebarTextText.focus();
+                    alert('Proszę wprowadzić prawidłowy kolor tekstu menu w formacie HEX (np. #ffffff)');
+                    return;
                 }
             });
         }
