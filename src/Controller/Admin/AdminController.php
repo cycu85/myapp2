@@ -1256,7 +1256,7 @@ class AdminController extends AbstractController
             
             // Sprawdź typ bazy danych
             $platform = $connection->getDatabasePlatform();
-            $databaseType = $platform->getName();
+            $databaseType = $this->getDatabaseTypeName($platform);
             
             // Pobierz rozmiar bazy danych (MySQL)
             $databaseSize = 0;
@@ -1361,7 +1361,7 @@ class AdminController extends AbstractController
         $databaseName = $connection->getDatabase();
         
         // Sprawdź czy to MySQL
-        if ($connection->getDatabasePlatform()->getName() !== 'mysql') {
+        if (!$this->isMySQLPlatform($connection->getDatabasePlatform())) {
             throw new \Exception('Kopie zapasowe są obsługiwane tylko dla MySQL');
         }
         
@@ -1420,7 +1420,7 @@ class AdminController extends AbstractController
     {
         $connection = $this->entityManager->getConnection();
         
-        if ($connection->getDatabasePlatform()->getName() !== 'mysql') {
+        if (!$this->isMySQLPlatform($connection->getDatabasePlatform())) {
             throw new \Exception('Optymalizacja jest obsługiwana tylko dla MySQL');
         }
         
@@ -1457,7 +1457,7 @@ class AdminController extends AbstractController
     {
         $connection = $this->entityManager->getConnection();
         
-        if ($connection->getDatabasePlatform()->getName() !== 'mysql') {
+        if (!$this->isMySQLPlatform($connection->getDatabasePlatform())) {
             throw new \Exception('Analiza jest obsługiwana tylko dla MySQL');
         }
         
@@ -1569,6 +1569,37 @@ class AdminController extends AbstractController
         
         // Zamień pliki
         rename($tempFile, $logFile);
+    }
+
+    /**
+     * Pomocnicza metoda do określenia typu bazy danych
+     */
+    private function getDatabaseTypeName($platform): string
+    {
+        // Sprawdź klasę platformy zamiast używać getName()
+        if ($platform instanceof \Doctrine\DBAL\Platforms\MySQLPlatform) {
+            return 'mysql';
+        } elseif ($platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform) {
+            return 'postgresql';
+        } elseif ($platform instanceof \Doctrine\DBAL\Platforms\SQLitePlatform) {
+            return 'sqlite';
+        } elseif ($platform instanceof \Doctrine\DBAL\Platforms\SQLServerPlatform) {
+            return 'mssql';
+        }
+        
+        // Fallback - spróbuj użyć refleksji do uzyskania nazwy klasy
+        $reflection = new \ReflectionClass($platform);
+        $className = $reflection->getShortName();
+        
+        return strtolower(str_replace('Platform', '', $className));
+    }
+    
+    /**
+     * Sprawdza czy platforma to MySQL
+     */
+    private function isMySQLPlatform($platform): bool
+    {
+        return $platform instanceof \Doctrine\DBAL\Platforms\MySQLPlatform;
     }
 
     private function getClientIp(): ?string
