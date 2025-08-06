@@ -132,6 +132,8 @@ class SettingService
             'app_name' => $this->get('app_name', 'AssetHub'),
             'company_logo' => $this->get('company_logo', '/assets/images/logo-dark.png'),
             'primary_color' => $this->get('primary_color', '#405189'),
+            'sidebar_bg_color' => $this->get('sidebar_bg_color', '#2a3042'),
+            'sidebar_text_color' => $this->get('sidebar_text_color', '#ffffff'),
         ];
     }
 
