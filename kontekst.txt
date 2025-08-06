@@ -365,6 +365,45 @@ $categoryType->setValue('Aktywny');
 - **Upload avatarów** - JPG, PNG, GIF, WebP (max 2MB), przechowywane w `public/uploads/avatars/`
 - **Integracja LDAP** - synchronizacja danych z Active Directory
 
+## SYSTEM ZARZĄDZANIA BAZĄ DANYCH
+
+### Funkcjonalności zarządzania bazą
+- **📊 Informacje o bazie** - rozmiar, liczba tabel, wersja, szczegółowe statystyki tabel
+- **💾 Kopie zapasowe** - automatyczne backupy przez mysqldump, lista i pobieranie backupów
+- **⚡ Optymalizacja** - OPTIMIZE TABLE dla wszystkich tabel MySQL
+- **🔍 Analiza** - ANALYZE TABLE dla aktualizacji statystyk indeksów  
+- **🧹 Czyszczenie logów** - usuwanie starych plików logów (>30 dni)
+- **📋 Monitoring** - szczegółowe informacje o tabelach (rozmiar danych/indeksów, liczba wierszy)
+
+### Lokalizacja i dostęp
+- **Route**: `/admin/settings/database`
+- **Uprawnienia**: tylko rola `system_admin`
+- **Katalog backupów**: `var/backups/` (automatycznie tworzony)
+- **Format backupów**: `backup_[database]_[YYYY-mm-dd_HH-ii-ss].sql`
+
+### Bezpieczeństwo backupów
+```php
+// Parsing DATABASE_URL z obsługą parametrów
+if (preg_match('/mysql:\/\/([^:]+):([^@]+)@([^:]+):?(\d+)?\/([^?]+)(?:\?.*)?/', $databaseUrl, $matches)) {
+    $database = $matches[5]; // Ignoruje parametry po znaku ?
+}
+
+// Komenda mysqldump z bezpiecznym escapowaniem
+$command = sprintf(
+    'mysqldump -h%s -P%s -u%s -p%s --single-transaction --routines --triggers %s > %s 2>&1',
+    escapeshellarg($host), escapeshellarg($port), escapeshellarg($username),
+    escapeshellarg($password), escapeshellarg($database), escapeshellarg($filepath)
+);
+```
+
+### Walidacja backupów
+```php
+// Sprawdzanie rozmiaru i zawartości
+if ($fileSize < 1000) { // Mniej niż 1KB = prawdopodobnie błąd
+    throw new \Exception('Kopia zapasowa wydaje się niepełna');
+}
+```
+
 ### Struktura plików avatarów
 ```bash
 public/uploads/avatars/
@@ -463,6 +502,57 @@ if ($this->columnNotExists('users', 'branch', $connection, $databaseName)) {
 // Dodaj wszystkie kolumny jednym zapytaniem
 if (!empty($columnsToAdd)) {
     $this->addSql('ALTER TABLE users ' . implode(', ', $columnsToAdd));
+}
+```
+
+## KOMPATYBILNOŚĆ DOCTRINE DBAL
+
+### Problem z getName() w nowszych wersjach
+**Błąd**: `Attempted to call undefined method getName() of class Doctrine\DBAL\Platforms\MySQLPlatform`
+
+**Rozwiązanie**: Zastąp `getName()` sprawdzaniem przez `instanceof`
+
+```php
+// BŁĘDNE (przestarzałe)
+if ($connection->getDatabasePlatform()->getName() !== 'mysql') {
+    // ...
+}
+
+// POPRAWNE (kompatybilne z nowszymi wersjami)
+private function getDatabaseTypeName($platform): string
+{
+    if ($platform instanceof \Doctrine\DBAL\Platforms\MySQLPlatform) {
+        return 'mysql';
+    } elseif ($platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform) {
+        return 'postgresql';
+    } elseif ($platform instanceof \Doctrine\DBAL\Platforms\SQLitePlatform) {
+        return 'sqlite';
+    }
+    
+    // Fallback przy użyciu refleksji
+    $reflection = new \ReflectionClass($platform);
+    return strtolower(str_replace('Platform', '', $reflection->getShortName()));
+}
+
+private function isMySQLPlatform($platform): bool
+{
+    return $platform instanceof \Doctrine\DBAL\Platforms\MySQLPlatform;
+}
+```
+
+### MySQL INFORMATION_SCHEMA - problem z kluczami
+**Błąd**: `Key "table_name" does not exist` (MySQL zwraca wielkie litery: `TABLE_NAME`)
+
+**Rozwiązanie**: Normalizacja kluczy z fallback
+```php
+// Normalizuj klucze do małych liter
+$tables = [];
+foreach ($tablesResult as $row) {
+    $tables[] = [
+        'table_name' => $row['table_name'] ?? $row['TABLE_NAME'] ?? '',
+        'table_rows' => $row['table_rows'] ?? $row['TABLE_ROWS'] ?? 0,
+        // ...
+    ];
 }
 ```
 

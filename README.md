@@ -65,17 +65,18 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 - Kontrola kosztów eksploatacji
 
 ### 👨‍💼 Panel Administracyjny
-- Zarządzanie użytkownikami i rolami
-- Konfiguracja modułów systemu  
-- Generowanie raportów i analiz
-- Ustawienia systemowe i bezpieczeństwa
-- **System logowania** - Kompleksowe logowanie aktywności użytkowników
-- **Podgląd logów** - Przeglądanie logów systemowych w panelu administracyjnym
+- **Zarządzanie użytkownikami i rolami** - System uprawnień z granularnymi rolami (system_admin, employees_viewer, employees_editor, employees_manager)
+- **Konfiguracja modułów systemu** - Aktywacja i zarządzanie modułami aplikacji
+- **Generowanie raportów i analiz** - Kompleksowe raporty systemu
+- **System logowania** - Kompleksowe logowanie aktywności użytkowników z wielokanałowymi logami
+- **Podgląd logów** - Przeglądanie i filtrowanie logów systemowych w panelu administracyjnym
 - **System słowników** - Zarządzanie słownikami systemowymi dla wszystkich modułów
-- **🎨 Konfiguracja wyglądu** - Dynamiczne ustawienia nazwy, logo i kolorystyki
-- **⚙️ Panel ustawień** - Kompleksowy system konfiguracji aplikacji
-- **📧 Konfiguracja Email** - System SMTP z testowaniem połączenia
-- **🔗 Integracja LDAP/AD** - Synchronizacja użytkowników z Active Directory
+
+#### 🎨 Ustawienia Systemu
+- **Ogólne** - Dynamiczne ustawienia nazwy aplikacji, logo firmy i kolorystyki (color picker + HEX input)
+- **📧 Email** - Kompletna konfiguracja SMTP z testowaniem połączenia i wysyłaniem wiadomości testowych
+- **🔗 LDAP/Active Directory** - Pełna integracja z AD: synchronizacja użytkowników, mapowanie pól, hierarchia przełożonych
+- **💾 Baza Danych** - Zarządzanie bazą danych: kopie zapasowe (mysqldump), optymalizacja tabel, analiza, czyszczenie logów
 
 ### 👤 System Profili Użytkowników
 - **Profil użytkownika** - Przeglądanie i edycja danych osobowych
@@ -94,8 +95,9 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
 | **Serwer Web** | Apache 2.4+ / Nginx 1.18+ |
 | **Baza Danych** | MySQL 8.0+ (domyślnie) / PostgreSQL 13+ / SQLite 3.35+ |
 | **Pamięć RAM** | Minimum 512MB, zalecane 2GB+ |
-| **Przestrzeń Dyskowa** | Minimum 1GB, zalecane 10GB+ (w tym miejsce na avatary użytkowników) |
+| **Przestrzeń Dyskowa** | Minimum 1GB, zalecane 10GB+ (w tym miejsce na avatary, backupy bazy danych) |
 | **PHP Extensions** | mysql, pdo, intl, mbstring, xml, curl, gd, ldap |
+| **Narzędzia systemowe** | mysqldump (dla kopii zapasowych bazy danych) |
 
 ### Zalecane Wymagania Produkcyjne
 
@@ -194,10 +196,11 @@ AssetHub to nowoczesny system zarządzania zasobami firmy, zaprojektowany z myś
    # Tworzenie katalogów logów (system automatycznie utworzy pliki logów)
    sudo -u www-data mkdir -p var/log
    
-   # Tworzenie katalogu dla avatarów użytkowników
+   # Tworzenie katalogów dla uploads i backupów
    sudo -u www-data mkdir -p public/uploads/avatars
-   sudo chmod 755 public/uploads/avatars
-   sudo chown -R www-data:www-data public/uploads/avatars
+   sudo -u www-data mkdir -p var/backups
+   sudo chmod 755 public/uploads/avatars var/backups
+   sudo chown -R www-data:www-data public/uploads/avatars var/backups
    ```
 
 5. **Konfiguracja Apache**
