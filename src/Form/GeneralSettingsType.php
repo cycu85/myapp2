@@ -58,18 +58,13 @@ class GeneralSettingsType extends AbstractType
                     ])
                 ]
             ])
-            ->add('primary_color', ColorType::class, [
-                'label' => 'Główny kolor aplikacji',
-                'attr' => [
-                    'class' => 'form-control form-control-color',
-                    'title' => 'Wybierz kolor'
-                ],
+            ->add('primary_color', HiddenType::class, [
                 'constraints' => [
                     new NotBlank(['message' => 'Główny kolor musi być wybrany'])
                 ]
             ])
             ->add('primary_color_text', TextType::class, [
-                'label' => false,
+                'label' => 'Główny kolor aplikacji',
                 'mapped' => false,
                 'required' => false,
                 'attr' => [

@@ -55,13 +55,14 @@
                         </div>
 
                         <div class="mb-3">
-                            {{ form_label(form.primary_color, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.primary_color) }}
+                            {{ form_label(form.primary_color_text, null, {'label_attr': {'class': 'form-label'}}) }}
                             <div class="input-group">
-                                {{ form_widget(form.primary_color, {'attr': {'style': 'width: 80px; height: 38px;'}}) }}
-                                <span class="input-group-text" id="color-preview" style="background-color: {{ current_settings.primary_color }}; width: 40px;"></span>
                                 {{ form_widget(form.primary_color_text, {'value': current_settings.primary_color}) }}
+                                <span class="input-group-text" id="color-preview" style="background-color: {{ current_settings.primary_color }}; width: 40px; border-left: none;"></span>
                             </div>
                             {{ form_errors(form.primary_color) }}
+                            {{ form_errors(form.primary_color_text) }}
                             <div class="form-text">
                                 <i class="ri-information-line me-1"></i>
                                 Główny kolor używany w interfejsie aplikacji. Możesz wpisać kolor w formacie HEX (np. #405189, #ff0000, #abc)
@@ -151,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Aktualizacja podglądu koloru - synchronizacja dwukierunkowa
+    // Aktualizacja podglądu koloru
     const colorInput = document.getElementById('{{ form.primary_color.vars.id }}');
     const colorPreview = document.getElementById('color-preview');
     const colorText = document.getElementById('{{ form.primary_color_text.vars.id }}');
@@ -173,23 +174,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return /^#[0-9A-Fa-f]{6}$/.test(color);
     }
     
-    if (colorInput && colorPreview && colorText && colorBadgePreview) {
-        // Color picker zmienia tekst
-        colorInput.addEventListener('input', function() {
-            const color = this.value;
-            colorText.value = color;
-            updateColorPreview(color);
-        });
-        
-        // Pole tekstowe zmienia color picker
+    if (colorPreview && colorText && colorBadgePreview) {
+        // Pole tekstowe zmienia podgląd
         colorText.addEventListener('input', function() {
             const color = this.value;
-            if (isValidHexColor(color)) {
-                colorInput.value = color;
-                updateColorPreview(color);
-            } else {
-                updateColorPreview(color); // Pokazuje błąd walidacji
-            }
+            updateColorPreview(color);
         });
         
         // Walidacja przy opuszczeniu pola
@@ -208,20 +197,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.value = color;
             }
             
-            if (isValidHexColor(color)) {
-                colorInput.value = color;
-                updateColorPreview(color);
-            }
+            updateColorPreview(color);
         });
         
         // Synchronizacja przed submitem formularza
         const form = document.querySelector('form');
-        if (form) {
+        if (form && colorInput) {
             form.addEventListener('submit', function(e) {
-                // Upewnij się, że wartość z pola tekstowego jest w color picker
+                // Przekaż wartość z pola tekstowego do ukrytego pola
                 const textColor = colorText.value.trim();
                 if (isValidHexColor(textColor)) {
                     colorInput.value = textColor;
+                } else {
+                    // Jeśli kolor nieprawidłowy, zatrzymaj submit
+                    e.preventDefault();
+                    colorText.focus();
+                    alert('Proszę wprowadzić prawidłowy kolor w formacie HEX (np. #405189)');
                 }
             });
         }
