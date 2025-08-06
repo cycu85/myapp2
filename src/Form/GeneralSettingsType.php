@@ -102,6 +102,20 @@ class GeneralSettingsType extends AbstractType
                     'maxlength' => 7
                 ]
             ])
+            ->add('sidebar_active_color', HiddenType::class, [
+                'required' => false
+            ])
+            ->add('sidebar_active_color_text', TextType::class, [
+                'label' => 'Kolor aktywnego elementu w menu',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => '#405189',
+                    'pattern' => '^#[0-9A-Fa-f]{6}$',
+                    'maxlength' => 7
+                ]
+            ])
             ->add('save', SubmitType::class, [
                 'label' => 'Zapisz ustawienia',
                 'attr' => [

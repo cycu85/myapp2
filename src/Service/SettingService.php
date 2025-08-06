@@ -73,6 +73,11 @@ class SettingService
             $this->set('sidebar_text_color', $data['sidebar_text_color'], 'general', 'color', 'Kolor tekstu w menu');
         }
 
+        // Zapisz kolor aktywnego elementu sidebar
+        if (isset($data['sidebar_active_color'])) {
+            $this->set('sidebar_active_color', $data['sidebar_active_color'], 'general', 'color', 'Kolor aktywnego elementu w menu');
+        }
+
         // Obsługa uploadu logo
         if ($logoFile) {
             $logoPath = $this->handleLogoUpload($logoFile);
@@ -134,6 +139,7 @@ class SettingService
             'primary_color' => $this->get('primary_color', '#405189'),
             'sidebar_bg_color' => $this->get('sidebar_bg_color', '#2a3042'),
             'sidebar_text_color' => $this->get('sidebar_text_color', '#ffffff'),
+            'sidebar_active_color' => $this->get('sidebar_active_color', '#405189'),
         ];
     }
 

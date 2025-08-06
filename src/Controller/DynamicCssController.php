@@ -20,6 +20,7 @@ class DynamicCssController extends AbstractController
         $primaryColor = $this->settingService->get('primary_color', '#405189');
         $sidebarBgColor = $this->settingService->get('sidebar_bg_color', '#2a3042');
         $sidebarTextColor = $this->settingService->get('sidebar_text_color', '#ffffff');
+        $sidebarActiveColor = $this->settingService->get('sidebar_active_color', '#405189');
         
         // Konwertuj hex na RGB
         $rgb = $this->hexToRgb($primaryColor);
@@ -163,7 +164,7 @@ html[data-sidebar=\"dark\"] .vertical-menu {
 }
 
 .vertical-menu .navbar-nav .nav-item .nav-link.active {
-    background-color: rgba(" . implode(', ', $this->hexToRgb($sidebarTextColor)) . ", 0.2) !important;
+    background-color: {$sidebarActiveColor} !important;
     color: {$sidebarTextColor} !important;
     opacity: 1;
 }
@@ -220,7 +221,7 @@ html[data-sidebar=\"dark\"] .vertical-menu {
         $response->setPublic();
         
         // Dodaj ETag bazując na ustawieniach kolorów
-        $etag = md5($primaryColor . $sidebarBgColor . $sidebarTextColor);
+        $etag = md5($primaryColor . $sidebarBgColor . $sidebarTextColor . $sidebarActiveColor);
         $response->setEtag($etag);
         
         return $response;

@@ -99,6 +99,21 @@
                             </div>
                         </div>
 
+                        <div class="mb-3">
+                            {{ form_widget(form.sidebar_active_color) }}
+                            {{ form_label(form.sidebar_active_color_text, null, {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                {{ form_widget(form.sidebar_active_color_text, {'value': current_settings.sidebar_active_color|default('#405189')}) }}
+                                <span class="input-group-text" id="sidebar-active-preview" style="background-color: {{ current_settings.sidebar_active_color|default('#405189') }}; width: 40px; border-left: none;"></span>
+                            </div>
+                            {{ form_errors(form.sidebar_active_color) }}
+                            {{ form_errors(form.sidebar_active_color_text) }}
+                            <div class="form-text">
+                                <i class="ri-information-line me-1"></i>
+                                Kolor aktywnego (zaznaczonego) elementu w menu bocznym (np. #405189, #3b82f6)
+                            </div>
+                        </div>
+
                         <div class="mb-4">
                             {{ form_label(form.company_logo, null, {'label_attr': {'class': 'form-label'}}) }}
                             {{ form_widget(form.company_logo) }}
@@ -153,6 +168,10 @@
                                             <div style="color: {{ current_settings.sidebar_text_color|default('#ffffff') }}; font-size: 12px; opacity: 0.7;" 
                                                  id="menu-text-preview-2">
                                                 <i class="ri-settings-line me-1"></i>Ustawienia
+                                            </div>
+                                            <div style="background-color: {{ current_settings.sidebar_active_color|default('#405189') }}; color: {{ current_settings.sidebar_text_color|default('#ffffff') }}; font-size: 12px; padding: 2px 4px; margin-top: 2px; border-radius: 3px;" 
+                                                 id="menu-active-preview">
+                                                <i class="ri-user-line me-1"></i>Aktywny element
                                             </div>
                                         </div>
                                     </div>
@@ -279,9 +298,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuTextPreview = document.getElementById('menu-text-preview');
     const menuTextPreview2 = document.getElementById('menu-text-preview-2');
     
+    const sidebarActiveInput = document.getElementById('{{ form.sidebar_active_color.vars.id }}');
+    const sidebarActivePreview = document.getElementById('sidebar-active-preview');
+    const sidebarActiveText = document.getElementById('{{ form.sidebar_active_color_text.vars.id }}');
+    const menuActivePreview = document.getElementById('menu-active-preview');
+    
     function updateSidebarPreview() {
         const bgColor = sidebarBgText.value || '#2a3042';
         const textColor = sidebarTextText.value || '#ffffff';
+        const activeColor = sidebarActiveText.value || '#405189';
         
         if (isValidHexColor(bgColor)) {
             sidebarBgPreview.style.backgroundColor = bgColor;
@@ -297,15 +322,30 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebarTextPreview.style.backgroundColor = textColor;
             menuTextPreview.style.color = textColor;
             menuTextPreview2.style.color = textColor;
+            if (menuActivePreview) {
+                menuActivePreview.style.color = textColor;
+            }
             sidebarTextText.classList.remove('is-invalid');
             sidebarTextText.classList.add('is-valid');
         } else {
             sidebarTextText.classList.remove('is-valid');
             sidebarTextText.classList.add('is-invalid');
         }
+        
+        if (isValidHexColor(activeColor)) {
+            sidebarActivePreview.style.backgroundColor = activeColor;
+            if (menuActivePreview) {
+                menuActivePreview.style.backgroundColor = activeColor;
+            }
+            sidebarActiveText.classList.remove('is-invalid');
+            sidebarActiveText.classList.add('is-valid');
+        } else {
+            sidebarActiveText.classList.remove('is-valid');
+            sidebarActiveText.classList.add('is-invalid');
+        }
     }
     
-    if (sidebarBgText && sidebarTextText) {
+    if (sidebarBgText && sidebarTextText && sidebarActiveText) {
         // Sidebar background color
         sidebarBgText.addEventListener('input', updateSidebarPreview);
         sidebarBgText.addEventListener('blur', function() {
@@ -324,6 +364,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Sidebar text color
         sidebarTextText.addEventListener('input', updateSidebarPreview);
         sidebarTextText.addEventListener('blur', function() {
+            let color = this.value.trim();
+            if (color && !color.startsWith('#')) {
+                color = '#' + color;
+                this.value = color;
+            }
+            if (/^#[0-9A-Fa-f]{3}$/.test(color)) {
+                color = '#' + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+                this.value = color;
+            }
+            updateSidebarPreview();
+        });
+        
+        // Sidebar active color
+        sidebarActiveText.addEventListener('input', updateSidebarPreview);
+        sidebarActiveText.addEventListener('blur', function() {
             let color = this.value.trim();
             if (color && !color.startsWith('#')) {
                 color = '#' + color;
@@ -358,6 +413,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     e.preventDefault();
                     sidebarTextText.focus();
                     alert('Proszę wprowadzić prawidłowy kolor tekstu menu w formacie HEX (np. #ffffff)');
+                    return;
+                }
+                
+                // Sidebar active color
+                const activeColor = sidebarActiveText.value.trim();
+                if (activeColor && isValidHexColor(activeColor) && sidebarActiveInput) {
+                    sidebarActiveInput.value = activeColor;
+                } else if (activeColor) {
+                    e.preventDefault();
+                    sidebarActiveText.focus();
+                    alert('Proszę wprowadzić prawidłowy kolor aktywnego elementu menu w formacie HEX (np. #405189)');
                     return;
                 }
             });
