@@ -129,26 +129,77 @@ $this->logger->error('Operation failed', [
 ### Sprawdzanie uprawnień
 ```php
 // W kontrolerze - ZAWSZE na początku akcji
-if (!$this->permissionService->canAccessModule($user, 'module_name')) {
+if (!$this->permissionService->hasPermission($user, 'module_name', 'PERMISSION_NAME')) {
     $this->logger->warning('Unauthorized access attempt', [
         'module' => 'module_name',
         'user' => $user?->getUsername() ?? 'anonymous',
-        'ip' => $this->getClientIp()
+        'ip' => $request->getClientIp()
     ]);
-    throw $this->createAccessDeniedException('Brak dostępu');
+    return $this->redirectToRoute('error_access_denied');
 }
 
-// W szablonach
-{% if is_granted_module('module_name') %}
-    <!-- treść dostępna tylko dla uprawnionych -->
+// W szablonach - sprawdzanie ról w module admin
+{% set userModules = get_user_modules() %}
+{% set hasSystemAdmin = false %}
+{% set hasEmployeesRole = false %}
+
+{% for userRole in userModules %}
+    {% set module = userRole.role.module %}
+    
+    {% if module.name == 'admin' and userRole.role.name == 'system_admin' %}
+        {% set hasSystemAdmin = true %}
+    {% elseif module.name == 'admin' and userRole.role.name in ['employees_viewer', 'employees_editor', 'employees_manager'] %}
+        {% set hasEmployeesRole = true %}
+    {% endif %}
+{% endfor %}
+
+{# Panel administracyjny dla system_admin #}
+{% if hasSystemAdmin %}
+    <!-- admin panel content -->
+{% endif %}
+
+{# Menu Pracownicy dla system_admin lub ról employees #}
+{% if hasSystemAdmin or hasEmployeesRole %}
+    <!-- employees menu -->
 {% endif %}
 ```
 
-### Typy uprawnień
-- `VIEW` - podgląd
-- `CREATE` - tworzenie
-- `EDIT` - edycja
-- `DELETE` - usuwanie
+### Typy uprawnień w module admin
+- **system_admin** - pełny dostęp do panelu administracyjnego
+- **employees_viewer** - `EMPLOYEES_VIEW` - tylko podgląd pracowników
+- **employees_editor** - `EMPLOYEES_EDIT_BASIC` - edycja podstawowych danych pracowników
+- **employees_manager** - `EMPLOYEES_EDIT_FULL` - pełne zarządzanie pracownikami (tworzenie, usuwanie, role)
+
+### Kontrola dostępu w kontrolerach pracowników
+```php
+// Podgląd pracowników - wystarczy jeden z trzech uprawnień
+if (!$this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_VIEW') && 
+    !$this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_BASIC') && 
+    !$this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_FULL')) {
+    return $this->redirectToRoute('error_access_denied');
+}
+
+// Edycja pracowników - wystarczy jedno z dwóch uprawnień edycji
+if (!$this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_BASIC') && 
+    !$this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_FULL')) {
+    return $this->redirectToRoute('error_access_denied');
+}
+
+// Pełne zarządzanie - tylko EMPLOYEES_EDIT_FULL
+if (!$this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_FULL')) {
+    return $this->redirectToRoute('error_access_denied');
+}
+
+// Przekazywanie uprawnień do szablonu
+$canEdit = $this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_BASIC') || 
+           $this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_FULL');
+$canEditFull = $this->permissionService->hasPermission($user, 'admin', 'EMPLOYEES_EDIT_FULL');
+
+return $this->render('template.html.twig', [
+    'can_edit' => $canEdit,
+    'can_edit_full' => $canEditFull,
+]);
+```
 
 ## BAZA DANYCH - FIXTURES
 
@@ -306,6 +357,115 @@ $categoryType->setKey('active');
 $categoryType->setValue('Aktywny');
 ```
 
+## SYSTEM PROFILI UŻYTKOWNIKÓW
+
+### Funkcjonalności profili
+- **Edycja danych osobowych** - imię, nazwisko, email, telefon, stanowisko, dział, oddział
+- **Zmiana hasła** - dla użytkowników lokalnych (nie LDAP)
+- **Upload avatarów** - JPG, PNG, GIF, WebP (max 2MB), przechowywane w `public/uploads/avatars/`
+- **Integracja LDAP** - synchronizacja danych z Active Directory
+
+### Struktura plików avatarów
+```bash
+public/uploads/avatars/
+├── user_1_avatar.jpg    # avatar_{user_id}_avatar.{ext}
+├── user_2_avatar.png
+└── default/
+    └── default-avatar.png  # domyślny avatar jeśli użytkownik nie ma własnego
+```
+
+### Form avatarów (src/Form/AvatarUploadType.php)
+```php
+->add('avatar', FileType::class, [
+    'required' => false,
+    'mapped' => false,
+    'constraints' => [
+        new File([
+            'maxSize' => '2M',
+            'mimeTypes' => ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+            'mimeTypesMessage' => 'Proszę wybrać prawidłowy plik obrazu (JPG, PNG, GIF, WebP)',
+        ])
+    ],
+    'attr' => [
+        'accept' => '.jpg,.jpeg,.png,.gif,.webp'
+    ]
+])
+```
+
+### Obsługa uploadów w kontrolerze
+```php
+// Upload nowego avataru
+if ($avatarFile = $form->get('avatar')->getData()) {
+    // Usunięcie starego avataru
+    $oldAvatar = $user->getAvatar();
+    if ($oldAvatar && file_exists($this->getParameter('avatars_directory') . '/' . $oldAvatar)) {
+        unlink($this->getParameter('avatars_directory') . '/' . $oldAvatar);
+    }
+    
+    // Zapisanie nowego
+    $fileName = 'avatar_' . $user->getId() . '_avatar.' . $avatarFile->guessExtension();
+    $avatarFile->move($this->getParameter('avatars_directory'), $fileName);
+    $user->setAvatar($fileName);
+}
+```
+
+### Wyświetlanie avatarów w szablonach
+```twig
+{# W topbar.html.twig #}
+{% if app.user.avatar %}
+    <img class="rounded-circle header-profile-user" 
+         src="{{ asset('uploads/avatars/' ~ app.user.avatar) }}" 
+         alt="Avatar">
+{% else %}
+    <img class="rounded-circle header-profile-user" 
+         src="{{ asset('assets/images/users/avatar-1.jpg') }}" 
+         alt="Default Avatar">
+{% endif %}
+```
+
+## MIGRACJE BAZY DANYCH
+
+### Migracje MySQL - kompatybilność
+**Problem**: MySQL nie obsługuje `IF NOT EXISTS` w `ALTER TABLE ADD COLUMN`
+
+**Rozwiązanie**: Użyj `INFORMATION_SCHEMA` do sprawdzenia istnienia kolumn:
+```php
+public function up(Schema $schema): void
+{
+    $connection = $this->connection;
+    $databaseName = $connection->getDatabase();
+    
+    // Sprawdź czy kolumna istnieje
+    $result = $connection->fetchOne(
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+         WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'avatar'",
+        [$databaseName]
+    );
+    if ($result == 0) {
+        $this->addSql('ALTER TABLE users ADD avatar VARCHAR(255) DEFAULT NULL');
+    }
+}
+```
+
+### Przykład migracji z wieloma kolumnami
+```php
+// Zbierz wszystkie kolumny do dodania
+$columnsToAdd = [];
+
+// Sprawdź każdą kolumnę osobno
+if ($this->columnNotExists('users', 'avatar', $connection, $databaseName)) {
+    $columnsToAdd[] = 'ADD avatar VARCHAR(255) DEFAULT NULL';
+}
+if ($this->columnNotExists('users', 'branch', $connection, $databaseName)) {
+    $columnsToAdd[] = 'ADD branch VARCHAR(100) DEFAULT NULL';
+}
+
+// Dodaj wszystkie kolumny jednym zapytaniem
+if (!empty($columnsToAdd)) {
+    $this->addSql('ALTER TABLE users ' . implode(', ', $columnsToAdd));
+}
+```
+
 ## DODATKOWE WSKAZÓWKI
 
 1. **Zawsze używaj transakcji** dla operacji na wielu tabelach
@@ -314,6 +474,8 @@ $categoryType->setValue('Aktywny');
 4. **API** - jeśli moduł ma API, używaj ApiPlatform
 5. **Eventy** - używaj Symfony Events dla loose coupling
 6. **Tłumaczenia** - przygotuj klucze dla Symfony Translator
+7. **Pliki uploads** - zawsze sprawdzaj typ MIME i wielkość pliku
+8. **MySQL migracje** - używaj INFORMATION_SCHEMA zamiast IF NOT EXISTS
 
 ## DEPLOYMENT
 
