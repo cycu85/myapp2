@@ -3,6 +3,8 @@
 namespace App\DataFixtures;
 
 use App\Entity\Tool;
+use App\Entity\ToolCategory;
+use App\Entity\ToolType;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -255,8 +257,8 @@ class ToolFixtures extends Fixture implements FixtureGroupInterface, DependentFi
         foreach ($tools as $toolData) {
             $tool = new Tool();
             
-            $category = $this->getReference($toolData['category']);
-            $type = $this->getReference($toolData['type']);
+            $category = $this->getReference($toolData['category'], ToolCategory::class);
+            $type = $this->getReference($toolData['type'], ToolType::class);
             
             $tool->setCategory($category)
                  ->setType($type)

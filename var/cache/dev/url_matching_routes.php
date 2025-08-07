@@ -18,6 +18,7 @@ return [
         '/admin/modules' => [[['_route' => 'admin_modules', '_controller' => 'App\\Controller\\Admin\\AdminController::modules'], null, null, null, false, false, null]],
         '/admin/settings' => [[['_route' => 'admin_settings', '_controller' => 'App\\Controller\\Admin\\AdminController::settings'], null, null, null, false, false, null]],
         '/admin/settings/general' => [[['_route' => 'admin_settings_general', '_controller' => 'App\\Controller\\Admin\\AdminController::generalSettings'], null, null, null, false, false, null]],
+        '/admin/settings/general/reset' => [[['_route' => 'admin_settings_general_reset', '_controller' => 'App\\Controller\\Admin\\AdminController::resetGeneralSettings'], null, ['POST' => 0], null, false, false, null]],
         '/admin/settings/email' => [[['_route' => 'admin_settings_email', '_controller' => 'App\\Controller\\Admin\\AdminController::emailSettings'], null, null, null, false, false, null]],
         '/admin/settings/database' => [[['_route' => 'admin_settings_database', '_controller' => 'App\\Controller\\Admin\\AdminController::databaseSettings'], null, null, null, false, false, null]],
         '/admin/settings/ldap' => [[['_route' => 'admin_settings_ldap', '_controller' => 'App\\Controller\\Admin\\AdminController::ldapSettings'], null, null, null, false, false, null]],
@@ -110,6 +111,83 @@ return [
                     .'|category/(\\d+)(*:767)'
                 .')'
                 .'|/((?!install|admin|api|login|logout|profile).*)(*:823)'
+                .'|/tools(?'
+                    .'|/(?'
+                        .'|categories(?'
+                            .'|(*:857)'
+                            .'|/(?'
+                                .'|new(*:872)'
+                                .'|([^/]++)(?'
+                                    .'|(*:891)'
+                                    .'|/edit(*:904)'
+                                    .'|(*:912)'
+                                .')'
+                            .')'
+                        .')'
+                        .'|new(*:926)'
+                        .'|([^/]++)(?'
+                            .'|(*:945)'
+                            .'|/edit(*:958)'
+                            .'|(*:966)'
+                        .')'
+                        .'|s(?'
+                            .'|tatistics/dashboard(*:998)'
+                            .'|ets(?'
+                                .'|(*:1012)'
+                                .'|/(?'
+                                    .'|new(*:1028)'
+                                    .'|([^/]++)(?'
+                                        .'|(*:1048)'
+                                        .'|/(?'
+                                            .'|edit(*:1065)'
+                                            .'|add\\-item(*:1083)'
+                                            .'|item/([^/]++)/(?'
+                                                .'|edit(*:1113)'
+                                                .'|remove(*:1128)'
+                                            .')'
+                                            .'|c(?'
+                                                .'|heck(?'
+                                                    .'|out(*:1152)'
+                                                    .'|in(*:1163)'
+                                                .')'
+                                                .'|lone(*:1177)'
+                                            .')'
+                                        .')'
+                                        .'|(*:1188)'
+                                    .')'
+                                .')'
+                            .')'
+                        .')'
+                        .'|export/csv(*:1211)'
+                        .'|bulk\\-action(*:1232)'
+                        .'|inspections(?'
+                            .'|(*:1255)'
+                            .'|/(?'
+                                .'|new(*:1271)'
+                                .'|tool/([^/]++)/new(*:1297)'
+                                .'|([^/]++)(?'
+                                    .'|(*:1317)'
+                                    .'|/edit(*:1331)'
+                                    .'|(*:1340)'
+                                .')'
+                                .'|calendar(*:1358)'
+                                .'|bulk\\-schedule(*:1381)'
+                            .')'
+                        .')'
+                        .'|types(?'
+                            .'|(*:1400)'
+                            .'|/(?'
+                                .'|new(*:1416)'
+                                .'|([^/]++)(?'
+                                    .'|(*:1436)'
+                                    .'|/edit(*:1450)'
+                                    .'|(*:1459)'
+                                .')'
+                            .')'
+                        .')'
+                    .')'
+                    .'|(*:1472)'
+                .')'
             .')/?$}sDu',
     ],
     [ // $dynamicRoutes
@@ -145,8 +223,45 @@ return [
         725 => [[['_route' => 'equipment_edit', '_controller' => 'App\\Controller\\EquipmentController::edit'], ['id'], null, null, false, false, null]],
         745 => [[['_route' => 'equipment_delete', '_controller' => 'App\\Controller\\EquipmentController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
         767 => [[['_route' => 'equipment_by_category', '_controller' => 'App\\Controller\\EquipmentController::byCategory'], ['id'], null, null, false, true, null]],
-        823 => [
-            [['_route' => 'app_home_root', '_controller' => 'App\\Controller\\HomeController::root'], ['path'], null, null, false, true, null],
+        823 => [[['_route' => 'app_home_root', '_controller' => 'App\\Controller\\HomeController::root'], ['path'], null, null, false, true, null]],
+        857 => [[['_route' => 'app_tool_category_index', '_controller' => 'App\\Controller\\ToolCategoryController::index'], [], ['GET' => 0], null, true, false, null]],
+        872 => [[['_route' => 'app_tool_category_new', '_controller' => 'App\\Controller\\ToolCategoryController::new'], [], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        891 => [[['_route' => 'app_tool_category_show', '_controller' => 'App\\Controller\\ToolCategoryController::show'], ['id'], ['GET' => 0], null, false, true, null]],
+        904 => [[['_route' => 'app_tool_category_edit', '_controller' => 'App\\Controller\\ToolCategoryController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        912 => [[['_route' => 'app_tool_category_delete', '_controller' => 'App\\Controller\\ToolCategoryController::delete'], ['id'], ['POST' => 0], null, false, true, null]],
+        926 => [[['_route' => 'app_tool_new', '_controller' => 'App\\Controller\\ToolController::new'], [], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        945 => [[['_route' => 'app_tool_show', '_controller' => 'App\\Controller\\ToolController::show'], ['id'], ['GET' => 0], null, false, true, null]],
+        958 => [[['_route' => 'app_tool_edit', '_controller' => 'App\\Controller\\ToolController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        966 => [[['_route' => 'app_tool_delete', '_controller' => 'App\\Controller\\ToolController::delete'], ['id'], ['POST' => 0], null, false, true, null]],
+        998 => [[['_route' => 'app_tool_statistics', '_controller' => 'App\\Controller\\ToolController::statistics'], [], ['GET' => 0], null, false, false, null]],
+        1012 => [[['_route' => 'app_tool_set_index', '_controller' => 'App\\Controller\\ToolSetController::index'], [], ['GET' => 0], null, true, false, null]],
+        1028 => [[['_route' => 'app_tool_set_new', '_controller' => 'App\\Controller\\ToolSetController::new'], [], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1048 => [[['_route' => 'app_tool_set_show', '_controller' => 'App\\Controller\\ToolSetController::show'], ['id'], ['GET' => 0], null, false, true, null]],
+        1065 => [[['_route' => 'app_tool_set_edit', '_controller' => 'App\\Controller\\ToolSetController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1083 => [[['_route' => 'app_tool_set_add_item', '_controller' => 'App\\Controller\\ToolSetController::addItem'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1113 => [[['_route' => 'app_tool_set_edit_item', '_controller' => 'App\\Controller\\ToolSetController::editItem'], ['setId', 'itemId'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1128 => [[['_route' => 'app_tool_set_remove_item', '_controller' => 'App\\Controller\\ToolSetController::removeItem'], ['setId', 'itemId'], ['POST' => 0], null, false, false, null]],
+        1152 => [[['_route' => 'app_tool_set_checkout', '_controller' => 'App\\Controller\\ToolSetController::checkout'], ['id'], ['POST' => 0], null, false, false, null]],
+        1163 => [[['_route' => 'app_tool_set_checkin', '_controller' => 'App\\Controller\\ToolSetController::checkin'], ['id'], ['POST' => 0], null, false, false, null]],
+        1177 => [[['_route' => 'app_tool_set_clone', '_controller' => 'App\\Controller\\ToolSetController::clone'], ['id'], ['POST' => 0], null, false, false, null]],
+        1188 => [[['_route' => 'app_tool_set_delete', '_controller' => 'App\\Controller\\ToolSetController::delete'], ['id'], ['POST' => 0], null, false, true, null]],
+        1211 => [[['_route' => 'app_tool_export_csv', '_controller' => 'App\\Controller\\ToolController::exportCsv'], [], ['GET' => 0], null, false, false, null]],
+        1232 => [[['_route' => 'app_tool_bulk_action', '_controller' => 'App\\Controller\\ToolController::bulkAction'], [], ['POST' => 0], null, false, false, null]],
+        1255 => [[['_route' => 'app_tool_inspection_index', '_controller' => 'App\\Controller\\ToolInspectionController::index'], [], ['GET' => 0], null, true, false, null]],
+        1271 => [[['_route' => 'app_tool_inspection_new', '_controller' => 'App\\Controller\\ToolInspectionController::new'], [], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1297 => [[['_route' => 'app_tool_inspection_new_for_tool', '_controller' => 'App\\Controller\\ToolInspectionController::newForTool'], ['toolId'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1317 => [[['_route' => 'app_tool_inspection_show', '_controller' => 'App\\Controller\\ToolInspectionController::show'], ['id'], ['GET' => 0], null, false, true, null]],
+        1331 => [[['_route' => 'app_tool_inspection_edit', '_controller' => 'App\\Controller\\ToolInspectionController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1340 => [[['_route' => 'app_tool_inspection_delete', '_controller' => 'App\\Controller\\ToolInspectionController::delete'], ['id'], ['POST' => 0], null, false, true, null]],
+        1358 => [[['_route' => 'app_tool_inspection_calendar', '_controller' => 'App\\Controller\\ToolInspectionController::calendar'], [], ['GET' => 0], null, false, false, null]],
+        1381 => [[['_route' => 'app_tool_inspection_bulk_schedule', '_controller' => 'App\\Controller\\ToolInspectionController::bulkSchedule'], [], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1400 => [[['_route' => 'app_tool_type_index', '_controller' => 'App\\Controller\\ToolTypeController::index'], [], ['GET' => 0], null, true, false, null]],
+        1416 => [[['_route' => 'app_tool_type_new', '_controller' => 'App\\Controller\\ToolTypeController::new'], [], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1436 => [[['_route' => 'app_tool_type_show', '_controller' => 'App\\Controller\\ToolTypeController::show'], ['id'], ['GET' => 0], null, false, true, null]],
+        1450 => [[['_route' => 'app_tool_type_edit', '_controller' => 'App\\Controller\\ToolTypeController::edit'], ['id'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1459 => [[['_route' => 'app_tool_type_delete', '_controller' => 'App\\Controller\\ToolTypeController::delete'], ['id'], ['POST' => 0], null, false, true, null]],
+        1472 => [
+            [['_route' => 'app_tool_index', '_controller' => 'App\\Controller\\ToolController::index'], [], ['GET' => 0], null, true, false, null],
             [null, null, null, null, false, false, 0],
         ],
     ],
