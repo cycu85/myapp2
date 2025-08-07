@@ -1,0 +1,236 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dodaj kategorię - {{ app_name() }}{% endblock %}
+{% block page_title %}Dodaj nową kategorię narzędzi{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_index') }}">Narzędzia</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_category_index') }}">Kategorie</a></li>
+    <li class="breadcrumb-item active">Dodaj nową</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-xl-6 col-lg-8 mx-auto">
+        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+        
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-folder-add-line me-2"></i>Informacje o kategorii
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    {{ form_label(form.name, 'Nazwa kategorii', {'label_attr': {'class': 'form-label required'}}) }}
+                    {{ form_widget(form.name, {'attr': {'class': 'form-control', 'placeholder': 'np. Elektronarzędzia, Narzędzia hydrauliczne'}}) }}
+                    {{ form_errors(form.name) }}
+                    <div class="form-text">Nazwa kategorii powinna być unikalna i opisowa.</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.description, 'Opis', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Krótki opis kategorii narzędzi'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.icon, 'Ikona', {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i id="icon-preview" class="bx bx-folder"></i>
+                                </span>
+                                {{ form_widget(form.icon, {'attr': {'class': 'form-control', 'placeholder': 'bx bx-wrench', 'id': 'icon-input'}}) }}
+                            </div>
+                            {{ form_errors(form.icon) }}
+                            <div class="form-text">
+                                Klasa CSS ikony z <a href="https://boxicons.com/" target="_blank">Boxicons</a> 
+                                (np. <code>bx bx-wrench</code>, <code>ri-tools-line</code>)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.sortOrder, 'Kolejność sortowania', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.sortOrder, {'attr': {'class': 'form-control', 'min': 0}}) }}
+                            {{ form_errors(form.sortOrder) }}
+                            <div class="form-text">Niższe wartości będą wyświetlane jako pierwsze.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        {{ form_widget(form.isActive, {'attr': {'class': 'form-check-input'}}) }}
+                        {{ form_label(form.isActive, 'Kategoria aktywna', {'label_attr': {'class': 'form-check-label'}}) }}
+                        {{ form_errors(form.isActive) }}
+                        <div class="form-text">Tylko aktywne kategorie będą dostępne przy tworzeniu narzędzi.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Icon Gallery -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-palette-line me-2"></i>Popularne ikony
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-2" id="icon-gallery">
+                    <!-- Popular tool-related icons -->
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="bx bx-wrench" title="Klucz">
+                            <i class="bx bx-wrench"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="bx bx-cog" title="Koło zębate">
+                            <i class="bx bx-cog"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="bx bx-hammer" title="Młotek">
+                            <i class="bx bx-hammer"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="ri-tools-line" title="Narzędzia">
+                            <i class="ri-tools-line"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="ri-hammer-line" title="Młotek 2">
+                            <i class="ri-hammer-line"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="ri-scissors-line" title="Nożyce">
+                            <i class="ri-scissors-line"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="bx bx-build" title="Budowa">
+                            <i class="bx bx-build"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="bx bx-hard-hat" title="Kask">
+                            <i class="bx bx-hard-hat"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="ri-ruler-line" title="Linijka">
+                            <i class="ri-ruler-line"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="ri-compass-line" title="Kompas">
+                            <i class="ri-compass-line"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="ri-flashlight-line" title="Latarka">
+                            <i class="ri-flashlight-line"></i>
+                        </button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-outline-secondary icon-btn" data-icon="bx bx-folder" title="Folder">
+                            <i class="bx bx-folder"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ path('app_tool_category_index') }}" class="btn btn-light">
+                        <i class="ri-arrow-left-line me-1"></i> Anuluj
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="ri-save-line me-1"></i> Zapisz kategorię
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const iconInput = document.getElementById('icon-input');
+    const iconPreview = document.getElementById('icon-preview');
+    const iconButtons = document.querySelectorAll('.icon-btn');
+
+    // Update icon preview when typing
+    iconInput.addEventListener('input', function() {
+        const iconClass = this.value.trim();
+        iconPreview.className = iconClass || 'bx bx-folder';
+    });
+
+    // Icon gallery buttons
+    iconButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const iconClass = this.dataset.icon;
+            iconInput.value = iconClass;
+            iconPreview.className = iconClass;
+            
+            // Update button states
+            iconButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+});
+</script>
+
+<style>
+.icon-btn {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    background-color: var(--bs-secondary-bg);
+}
+
+.icon-btn.active {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: white;
+}
+</style>
+{% endblock %}

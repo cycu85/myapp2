@@ -1,0 +1,321 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ category.name }} - Kategorie narzędzi - {{ app_name() }}{% endblock %}
+{% block page_title %}{{ category.name }}{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_index') }}">Narzędzia</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_category_index') }}">Kategorie</a></li>
+    <li class="breadcrumb-item active">{{ category.name }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="avatar-sm">
+                            <div class="avatar-title rounded-circle bg-light text-body display-6">
+                                {% if category.icon %}
+                                    <i class="{{ category.icon }}"></i>
+                                {% else %}
+                                    <i class="bx bx-folder"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="card-title mb-1">{{ category.name }}</h5>
+                        {% if category.description %}
+                        <p class="text-muted mb-0">{{ category.description }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="flex-shrink-0">
+                        <div class="d-flex gap-2">
+                            {% if can_edit %}
+                            <a href="{{ path('app_tool_category_edit', {id: category.id}) }}" class="btn btn-primary">
+                                <i class="ri-pencil-line align-bottom me-1"></i> Edytuj
+                            </a>
+                            {% endif %}
+                            {% if can_delete and category.activeToolsCount == 0 %}
+                            <button type="button" class="btn btn-danger" onclick="deleteCategory({{ category.id }}, '{{ category.name }}')">
+                                <i class="ri-delete-bin-line align-bottom me-1"></i> Usuń
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="table-responsive">
+                            <table class="table table-borderless mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th class="ps-0" scope="row">Nazwa:</th>
+                                        <td class="text-muted">{{ category.name }}</td>
+                                    </tr>
+                                    {% if category.description %}
+                                    <tr>
+                                        <th class="ps-0" scope="row">Opis:</th>
+                                        <td class="text-muted">{{ category.description }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if category.icon %}
+                                    <tr>
+                                        <th class="ps-0" scope="row">Ikona:</th>
+                                        <td class="text-muted">
+                                            <span class="badge bg-secondary-subtle text-secondary">
+                                                <i class="{{ category.icon }} me-1"></i>{{ category.icon }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr>
+                                        <th class="ps-0" scope="row">Status:</th>
+                                        <td class="text-muted">
+                                            {% if category.isActive %}
+                                            <span class="badge bg-success-subtle text-success">Aktywna</span>
+                                            {% else %}
+                                            <span class="badge bg-danger-subtle text-danger">Nieaktywna</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="table-responsive">
+                            <table class="table table-borderless mb-0">
+                                <tbody>
+                                    <tr>
+                                        <th class="ps-0" scope="row">Kolejność:</th>
+                                        <td class="text-muted">{{ category.sortOrder }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="ps-0" scope="row">Liczba narzędzi:</th>
+                                        <td class="text-muted">
+                                            {% set tools_count = category.activeToolsCount %}
+                                            {% if tools_count > 0 %}
+                                            <a href="{{ path('app_tool_index', {category: category.id}) }}" class="text-decoration-none">
+                                                <span class="badge bg-primary-subtle text-primary">{{ tools_count }} narzędzi</span>
+                                            </a>
+                                            {% else %}
+                                            <span class="text-muted">0 narzędzi</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="ps-0" scope="row">Utworzona:</th>
+                                        <td class="text-muted">{{ category.createdAt|date('d.m.Y H:i') }}</td>
+                                    </tr>
+                                    {% if category.updatedAt %}
+                                    <tr>
+                                        <th class="ps-0" scope="row">Ostatnia modyfikacja:</th>
+                                        <td class="text-muted">{{ category.updatedAt|date('d.m.Y H:i') }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tools in this category -->
+        {% if category.activeToolsCount > 0 %}
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h6 class="card-title mb-0 flex-grow-1">Narzędzia w tej kategorii</h6>
+                    <div class="flex-shrink-0">
+                        <a href="{{ path('app_tool_index', {category: category.id}) }}" class="btn btn-soft-primary btn-sm">
+                            Zobacz wszystkie <i class="ri-arrow-right-line ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-borderless table-nowrap align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Narzędzie</th>
+                                <th scope="col">Typ</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Lokalizacja</th>
+                                <th scope="col">Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tool in category.tools|slice(0, 10) %}
+                            {% if tool.isActive %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0 avatar-xs me-2">
+                                            <div class="avatar-title rounded-circle bg-light text-body">
+                                                <i class="bx bx-wrench"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="fs-14 mb-1">
+                                                <a href="{{ path('app_tool_show', {id: tool.id}) }}" class="text-body">{{ tool.name }}</a>
+                                            </h6>
+                                            {% if tool.manufacturer %}
+                                            <p class="text-muted mb-0 fs-12">{{ tool.manufacturer }}{% if tool.model %} {{ tool.model }}{% endif %}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary">{{ tool.type.name }}</span>
+                                </td>
+                                <td>
+                                    {% set status_class = tool.status == 'active' ? 'success' : (tool.status == 'maintenance' ? 'warning' : 'danger') %}
+                                    <span class="badge bg-{{ status_class }}-subtle text-{{ status_class }}">{{ tool.statusLabel }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted">{{ tool.location ?: 'Nieokreślona' }}</span>
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_tool_show', {id: tool.id}) }}" class="btn btn-sm btn-soft-primary">
+                                        <i class="ri-eye-line"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Szybkie akcje</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if category.activeToolsCount > 0 %}
+                    <a href="{{ path('app_tool_index', {category: category.id}) }}" class="btn btn-primary">
+                        <i class="ri-list-check me-2"></i>Zobacz narzędzia ({{ category.activeToolsCount }})
+                    </a>
+                    {% endif %}
+                    <a href="{{ path('app_tool_new', {category: category.id}) }}" class="btn btn-success">
+                        <i class="ri-add-line me-2"></i>Dodaj narzędzie
+                    </a>
+                    {% if can_edit %}
+                    <a href="{{ path('app_tool_category_edit', {id: category.id}) }}" class="btn btn-soft-secondary">
+                        <i class="ri-pencil-line me-2"></i>Edytuj kategorię
+                    </a>
+                    {% endif %}
+                    <a href="{{ path('app_tool_category_index') }}" class="btn btn-soft-secondary">
+                        <i class="ri-arrow-left-line me-2"></i>Wróć do listy
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Statystyki</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        <div class="avatar-xs">
+                            <div class="avatar-title rounded-circle bg-primary-subtle text-primary">
+                                <i class="ri-tool-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">Narzędzia</h6>
+                        <p class="text-muted mb-0">{{ category.activeToolsCount }} aktywnych</p>
+                    </div>
+                </div>
+
+                {% if category.activeToolsCount > 0 %}
+                <!-- You can add more statistics here like average age, most common type, etc. -->
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Warning -->
+        {% if not category.isActive %}
+        <div class="card border-warning">
+            <div class="card-header bg-warning-subtle">
+                <h6 class="card-title text-warning mb-0">
+                    <i class="ri-error-warning-line me-2"></i>Uwaga
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning mb-0">
+                    <i class="ri-error-warning-line me-2"></i>
+                    Ta kategoria jest nieaktywna i nie będzie wyświetlana przy tworzeniu nowych narzędzi.
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade zoomIn" id="deleteRecordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mt-2 text-center">
+                    <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
+                    <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                        <h4>Czy jesteś pewien?</h4>
+                        <p class="text-muted mx-4 mb-0">Czy na pewno chcesz usunąć kategorię "<span id="category-name-to-delete"></span>"?</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                    <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Anuluj</button>
+                    <form method="post" id="delete-form" style="display: inline;">
+                        <input type="hidden" name="_token" id="delete-token">
+                        <button type="submit" class="btn w-sm btn-danger">Tak, usuń!</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+function deleteCategory(categoryId, categoryName) {
+    document.getElementById('category-name-to-delete').textContent = categoryName;
+    document.getElementById('delete-form').action = '{{ path('app_tool_category_delete', {id: category.id}) }}';
+    
+    // Generate CSRF token (you may need to implement this)
+    document.getElementById('delete-token').value = 'csrf-token-here';
+    
+    new bootstrap.Modal(document.getElementById('deleteRecordModal')).show();
+}
+</script>
+{% endblock %}

@@ -357,4 +357,25 @@ class ToolRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Find tools that need inspection
+     *
+     * @return Tool[]
+     */
+    public function findNeedingInspection(): array
+    {
+        $today = new \DateTime();
+        
+        return $this->createQueryBuilder('t')
+            ->where('t.isActive = :active')
+            ->andWhere('(t.nextInspectionDate IS NULL OR t.nextInspectionDate <= :today)')
+            ->andWhere('t.inspectionIntervalMonths IS NOT NULL')
+            ->setParameter('active', true)
+            ->setParameter('today', $today)
+            ->orderBy('t.nextInspectionDate', 'ASC')
+            ->addOrderBy('t.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

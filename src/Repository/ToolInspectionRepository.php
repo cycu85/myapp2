@@ -364,4 +364,25 @@ class ToolInspectionRepository extends ServiceEntityRepository
 
         return (float) ($result ?? 0);
     }
+
+    /**
+     * Find inspections in date range
+     *
+     * @param \DateTimeInterface $startDate
+     * @param \DateTimeInterface $endDate
+     * @return ToolInspection[]
+     */
+    public function findInDateRange(\DateTimeInterface $startDate, \DateTimeInterface $endDate): array
+    {
+        return $this->createQueryBuilder('ti')
+            ->where('(ti.plannedDate BETWEEN :start AND :end OR ti.inspectionDate BETWEEN :start AND :end)')
+            ->andWhere('ti.isActive = :active')
+            ->setParameter('start', $startDate)
+            ->setParameter('end', $endDate)
+            ->setParameter('active', true)
+            ->orderBy('ti.plannedDate', 'ASC')
+            ->addOrderBy('ti.inspectionDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

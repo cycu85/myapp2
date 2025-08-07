@@ -1,0 +1,494 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Zestawy narzędzi - {{ app_name() }}{% endblock %}
+{% block page_title %}Zestawy narzędzi{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_index') }}">Narzędzia</a></li>
+    <li class="breadcrumb-item active">Zestawy</li>
+{% endblock %}
+
+{% block content %}
+
+<!-- Statistics Cards -->
+{% if statistics %}
+<div class="row">
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Wszystkie zestawy</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i>
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-2">
+                    <div>
+                        <h2 class="ff-secondary fw-semibold">{{ statistics.total_sets }}</h2>
+                        <a href="#" class="text-decoration-underline">Zobacz wszystkie</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-success-subtle rounded fs-3">
+                            <i class="ri-stack-line text-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Aktywne</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-success fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i>
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-2">
+                    <div>
+                        <h2 class="ff-secondary fw-semibold">{{ statistics.active_sets }}</h2>
+                        <a href="?status=active" class="text-decoration-underline">Zobacz aktywne</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-primary-subtle rounded fs-3">
+                            <i class="ri-check-line text-primary"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Niekompletne</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-warning fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i>
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-2">
+                    <div>
+                        <h2 class="ff-secondary fw-semibold">{{ statistics.incomplete_sets }}</h2>
+                        <a href="?status=incomplete" class="text-decoration-underline">Zobacz niekompletne</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-warning-subtle rounded fs-3">
+                            <i class="ri-error-warning-line text-warning"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Średnia kompletność</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <h5 class="text-info fs-14 mb-0">
+                            <i class="ri-arrow-right-up-line fs-13 align-middle"></i>
+                        </h5>
+                    </div>
+                </div>
+                <div class="d-flex align-items-end justify-content-between mt-2">
+                    <div>
+                        <h2 class="ff-secondary fw-semibold">{{ statistics.average_completion }}%</h2>
+                        <a href="#" class="text-decoration-underline">Zobacz szczegóły</a>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-info-subtle rounded fs-3">
+                            <i class="ri-pie-chart-line text-info"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Tool Sets Table -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h5 class="card-title mb-0 flex-grow-1">Lista zestawów narzędzi</h5>
+                    <div class="flex-shrink-0">
+                        <div class="d-flex gap-2">
+                            {% if can_create %}
+                            <a href="{{ path('app_tool_set_new') }}" class="btn btn-success add-btn">
+                                <i class="ri-add-line align-bottom me-1"></i> Dodaj zestaw
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card-body border-bottom">
+                <form method="GET" action="{{ path('app_tool_set_index') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="search" class="form-label">Szukaj</label>
+                        <input type="text" class="form-control" id="search" name="search" value="{{ current_search }}" placeholder="Nazwa, kod, opis...">
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">Wszystkie statusy</option>
+                            <option value="active" {% if current_status == 'active' %}selected{% endif %}>Aktywny</option>
+                            <option value="checked_out" {% if current_status == 'checked_out' %}selected{% endif %}>Wydany</option>
+                            <option value="maintenance" {% if current_status == 'maintenance' %}selected{% endif %}>Konserwacja</option>
+                            <option value="retired" {% if current_status == 'retired' %}selected{% endif %}>Wycofany</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="assigned_to" class="form-label">Przypisany do</label>
+                        <input type="text" class="form-control" id="assigned_to" name="assigned_to" value="{{ current_assigned_to }}" placeholder="Nazwa użytkownika">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="ri-search-line me-1"></i> Filtruj
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card-body">
+                {% if tool_sets|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-nowrap table-striped-columns mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Zestaw</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Kompletność</th>
+                                <th scope="col">Lokalizacja</th>
+                                <th scope="col">Przypisany do</th>
+                                <th scope="col">Utworzony</th>
+                                <th scope="col">Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for set in tool_sets %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0 avatar-xs me-2">
+                                            <div class="avatar-title rounded-circle bg-light text-body">
+                                                <i class="ri-stack-line"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="fs-14 mb-1">
+                                                <a href="{{ path('app_tool_set_show', {id: set.id}) }}" class="text-body">{{ set.name }}</a>
+                                            </h6>
+                                            {% if set.code %}
+                                            <p class="text-muted mb-0 fs-12">Kod: {{ set.code }}</p>
+                                            {% endif %}
+                                            {% if set.description %}
+                                            <p class="text-muted mb-0 fs-12">{{ set.description|slice(0, 50) }}{% if set.description|length > 50 %}...{% endif %}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% set status_class = set.status == 'active' ? 'success' : (set.status == 'checked_out' ? 'info' : (set.status == 'maintenance' ? 'warning' : 'danger')) %}
+                                    <span class="badge bg-{{ status_class }}-subtle text-{{ status_class }}">
+                                        {{ set.statusLabel }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% set completion = set.completionPercentage %}
+                                    {% set completion_class = completion == 100 ? 'success' : (completion >= 75 ? 'info' : (completion >= 50 ? 'warning' : 'danger')) %}
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                            <div class="progress-bar bg-{{ completion_class }}" role="progressbar" style="width: {{ completion }}%"></div>
+                                        </div>
+                                        <span class="text-muted fs-12">{{ completion }}%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-muted">{{ set.location ?: 'Nieokreślona' }}</span>
+                                </td>
+                                <td>
+                                    {% if set.assignedTo %}
+                                    <span class="text-muted">{{ set.assignedTo.fullName }}</span>
+                                    {% if set.checkedOutAt %}
+                                    <br><small class="text-muted fs-11">od {{ set.checkedOutAt|date('d.m.Y') }}</small>
+                                    {% endif %}
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="text-muted">{{ set.createdAt|date('d.m.Y') }}</span>
+                                    {% if set.createdBy %}
+                                    <br><small class="text-muted fs-11">{{ set.createdBy.fullName }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-soft-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="ri-more-fill align-middle"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" href="{{ path('app_tool_set_show', {id: set.id}) }}">
+                                                <i class="ri-eye-fill align-bottom me-2 text-muted"></i> Szczegóły
+                                            </a></li>
+                                            {% if can_edit %}
+                                            <li><a class="dropdown-item edit-item-btn" href="{{ path('app_tool_set_edit', {id: set.id}) }}">
+                                                <i class="ri-pencil-fill align-bottom me-2 text-muted"></i> Edytuj
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="{{ path('app_tool_set_add_item', {id: set.id}) }}">
+                                                <i class="ri-add-line align-bottom me-2 text-muted"></i> Dodaj narzędzie
+                                            </a></li>
+                                            {% endif %}
+                                            {% if can_assign %}
+                                                {% if set.status == 'active' %}
+                                                <li class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-info" href="#" onclick="checkoutSet({{ set.id }}, '{{ set.name }}')">
+                                                    <i class="ri-logout-box-r-line align-bottom me-2"></i> Wydaj zestaw
+                                                </a></li>
+                                                {% elseif set.status == 'checked_out' %}
+                                                <li class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-success" href="#" onclick="checkinSet({{ set.id }}, '{{ set.name }}')">
+                                                    <i class="ri-login-box-line align-bottom me-2"></i> Odbierz zestaw
+                                                </a></li>
+                                                {% endif %}
+                                            {% endif %}
+                                            {% if can_create %}
+                                            <li><a class="dropdown-item" href="#" onclick="cloneSet({{ set.id }}, '{{ set.name }}')">
+                                                <i class="ri-file-copy-line align-bottom me-2 text-muted"></i> Klonuj
+                                            </a></li>
+                                            {% endif %}
+                                            {% if can_delete and set.status != 'checked_out' %}
+                                            <li class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-danger remove-item-btn" href="#" onclick="deleteSet({{ set.id }}, '{{ set.name }}')">
+                                                <i class="ri-delete-bin-fill align-bottom me-2"></i> Usuń
+                                            </a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="avatar-md mx-auto mb-4">
+                        <div class="avatar-title bg-light rounded-circle display-6 text-muted">
+                            <i class="ri-stack-line"></i>
+                        </div>
+                    </div>
+                    <h5>Brak zestawów</h5>
+                    <p class="text-muted">Nie znaleziono zestawów narzędzi spełniających kryteria wyszukiwania.</p>
+                    {% if can_create %}
+                    <a href="{{ path('app_tool_set_new') }}" class="btn btn-success">
+                        <i class="ri-add-line me-1"></i> Dodaj pierwszy zestaw
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Wydaj zestaw narzędzi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="checkout-form">
+                <div class="modal-body">
+                    <p>Wydajesz zestaw: <strong id="checkout-set-name"></strong></p>
+                    
+                    <div class="mb-3">
+                        <label for="assigned_to_select" class="form-label">Przypisz do użytkownika</label>
+                        <select class="form-select" id="assigned_to_select" name="assigned_to" required>
+                            <option value="">Wybierz użytkownika</option>
+                            <!-- Users will be loaded here -->
+                        </select>
+                    </div>
+                    
+                    <input type="hidden" name="_token" id="checkout-token">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-info">Wydaj zestaw</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Checkin Modal -->
+<div class="modal fade" id="checkinModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Odbierz zestaw narzędzi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="checkin-form">
+                <div class="modal-body">
+                    <div class="mt-2 text-center">
+                        <lord-icon src="https://cdn.lordicon.com/lupuorrc.json" trigger="loop" colors="primary:#0ab39c,secondary:#405189" style="width:100px;height:100px"></lord-icon>
+                        <div class="mt-4 pt-2">
+                            <h4>Odbierz zestaw</h4>
+                            <p class="text-muted">Czy na pewno chcesz odebrać zestaw "<span id="checkin-set-name"></span>"?</p>
+                        </div>
+                    </div>
+                    <input type="hidden" name="_token" id="checkin-token">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-success">Odbierz zestaw</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Clone Modal -->
+<div class="modal fade" id="cloneModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Klonuj zestaw narzędzi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="clone-form">
+                <div class="modal-body">
+                    <p>Tworzysz kopię zestawu: <strong id="clone-set-name"></strong></p>
+                    <div class="alert alert-info">
+                        <i class="ri-information-line me-2"></i>
+                        Zostanie utworzony nowy zestaw z tymi samymi narzędziami, ale z ilościami ustawionymi na 0.
+                    </div>
+                    <input type="hidden" name="_token" id="clone-token">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Klonuj zestaw</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade zoomIn" id="deleteRecordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mt-2 text-center">
+                    <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
+                    <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                        <h4>Czy jesteś pewien?</h4>
+                        <p class="text-muted mx-4 mb-0">Czy na pewno chcesz usunąć zestaw "<span id="set-name-to-delete"></span>"?</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                    <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Anuluj</button>
+                    <form method="post" id="delete-form" style="display: inline;">
+                        <input type="hidden" name="_token" id="delete-token">
+                        <button type="submit" class="btn w-sm btn-danger">Tak, usuń!</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form on filter change
+    const filterSelects = document.querySelectorAll('#status, #search, #assigned_to');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            if (this.id !== 'search') {
+                this.form.submit();
+            }
+        });
+    });
+});
+
+function checkoutSet(setId, setName) {
+    document.getElementById('checkout-set-name').textContent = setName;
+    document.getElementById('checkout-form').action = '{{ path('app_tool_set_checkout', {id: 'SET_ID'}) }}'.replace('SET_ID', setId);
+    document.getElementById('checkout-token').value = 'csrf-token-here';
+    
+    // Load users (you may need to implement this via AJAX)
+    // For now, add some placeholder options
+    const userSelect = document.getElementById('assigned_to_select');
+    userSelect.innerHTML = '<option value="">Wybierz użytkownika</option><option value="1">Jan Kowalski</option><option value="2">Anna Nowak</option>';
+    
+    new bootstrap.Modal(document.getElementById('checkoutModal')).show();
+}
+
+function checkinSet(setId, setName) {
+    document.getElementById('checkin-set-name').textContent = setName;
+    document.getElementById('checkin-form').action = '{{ path('app_tool_set_checkin', {id: 'SET_ID'}) }}'.replace('SET_ID', setId);
+    document.getElementById('checkin-token').value = 'csrf-token-here';
+    
+    new bootstrap.Modal(document.getElementById('checkinModal')).show();
+}
+
+function cloneSet(setId, setName) {
+    document.getElementById('clone-set-name').textContent = setName;
+    document.getElementById('clone-form').action = '{{ path('app_tool_set_clone', {id: 'SET_ID'}) }}'.replace('SET_ID', setId);
+    document.getElementById('clone-token').value = 'csrf-token-here';
+    
+    new bootstrap.Modal(document.getElementById('cloneModal')).show();
+}
+
+function deleteSet(setId, setName) {
+    document.getElementById('set-name-to-delete').textContent = setName;
+    document.getElementById('delete-form').action = '{{ path('app_tool_set_delete', {id: 'SET_ID'}) }}'.replace('SET_ID', setId);
+    document.getElementById('delete-token').value = 'csrf-token-here';
+    
+    new bootstrap.Modal(document.getElementById('deleteRecordModal')).show();
+}
+</script>
+{% endblock %}

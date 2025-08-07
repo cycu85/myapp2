@@ -1,0 +1,315 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dodaj narzędzie - {{ app_name() }}{% endblock %}
+{% block page_title %}Dodaj nowe narzędzie{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_index') }}">Narzędzia</a></li>
+    <li class="breadcrumb-item active">Dodaj nowe</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-xl-8 col-lg-10 mx-auto">
+        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+        
+        <!-- Basic Information -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-information-line me-2"></i>Podstawowe informacje
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.name, 'Nazwa narzędzia', {'label_attr': {'class': 'form-label required'}}) }}
+                            {{ form_widget(form.name, {'attr': {'class': 'form-control', 'placeholder': 'np. Wiertarka Bosch GSR 18V'}}) }}
+                            {{ form_errors(form.name) }}
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.category, 'Kategoria', {'label_attr': {'class': 'form-label required'}}) }}
+                            {{ form_widget(form.category, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.category) }}
+                            <div class="form-text">
+                                <a href="{{ path('app_tool_category_new') }}" target="_blank">Dodaj nową kategorię</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.type, 'Typ', {'label_attr': {'class': 'form-label required'}}) }}
+                            {{ form_widget(form.type, {'attr': {'class': 'form-select', 'id': 'tool-type-select'}}) }}
+                            {{ form_errors(form.type) }}
+                            <div class="form-text">
+                                <a href="{{ path('app_tool_type_new') }}" target="_blank">Dodaj nowy typ</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.status, 'Status', {'label_attr': {'class': 'form-label required'}}) }}
+                            {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+                            {{ form_errors(form.status) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.manufacturer, 'Producent', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.manufacturer, {'attr': {'class': 'form-control', 'placeholder': 'np. Bosch, Makita'}}) }}
+                            {{ form_errors(form.manufacturer) }}
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.model, 'Model', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.model, {'attr': {'class': 'form-control', 'placeholder': 'np. GSR 18V-21'}}) }}
+                            {{ form_errors(form.model) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.description, 'Opis', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Opis funkcji i zastosowań narzędzia'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Identification -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-barcode-line me-2"></i>Identyfikacja
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.serialNumber, 'Numer seryjny', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.serialNumber, {'attr': {'class': 'form-control', 'placeholder': 'np. SN123456789'}}) }}
+                            {{ form_errors(form.serialNumber) }}
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.inventoryNumber, 'Numer inwentarzowy', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.inventoryNumber, {'attr': {'class': 'form-control', 'placeholder': 'np. INV-2024-001'}}) }}
+                            {{ form_errors(form.inventoryNumber) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.location, 'Lokalizacja', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.location, {'attr': {'class': 'form-control', 'placeholder': 'np. Magazyn A1, Warsztat B2'}}) }}
+                    {{ form_errors(form.location) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantity Management -->
+        <div class="card" id="quantity-section" style="display: none;">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-stack-line me-2"></i>Zarządzanie ilością
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="ri-information-line me-2"></i>
+                    Ten typ narzędzia obsługuje zarządzanie ilością (narzędzia wielosztuki).
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="mb-3">
+                            {{ form_label(form.totalQuantity, 'Ilość całkowita', {'label_attr': {'class': 'form-label required'}}) }}
+                            {{ form_widget(form.totalQuantity, {'attr': {'class': 'form-control', 'min': 1}}) }}
+                            {{ form_errors(form.totalQuantity) }}
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="mb-3">
+                            {{ form_label(form.currentQuantity, 'Ilość dostępna', {'label_attr': {'class': 'form-label required'}}) }}
+                            {{ form_widget(form.currentQuantity, {'attr': {'class': 'form-control', 'min': 0}}) }}
+                            {{ form_errors(form.currentQuantity) }}
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="mb-3">
+                            {{ form_label(form.minQuantity, 'Minimalny stan', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.minQuantity, {'attr': {'class': 'form-control', 'min': 0}}) }}
+                            {{ form_errors(form.minQuantity) }}
+                            <div class="form-text">Ilość poniżej której system wyświetli ostrzeżenie</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.unit, 'Jednostka', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.unit, {'attr': {'class': 'form-control', 'placeholder': 'szt, kg, m'}}) }}
+                            {{ form_errors(form.unit) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchase Information -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-shopping-cart-line me-2"></i>Informacje o zakupie
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.purchaseDate, 'Data zakupu', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.purchaseDate, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.purchaseDate) }}
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.purchasePrice, 'Cena zakupu', {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                {{ form_widget(form.purchasePrice, {'attr': {'class': 'form-control', 'placeholder': '0.00'}}) }}
+                                <span class="input-group-text">zł</span>
+                            </div>
+                            {{ form_errors(form.purchasePrice) }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.warrantyEndDate, 'Data końca gwarancji', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.warrantyEndDate, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.warrantyEndDate) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Inspection Settings -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-search-eye-line me-2"></i>Ustawienia przeglądów
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.inspectionIntervalMonths, 'Częstotliwość przeglądów', {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                {{ form_widget(form.inspectionIntervalMonths, {'attr': {'class': 'form-control', 'min': 1, 'placeholder': '12'}}) }}
+                                <span class="input-group-text">miesięcy</span>
+                            </div>
+                            {{ form_errors(form.inspectionIntervalMonths) }}
+                            <div class="form-text">Co ile miesięcy przeprowadzać przegląd</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.nextInspectionDate, 'Data następnego przeglądu', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.nextInspectionDate, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.nextInspectionDate) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Notes -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-sticky-note-line me-2"></i>Dodatkowe informacje
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    {{ form_label(form.notes, 'Uwagi', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.notes, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Dodatkowe uwagi, instrukcje, informacje o konserwacji'}}) }}
+                    {{ form_errors(form.notes) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ path('app_tool_index') }}" class="btn btn-light">
+                        <i class="ri-arrow-left-line me-1"></i> Anuluj
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="ri-save-line me-1"></i> Zapisz narzędzie
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('tool-type-select');
+    const quantitySection = document.getElementById('quantity-section');
+    
+    function toggleQuantitySection() {
+        const selectedOption = typeSelect.options[typeSelect.selectedIndex];
+        if (selectedOption && selectedOption.dataset && selectedOption.dataset.isMultiQuantity === '1') {
+            quantitySection.style.display = 'block';
+        } else {
+            quantitySection.style.display = 'none';
+        }
+    }
+    
+    // Initial check
+    toggleQuantitySection();
+    
+    // Listen for changes
+    typeSelect.addEventListener('change', toggleQuantitySection);
+    
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+});
+</script>
+{% endblock %}

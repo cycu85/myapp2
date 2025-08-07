@@ -1,0 +1,291 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dodaj przegląd - {{ app_name() }}{% endblock %}
+{% block page_title %}{% if tool %}Nowy przegląd: {{ tool.name }}{% else %}Dodaj przegląd narzędzia{% endif %}{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="/admin">Administracja</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_index') }}">Narzędzia</a></li>
+    {% if tool %}
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_show', {id: tool.id}) }}">{{ tool.name }}</a></li>
+    {% else %}
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_inspection_index') }}">Przeglądy</a></li>
+    {% endif %}
+    <li class="breadcrumb-item active">Nowy przegląd</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-xl-8 col-lg-10 mx-auto">
+        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+        
+        {% if tool %}
+        <!-- Tool Information Header -->
+        <div class="card bg-primary-subtle">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="avatar-sm">
+                            <div class="avatar-title rounded-circle bg-primary text-white display-6">
+                                <i class="bx bx-wrench"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="card-title text-primary mb-1">{{ tool.name }}</h5>
+                        <p class="text-muted mb-0">
+                            {{ tool.category.name }} • {{ tool.type.name }}
+                            {% if tool.manufacturer %} • {{ tool.manufacturer }}{% endif %}
+                            {% if tool.serialNumber %} • SN: {{ tool.serialNumber }}{% endif %}
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <a href="{{ path('app_tool_show', {id: tool.id}) }}" class="btn btn-outline-primary">
+                            <i class="ri-eye-line me-1"></i> Podgląd narzędzia
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if tool.isInspectionDue %}
+        <div class="alert alert-warning">
+            <i class="ri-error-warning-line me-2"></i>
+            <strong>Uwaga!</strong> To narzędzie ma zaległy przegląd. Ostatni planowany był na {{ tool.nextInspectionDate|date('d.m.Y') }}.
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <!-- Inspection Details -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-search-eye-line me-2"></i>Szczegóły przeglądu
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if not tool %}
+                <div class="mb-3">
+                    {{ form_label(form.tool, 'Narzędzie', {'label_attr': {'class': 'form-label required'}}) }}
+                    {{ form_widget(form.tool, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.tool) }}
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.inspectionDate, 'Data przeglądu', {'label_attr': {'class': 'form-label required'}}) }}
+                            {{ form_widget(form.inspectionDate, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.inspectionDate) }}
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.plannedDate, 'Data planowana', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.plannedDate, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.plannedDate) }}
+                            <div class="form-text">Data kiedy przegląd był pierwotnie planowany</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.inspectorName, 'Imię i nazwisko inspektora', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.inspectorName, {'attr': {'class': 'form-control', 'placeholder': 'Jan Kowalski'}}) }}
+                            {{ form_errors(form.inspectorName) }}
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.cost, 'Koszt przeglądu', {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                {{ form_widget(form.cost, {'attr': {'class': 'form-control', 'placeholder': '0.00', 'step': '0.01'}}) }}
+                                <span class="input-group-text">zł</span>
+                            </div>
+                            {{ form_errors(form.cost) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inspection Results -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-checkbox-line me-2"></i>Wynik przeglądu
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    {{ form_label(form.result, 'Wynik', {'label_attr': {'class': 'form-label required'}}) }}
+                    {{ form_widget(form.result, {'attr': {'class': 'form-select', 'id': 'result-select'}}) }}
+                    {{ form_errors(form.result) }}
+                </div>
+
+                <div class="alert alert-info" id="result-info" style="display: none;">
+                    <div id="result-description"></div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.defectsFound, 'Znalezione usterki', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.defectsFound, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Opisz znalezione usterki, problemy lub nieprawidłowości'}}) }}
+                    {{ form_errors(form.defectsFound) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.recommendations, 'Zalecenia', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.recommendations, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Zalecenia dotyczące konserwacji, napraw lub dalszego użytkowania'}}) }}
+                    {{ form_errors(form.recommendations) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.notes, 'Dodatkowe uwagi', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.notes, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Inne uwagi dotyczące przeglądu'}}) }}
+                    {{ form_errors(form.notes) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Inspection -->
+        <div class="card" id="next-inspection-card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-calendar-schedule-line me-2"></i>Następny przegląd
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="ri-information-line me-2"></i>
+                    Data następnego przeglądu zostanie automatycznie obliczona na podstawie wyniku i ustawień narzędzia.
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            {{ form_label(form.nextInspectionDate, 'Data następnego przeglądu', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.nextInspectionDate, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.nextInspectionDate) }}
+                            <div class="form-text">Pozostaw puste aby data została wyliczona automatycznie</div>
+                        </div>
+                    </div>
+                    {% if tool and tool.inspectionIntervalMonths %}
+                    <div class="col-lg-6">
+                        <div class="mb-3">
+                            <label class="form-label">Częstotliwość przeglądów</label>
+                            <div class="form-control-static">
+                                Co {{ tool.inspectionIntervalMonths }} miesięcy
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-end gap-2">
+                    {% if tool %}
+                    <a href="{{ path('app_tool_show', {id: tool.id}) }}" class="btn btn-light">
+                        <i class="ri-arrow-left-line me-1"></i> Wróć do narzędzia
+                    </a>
+                    {% else %}
+                    <a href="{{ path('app_tool_inspection_index') }}" class="btn btn-light">
+                        <i class="ri-arrow-left-line me-1"></i> Anuluj
+                    </a>
+                    {% endif %}
+                    <button type="submit" class="btn btn-success">
+                        <i class="ri-save-line me-1"></i> Zapisz przegląd
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const resultSelect = document.getElementById('result-select');
+    const resultInfo = document.getElementById('result-info');
+    const resultDescription = document.getElementById('result-description');
+    const nextInspectionCard = document.getElementById('next-inspection-card');
+
+    const resultDescriptions = {
+        'passed': {
+            text: '<strong>Pozytywny:</strong> Narzędzie jest w dobrym stanie technicznym i może być nadal używane.',
+            class: 'alert-success',
+            showNext: true
+        },
+        'failed': {
+            text: '<strong>Negatywny:</strong> Narzędzie ma usterki, ale może być używane z ograniczeniami.',
+            class: 'alert-warning',
+            showNext: true
+        },
+        'needs_repair': {
+            text: '<strong>Wymaga naprawy:</strong> Narzędzie wymaga naprawy przed dalszym użytkowaniem.',
+            class: 'alert-warning',
+            showNext: false
+        },
+        'out_of_service': {
+            text: '<strong>Wyłączony z użytku:</strong> Narzędzie nie może być używane i powinno zostać wycofane.',
+            class: 'alert-danger',
+            showNext: false
+        }
+    };
+
+    function updateResultInfo() {
+        const selectedValue = resultSelect.value;
+        
+        if (selectedValue && resultDescriptions[selectedValue]) {
+            const description = resultDescriptions[selectedValue];
+            resultDescription.innerHTML = description.text;
+            resultInfo.className = 'alert ' + description.class;
+            resultInfo.style.display = 'block';
+            
+            // Show/hide next inspection section
+            if (description.showNext) {
+                nextInspectionCard.style.display = 'block';
+            } else {
+                nextInspectionCard.style.display = 'none';
+            }
+        } else {
+            resultInfo.style.display = 'none';
+            nextInspectionCard.style.display = 'block';
+        }
+    }
+
+    // Initial check
+    updateResultInfo();
+    
+    // Listen for changes
+    resultSelect.addEventListener('change', updateResultInfo);
+
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+});
+</script>
+{% endblock %}

@@ -201,7 +201,7 @@ class ToolSetService
     /**
      * Check out a tool set (mark tools as in use)
      */
-    public function checkOutSet(ToolSet $toolSet, ?string $notes = null): array
+    public function checkOutSet(ToolSet $toolSet, $assignedTo, $assignedBy): array
     {
         $checkedOut = [];
         $errors = [];
@@ -235,8 +235,10 @@ class ToolSetService
         }
 
         if (empty($errors)) {
-            $toolSet->setStatus(ToolSet::STATUS_INACTIVE);
-            $toolSet->setLocation($toolSet->getLocation() ? $toolSet->getLocation() . ' (wypożyczony)' : 'Wypożyczony');
+            $toolSet->setStatus(ToolSet::STATUS_CHECKED_OUT);
+            $toolSet->setAssignedTo($assignedTo);
+            $toolSet->setCheckedOutAt(new \DateTime());
+            $toolSet->setCheckedOutBy($assignedBy);
         }
 
         $this->entityManager->flush();
@@ -258,16 +260,15 @@ class ToolSetService
     /**
      * Check in a tool set (mark tools as returned)
      */
-    public function checkInSet(ToolSet $toolSet, array $returnedQuantities = []): array
+    public function checkInSet(ToolSet $toolSet, $checkedInBy): array
     {
         $checkedIn = [];
         
         foreach ($toolSet->getActiveItems() as $item) {
             $tool = $item->getTool();
-            $toolId = $tool->getId();
             
             if ($tool->isMultiQuantity()) {
-                $returnQuantity = $returnedQuantities[$toolId] ?? $item->getQuantity();
+                $returnQuantity = $item->getQuantity();
                 $currentQuantity = $tool->getCurrentQuantity();
                 $tool->setCurrentQuantity($currentQuantity + $returnQuantity);
                 $checkedIn[] = ['tool' => $tool, 'quantity' => $returnQuantity];
@@ -282,10 +283,9 @@ class ToolSetService
 
         // Update tool set status
         $toolSet->setStatus(ToolSet::STATUS_ACTIVE);
-        $location = $toolSet->getLocation();
-        if ($location && str_contains($location, '(wypożyczony)')) {
-            $toolSet->setLocation(str_replace(' (wypożyczony)', '', $location));
-        }
+        $toolSet->setAssignedTo(null);
+        $toolSet->setCheckedInAt(new \DateTime());
+        $toolSet->setCheckedInBy($checkedInBy);
 
         $this->entityManager->flush();
 
@@ -300,21 +300,20 @@ class ToolSetService
     /**
      * Clone a tool set with all its items
      */
-    public function cloneToolSet(ToolSet $originalSet, string $newName, ?string $newCode = null): ToolSet
+    public function cloneSet(ToolSet $originalSet, $createdBy): ToolSet
     {
+        $newName = $originalSet->getName() . ' (kopia)';
         $clonedSet = new ToolSet();
         $clonedSet->setName($newName)
                  ->setDescription($originalSet->getDescription() ? $originalSet->getDescription() . ' (kopia)' : null)
-                 ->setCode($newCode)
-                 ->setLocation($originalSet->getLocation());
+                 ->setLocation($originalSet->getLocation())
+                 ->setCreatedBy($createdBy);
 
         $this->entityManager->persist($clonedSet);
         $this->entityManager->flush();
 
-        // Auto-generate code if not provided
-        if (!$newCode) {
-            $clonedSet->setCode($clonedSet->generateCode());
-        }
+        // Auto-generate code
+        $clonedSet->setCode($clonedSet->generateCode());
 
         // Clone all items
         foreach ($originalSet->getActiveItems() as $originalItem) {
