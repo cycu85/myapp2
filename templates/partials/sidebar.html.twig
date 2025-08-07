@@ -41,12 +41,17 @@
 
                 <!-- AssetHub Modules -->
                 {% set userModules = get_user_modules() %}
-                {% if userModules|length > 0 %}
+                {% set isSystemAdmin = is_system_admin() %}
+                {% set allModules = isSystemAdmin ? get_all_enabled_modules() : [] %}
+                
+                {% if userModules|length > 0 or isSystemAdmin %}
                     <li class="menu-title"><span data-key="t-modules">Moduły</span></li>
                     
                     {% set hasSystemAdmin = false %}
                     {% set hasEmployeesRole = false %}
+                    {% set processedModules = [] %}
                     
+                    {# Process user modules first #}
                     {% for userRole in userModules %}
                         {% set module = userRole.role.module %}
                         
@@ -56,27 +61,59 @@
                             {% set hasEmployeesRole = true %}
                         {% endif %}
                         
-                        {% if module.name == 'equipment' %}
-                        <li class="nav-item">
-                            <a class="nav-link menu-link {{ app.request.get('_route') starts with 'equipment_' ? 'active' : '' }}" href="{{ path('equipment_index') }}">
-                                <i class="ri-tools-line"></i> <span>{{ module.displayName }}</span>
-                            </a>
-                        </li>
-                        {% elseif module.name == 'tools' %}
-                        <li class="nav-item">
-                            <a class="nav-link menu-link {{ app.request.get('_route') starts with 'app_tool' ? 'active' : '' }}" href="{{ path('app_tool_index') }}">
-                                <i class="ri-hammer-line"></i> <span>{{ module.displayName }}</span>
-                            </a>
-                        </li>
-                        {% elseif module.name != 'admin' %}
-                        {# Generic module handler - dla przyszłych modułów (pomijamy admin bo obsługujemy go osobno) #}
-                        <li class="nav-item">
-                            <a class="nav-link menu-link {{ app.request.get('_route') starts with module.name ~ '_' ? 'active' : '' }}" href="{{ path(module.name ~ '_index') }}">
-                                <i class="ri-apps-line"></i> <span>{{ module.displayName }}</span>
-                            </a>
-                        </li>
+                        {% if module.name not in processedModules %}
+                            {% set processedModules = processedModules|merge([module.name]) %}
+                            
+                            {% if module.name == 'equipment' %}
+                            <li class="nav-item">
+                                <a class="nav-link menu-link {{ app.request.get('_route') starts with 'equipment_' ? 'active' : '' }}" href="{{ path('equipment_index') }}">
+                                    <i class="ri-tools-line"></i> <span>{{ module.displayName }}</span>
+                                </a>
+                            </li>
+                            {% elseif module.name == 'tools' %}
+                            <li class="nav-item">
+                                <a class="nav-link menu-link {{ app.request.get('_route') starts with 'app_tool' ? 'active' : '' }}" href="{{ path('app_tool_index') }}">
+                                    <i class="ri-hammer-line"></i> <span>{{ module.displayName }}</span>
+                                </a>
+                            </li>
+                            {% elseif module.name != 'admin' %}
+                            {# Generic module handler - dla przyszłych modułów (pomijamy admin bo obsługujemy go osobno) #}
+                            <li class="nav-item">
+                                <a class="nav-link menu-link {{ app.request.get('_route') starts with module.name ~ '_' ? 'active' : '' }}" href="{{ path(module.name ~ '_index') }}">
+                                    <i class="ri-apps-line"></i> <span>{{ module.displayName }}</span>
+                                </a>
+                            </li>
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
+                    
+                    {# For system admin, add any missing enabled modules #}
+                    {% if isSystemAdmin %}
+                        {% for module in allModules %}
+                            {% if module.name not in processedModules and module.name != 'admin' %}
+                                {% if module.name == 'equipment' %}
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link {{ app.request.get('_route') starts with 'equipment_' ? 'active' : '' }}" href="{{ path('equipment_index') }}">
+                                        <i class="ri-tools-line"></i> <span>{{ module.displayName }}</span>
+                                    </a>
+                                </li>
+                                {% elseif module.name == 'tools' %}
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link {{ app.request.get('_route') starts with 'app_tool' ? 'active' : '' }}" href="{{ path('app_tool_index') }}">
+                                        <i class="ri-hammer-line"></i> <span>{{ module.displayName }}</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                {# Generic module handler #}
+                                <li class="nav-item">
+                                    <a class="nav-link menu-link {{ app.request.get('_route') starts with module.name ~ '_' ? 'active' : '' }}" href="{{ path(module.name ~ '_index') }}">
+                                        <i class="ri-apps-line"></i> <span>{{ module.displayName }}</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
                     
                     {# Panel administracyjny dla system_admin #}
                     {% if hasSystemAdmin %}

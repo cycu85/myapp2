@@ -95,31 +95,30 @@ class PermissionService
         
         if ($isSystemAdmin) {
             // For system admin, include all enabled modules
+            // Find actual user roles first, then add missing modules
+            foreach ($userRoles as $userRole) {
+                $module = $userRole->getRole()->getModule();
+                if ($module->isEnabled() && !in_array($module->getId(), $seenModules, true)) {
+                    $moduleUserRoles[] = $userRole;
+                    $seenModules[] = $module->getId();
+                }
+            }
+            
+            // For system admin, ensure all enabled modules are shown even if no explicit role exists
             $allModules = $this->moduleRepository->findEnabledModules();
+            $adminUserRole = null;
+            foreach ($userRoles as $userRole) {
+                if ($userRole->getRole()->getName() === 'system_admin') {
+                    $adminUserRole = $userRole;
+                    break;
+                }
+            }
+            
             foreach ($allModules as $module) {
-                if (!in_array($module->getId(), $seenModules, true)) {
-                    // Create a virtual user role for display purposes
-                    $virtualUserRole = null;
-                    // Find actual user role for this module or use admin role
-                    foreach ($userRoles as $userRole) {
-                        if ($userRole->getRole()->getModule()->getId() === $module->getId()) {
-                            $virtualUserRole = $userRole;
-                            break;
-                        }
-                    }
-                    // If no specific role found, use the admin role for display
-                    if (!$virtualUserRole) {
-                        foreach ($userRoles as $userRole) {
-                            if ($userRole->getRole()->getName() === 'system_admin') {
-                                $virtualUserRole = $userRole;
-                                break;
-                            }
-                        }
-                    }
-                    if ($virtualUserRole) {
-                        $moduleUserRoles[] = $virtualUserRole;
-                        $seenModules[] = $module->getId();
-                    }
+                if (!in_array($module->getId(), $seenModules, true) && $adminUserRole) {
+                    // Use the admin role but don't add to results - just ensure access
+                    $moduleUserRoles[] = $adminUserRole;
+                    $seenModules[] = $module->getId();
                 }
             }
         } else {
@@ -177,6 +176,11 @@ class PermissionService
         }
         
         return false;
+    }
+
+    public function getModuleRepository(): ModuleRepository
+    {
+        return $this->moduleRepository;
     }
 
     public static function getAvailablePermissions(): array

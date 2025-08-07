@@ -21,6 +21,8 @@ class PermissionExtension extends AbstractExtension
             new TwigFunction('is_granted_module', [$this, 'isGrantedModule']),
             new TwigFunction('has_permission', [$this, 'hasPermission']),
             new TwigFunction('get_user_modules', [$this, 'getUserModules']),
+            new TwigFunction('get_all_enabled_modules', [$this, 'getAllEnabledModules']),
+            new TwigFunction('is_system_admin', [$this, 'isSystemAdmin']),
         ];
     }
 
@@ -52,5 +54,38 @@ class PermissionExtension extends AbstractExtension
         }
 
         return $this->permissionService->getUserModules($user);
+    }
+
+    public function getAllEnabledModules(): array
+    {
+        $user = $this->security->getUser();
+        if (!$user) {
+            return [];
+        }
+
+        // Only for system admin, return all enabled modules
+        if ($this->isSystemAdmin()) {
+            return $this->permissionService->getModuleRepository()->findEnabledModules();
+        }
+
+        return [];
+    }
+
+    public function isSystemAdmin(): bool
+    {
+        $user = $this->security->getUser();
+        if (!$user) {
+            return false;
+        }
+
+        $userModules = $this->permissionService->getUserModules($user);
+        foreach ($userModules as $userRole) {
+            $role = $userRole->getRole();
+            if ($role->getName() === 'system_admin' && $role->getModule()->getName() === 'admin') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
