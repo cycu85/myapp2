@@ -19,14 +19,46 @@ final class Version20250804120000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // Add new employee fields to users table
-        $this->addSql('ALTER TABLE users ADD branch VARCHAR(100) DEFAULT NULL');
-        $this->addSql('ALTER TABLE users ADD supervisor_id INT DEFAULT NULL');  
-        $this->addSql('ALTER TABLE users ADD status VARCHAR(50) DEFAULT NULL');
+        $connection = $this->connection;
+        $databaseName = $connection->getDatabase();
         
-        // Add foreign key constraint for supervisor_id
-        $this->addSql('ALTER TABLE users ADD CONSTRAINT FK_1483A5E919E9AC5F FOREIGN KEY (supervisor_id) REFERENCES users (id)');
-        $this->addSql('CREATE INDEX IDX_1483A5E919E9AC5F ON users (supervisor_id)');
+        // Check if columns already exist
+        $branchExists = $connection->fetchOne(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'branch'",
+            [$databaseName]
+        );
+        
+        $supervisorExists = $connection->fetchOne(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'supervisor_id'",
+            [$databaseName]
+        );
+        
+        $statusExists = $connection->fetchOne(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME = 'status'",
+            [$databaseName]
+        );
+        
+        // Add columns only if they don't exist
+        if ($branchExists == 0) {
+            $this->addSql('ALTER TABLE users ADD branch VARCHAR(100) DEFAULT NULL');
+        }
+        
+        if ($supervisorExists == 0) {
+            $this->addSql('ALTER TABLE users ADD supervisor_id INT DEFAULT NULL');
+        }
+        
+        if ($statusExists == 0) {
+            $this->addSql('ALTER TABLE users ADD status VARCHAR(50) DEFAULT NULL');
+        }
+        
+        // Add foreign key constraint for supervisor_id only if column was added
+        if ($supervisorExists == 0) {
+            $this->addSql('ALTER TABLE users ADD CONSTRAINT FK_1483A5E919E9AC5F FOREIGN KEY (supervisor_id) REFERENCES users (id)');
+            $this->addSql('CREATE INDEX IDX_1483A5E919E9AC5F ON users (supervisor_id)');
+        }
     }
 
     public function down(Schema $schema): void
