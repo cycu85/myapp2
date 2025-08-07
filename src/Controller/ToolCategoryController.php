@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/admin/tools/categories')]
+#[Route('/tools/categories')]
 #[IsGranted('ROLE_USER')]
 class ToolCategoryController extends AbstractController
 {
