@@ -100,6 +100,7 @@ class ToolController extends AbstractController
             'can_create' => $this->permissionService->hasPermission($this->getUser(), 'tools', 'CREATE'),
             'can_edit' => $this->permissionService->hasPermission($this->getUser(), 'tools', 'EDIT'),
             'can_delete' => $this->permissionService->hasPermission($this->getUser(), 'tools', 'DELETE'),
+            'can_export' => $this->permissionService->hasPermission($this->getUser(), 'tools', 'EXPORT'),
         ]);
     }
 
