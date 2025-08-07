@@ -23,6 +23,7 @@ class AppFixtures extends Fixture
         $moduleRepository = $manager->getRepository(Module::class);
         $adminModule = $moduleRepository->findOneBy(['name' => 'admin']);
         $equipmentModule = $moduleRepository->findOneBy(['name' => 'equipment']);
+        $toolsModule = $moduleRepository->findOneBy(['name' => 'tools']);
 
         // Create modules only if they don't exist
         if (!$adminModule) {
@@ -41,6 +42,15 @@ class AppFixtures extends Fixture
                 ->setDescription('Zarządzanie sprzętem wysokościowym')
                 ->setRequiredPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'ASSIGN', 'REVIEW', 'EXPORT']);
             $manager->persist($equipmentModule);
+        }
+
+        if (!$toolsModule) {
+            $toolsModule = new Module();
+            $toolsModule->setName('tools')
+                ->setDisplayName('Narzędzia')
+                ->setDescription('Zarządzanie narzędziami i sprzętem')
+                ->setRequiredPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'ASSIGN', 'REVIEW', 'EXPORT', 'INSPECT', 'MANAGE_SETS']);
+            $manager->persist($toolsModule);
         }
 
         // Create roles only if they don't exist
@@ -113,6 +123,51 @@ class AppFixtures extends Fixture
             $manager->persist($equipmentViewerRole);
         }
 
+        // Tools module roles
+        $toolsManagerRole = $roleRepository->findOneBy(['name' => 'tools_manager']);
+        if (!$toolsManagerRole) {
+            $toolsManagerRole = new Role();
+            $toolsManagerRole->setName('tools_manager')
+                ->setDescription('Menedżer narzędzi - pełny dostęp')
+                ->setModule($toolsModule)
+                ->setPermissions(['VIEW', 'CREATE', 'EDIT', 'DELETE', 'ASSIGN', 'REVIEW', 'EXPORT', 'INSPECT', 'MANAGE_SETS'])
+                ->setIsSystemRole(true);
+            $manager->persist($toolsManagerRole);
+        }
+
+        $toolsInspectorRole = $roleRepository->findOneBy(['name' => 'tools_inspector']);
+        if (!$toolsInspectorRole) {
+            $toolsInspectorRole = new Role();
+            $toolsInspectorRole->setName('tools_inspector')
+                ->setDescription('Inspektor narzędzi - przeglądanie i przeglądy')
+                ->setModule($toolsModule)
+                ->setPermissions(['VIEW', 'INSPECT', 'REVIEW'])
+                ->setIsSystemRole(true);
+            $manager->persist($toolsInspectorRole);
+        }
+
+        $toolsUserRole = $roleRepository->findOneBy(['name' => 'tools_user']);
+        if (!$toolsUserRole) {
+            $toolsUserRole = new Role();
+            $toolsUserRole->setName('tools_user')
+                ->setDescription('Użytkownik narzędzi - podstawowy dostęp')
+                ->setModule($toolsModule)
+                ->setPermissions(['VIEW', 'ASSIGN'])
+                ->setIsSystemRole(true);
+            $manager->persist($toolsUserRole);
+        }
+
+        $toolsViewerRole = $roleRepository->findOneBy(['name' => 'tools_viewer']);
+        if (!$toolsViewerRole) {
+            $toolsViewerRole = new Role();
+            $toolsViewerRole->setName('tools_viewer')
+                ->setDescription('Przeglądanie narzędzi - tylko odczyt')
+                ->setModule($toolsModule)
+                ->setPermissions(['VIEW'])
+                ->setIsSystemRole(true);
+            $manager->persist($toolsViewerRole);
+        }
+
         // Create users only if they don't exist
         $userRepository = $manager->getRepository(User::class);
         
@@ -178,11 +233,25 @@ class AppFixtures extends Fixture
             ->setAssignedBy($adminUser);
         $manager->persist($equipmentAdminRole);
 
+        // Assign tools manager role to admin user
+        $toolsAdminRole = new UserRole();
+        $toolsAdminRole->setUser($adminUser)
+            ->setRole($toolsManagerRole)
+            ->setAssignedBy($adminUser);
+        $manager->persist($toolsAdminRole);
+
         $testUserRole = new UserRole();
         $testUserRole->setUser($testUser)
             ->setRole($equipmentViewerRole)
             ->setAssignedBy($adminUser);
         $manager->persist($testUserRole);
+
+        // Assign tools user role to test user
+        $testToolsRole = new UserRole();
+        $testToolsRole->setUser($testUser)
+            ->setRole($toolsUserRole)
+            ->setAssignedBy($adminUser);
+        $manager->persist($testToolsRole);
 
         // Assign HR role to HR user
         $hrUserRole = new UserRole();
@@ -190,6 +259,13 @@ class AppFixtures extends Fixture
             ->setRole($employeesEditorRole)
             ->setAssignedBy($adminUser);
         $manager->persist($hrUserRole);
+
+        // Assign tools inspector role to HR user
+        $hrToolsRole = new UserRole();
+        $hrToolsRole->setUser($hrUser)
+            ->setRole($toolsInspectorRole)
+            ->setAssignedBy($adminUser);
+        $manager->persist($hrToolsRole);
 
         $manager->flush();
 
