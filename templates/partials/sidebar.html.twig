@@ -62,6 +62,12 @@
                                 <i class="ri-tools-line"></i> <span>{{ module.displayName }}</span>
                             </a>
                         </li>
+                        {% elseif module.name == 'tools' %}
+                        <li class="nav-item">
+                            <a class="nav-link menu-link {{ app.request.get('_route') starts with 'app_tool' ? 'active' : '' }}" href="{{ path('app_tool_index') }}">
+                                <i class="ri-hammer-line"></i> <span>{{ module.displayName }}</span>
+                            </a>
+                        </li>
                         {% elseif module.name != 'admin' %}
                         {# Generic module handler - dla przyszłych modułów (pomijamy admin bo obsługujemy go osobno) #}
                         <li class="nav-item">
