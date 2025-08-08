@@ -1,0 +1,173 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edycja pozycji - {{ tool_set.name }} - {{ app_name() }}{% endblock %}
+{% block page_title %}Edycja pozycji zestawu{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_index') }}">Narzędzia</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_set_index') }}">Zestawy narzędzi</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_set_show', {id: tool_set.id}) }}">{{ tool_set.name }}</a></li>
+    <li class="breadcrumb-item active">Edycja pozycji</li>
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h5 class="card-title mb-0 flex-grow-1">
+                        <i class="ri-edit-line me-2"></i>Edycja pozycji w zestawie: {{ tool_set.name }}
+                    </h5>
+                    <div class="flex-shrink-0">
+                        <a href="{{ path('app_tool_set_show', {id: tool_set.id}) }}" class="btn btn-secondary">
+                            <i class="ri-arrow-left-line align-bottom me-1"></i> Powrót do zestawu
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+            <div class="card-body">
+                <div class="mb-3">
+                    {{ form_label(form.tool, null, {'label_attr': {'class': 'form-label required'}}) }}
+                    {{ form_widget(form.tool, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.tool) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.requiredQuantity, null, {'label_attr': {'class': 'form-label required'}}) }}
+                    {{ form_widget(form.requiredQuantity, {'attr': {'class': 'form-control', 'min': 1}}) }}
+                    {{ form_errors(form.requiredQuantity) }}
+                    {{ form_help(form.requiredQuantity) }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(form.notes, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.notes, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                    {{ form_errors(form.notes) }}
+                    {{ form_help(form.notes) }}
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="hstack gap-2 justify-content-end">
+                    <a href="{{ path('app_tool_set_show', {id: tool_set.id}) }}" class="btn btn-light">
+                        <i class="ri-close-line me-1"></i>Anuluj
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="ri-save-line me-1"></i>Zapisz zmiany
+                    </button>
+                </div>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Current Item Info -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-hammer-line me-1"></i>Edytowana pozycja
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if item.tool %}
+                <dl class="row">
+                    <dt class="col-sm-5">Narzędzie:</dt>
+                    <dd class="col-sm-7">{{ item.tool.name }}</dd>
+                    
+                    {% if item.tool.manufacturer or item.tool.model %}
+                    <dt class="col-sm-5">Producent:</dt>
+                    <dd class="col-sm-7">
+                        {{ item.tool.manufacturer }}
+                        {% if item.tool.model %}{{ item.tool.model }}{% endif %}
+                    </dd>
+                    {% endif %}
+                    
+                    {% if item.tool.serialNumber %}
+                    <dt class="col-sm-5">Nr seryjny:</dt>
+                    <dd class="col-sm-7"><code>{{ item.tool.serialNumber }}</code></dd>
+                    {% endif %}
+                    
+                    <dt class="col-sm-5">Aktualna ilość:</dt>
+                    <dd class="col-sm-7">{{ item.requiredQuantity }} {{ item.tool.unit }}</dd>
+                    
+                    <dt class="col-sm-5">Status:</dt>
+                    <dd class="col-sm-7">
+                        {% if item.isComplete %}
+                            <span class="badge bg-success-subtle text-success">
+                                <i class="ri-check-line"></i> Kompletne
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-warning">
+                                <i class="ri-error-warning-line"></i> Brakuje
+                            </span>
+                        {% endif %}
+                    </dd>
+                </dl>
+                {% else %}
+                <div class="alert alert-danger">
+                    <i class="ri-error-warning-line me-1"></i>
+                    Narzędzie zostało usunięte z systemu
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Set Info -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-stack-line me-1"></i>Informacje o zestawie
+                </h6>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-5">Nazwa:</dt>
+                    <dd class="col-sm-7">{{ tool_set.name }}</dd>
+                    
+                    <dt class="col-sm-5">Kod:</dt>
+                    <dd class="col-sm-7">
+                        {% if tool_set.code %}
+                            <code>{{ tool_set.code }}</code>
+                        {% else %}
+                            <span class="text-muted">Brak</span>
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-5">Pozycji:</dt>
+                    <dd class="col-sm-7">
+                        <span class="badge bg-info-subtle text-info">
+                            {{ tool_set.items|length }}
+                        </span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Help -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="ri-information-line me-1"></i>Pomoc
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">Uwagi</h6>
+                    <ul class="mb-0 small">
+                        <li>Zmiana narzędzia spowoduje zastąpienie obecnego</li>
+                        <li>Ilość musi być liczbą dodatnią</li>
+                        <li>Uwagi są opcjonalne</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,184 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nowy zestaw narzędzi - {{ app_name() }}{% endblock %}
+{% block page_title %}Nowy zestaw narzędzi{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_index') }}">Narzędzia</a></li>
+    <li class="breadcrumb-item"><a href="{{ path('app_tool_set_index') }}">Zestawy narzędzi</a></li>
+    <li class="breadcrumb-item active">Nowy zestaw</li>
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h5 class="card-title mb-0 flex-grow-1">
+                        <i class="ri-stack-line me-2"></i>Nowy zestaw narzędzi
+                    </h5>
+                    <div class="flex-shrink-0">
+                        <a href="{{ path('app_tool_set_index') }}" class="btn btn-secondary">
+                            <i class="ri-arrow-left-line align-bottom me-1"></i> Powrót do listy
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <!-- Basic Information -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">Informacje podstawowe</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="mb-3">
+                                            {{ form_label(form.name, null, {'label_attr': {'class': 'form-label required'}}) }}
+                                            {{ form_widget(form.name) }}
+                                            {{ form_errors(form.name) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form_label(form.code, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.code) }}
+                                            {{ form_errors(form.code) }}
+                                            {{ form_help(form.code) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.status, null, {'label_attr': {'class': 'form-label required'}}) }}
+                                            {{ form_widget(form.status) }}
+                                            {{ form_errors(form.status) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.location, null, {'label_attr': {'class': 'form-label'}}) }}
+                                            {{ form_widget(form.location) }}
+                                            {{ form_errors(form.location) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.description) }}
+                                    {{ form_errors(form.description) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tool Set Items -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex align-items-center">
+                                    <h6 class="card-title mb-0 flex-grow-1">Narzędzia w zestawie</h6>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="addToolSetItem()">
+                                        <i class="ri-add-line me-1"></i>Dodaj narzędzie
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="tool-set-items-container">
+                                    {{ form_widget(form.items) }}
+                                    {{ form_errors(form.items) }}
+                                </div>
+                                
+                                <div id="no-items-message" class="text-center py-4 text-muted" style="display: none;">
+                                    <i class="ri-inbox-line display-6"></i>
+                                    <p class="mt-2">Brak narzędzi w zestawie</p>
+                                    <p class="small">Kliknij "Dodaj narzędzie" aby rozpocząć</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <!-- Quick Help -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="ri-information-line me-1"></i>Pomoc
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <h6 class="alert-heading">Tworzenie zestawu narzędzi</h6>
+                                    <p class="mb-2">Zestaw narzędzi to grupa narzędzi, które są razem wydawane i zwracane.</p>
+                                    <ul class="mb-0 small">
+                                        <li><strong>Nazwa:</strong> Unikalna nazwa zestawu</li>
+                                        <li><strong>Kod:</strong> Zostanie wygenerowany automatycznie</li>
+                                        <li><strong>Status:</strong> Aktualny stan zestawu</li>
+                                        <li><strong>Narzędzia:</strong> Dodaj po zapisaniu zestawu</li>
+                                    </ul>
+                                </div>
+
+                                <div class="alert alert-warning">
+                                    <h6 class="alert-heading">Uwaga</h6>
+                                    <p class="mb-0 small">Narzędzia można dodać do zestawu po jego utworzeniu. Najpierw zapisz podstawowe informacje.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="hstack gap-2 justify-content-end">
+                    <a href="{{ path('app_tool_set_index') }}" class="btn btn-light">
+                        <i class="ri-close-line me-1"></i>Anuluj
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="ri-save-line me-1"></i>Zapisz zestaw
+                    </button>
+                </div>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const itemsContainer = document.getElementById('tool-set-items-container');
+    const noItemsMessage = document.getElementById('no-items-message');
+    
+    function updateItemsDisplay() {
+        const items = itemsContainer.querySelectorAll('.tool-set-item');
+        if (items.length === 0) {
+            noItemsMessage.style.display = 'block';
+        } else {
+            noItemsMessage.style.display = 'none';
+        }
+    }
+    
+    // Initial check
+    updateItemsDisplay();
+    
+    // Monitor for changes
+    const observer = new MutationObserver(updateItemsDisplay);
+    observer.observe(itemsContainer, { childList: true, subtree: true });
+});
+
+function addToolSetItem() {
+    // This will be implemented when the collection type is working
+    alert('Funkcja dostępna po zapisaniu zestawu');
+}
+</script>
+{% endblock %}
