@@ -132,80 +132,6 @@ class ToolController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_tool_show', methods: ['GET'])]
-    public function show(Tool $tool): Response
-    {
-        if (!$this->permissionService->hasPermission($this->getUser(), 'tools', 'VIEW')) {
-            throw $this->createAccessDeniedException('Brak uprawnień do przeglądania narzędzi.');
-        }
-
-        if (!$tool->isActive()) {
-            throw $this->createNotFoundException('Narzędzie nie zostało znalezione.');
-        }
-
-        return $this->render('tool/show.html.twig', [
-            'tool' => $tool,
-            'can_edit' => $this->permissionService->hasPermission($this->getUser(), 'tools', 'EDIT'),
-            'can_delete' => $this->permissionService->hasPermission($this->getUser(), 'tools', 'DELETE'),
-        ]);
-    }
-
-    #[Route('/{id}/edit', name: 'app_tool_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Tool $tool): Response
-    {
-        if (!$this->permissionService->hasPermission($this->getUser(), 'tools', 'EDIT')) {
-            throw $this->createAccessDeniedException('Brak uprawnień do edycji narzędzi.');
-        }
-
-        if (!$tool->isActive()) {
-            throw $this->createNotFoundException('Narzędzie nie zostało znalezione.');
-        }
-
-        $form = $this->createForm(ToolFormType::class, $tool);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $tool->setUpdatedBy($this->getUser());
-            
-            $this->entityManager->flush();
-
-            $this->addFlash('success', sprintf('Narzędzie "%s" zostało zaktualizowane pomyślnie.', $tool->getName()));
-
-            return $this->redirectToRoute('app_tool_show', ['id' => $tool->getId()]);
-        }
-
-        return $this->render('tool/edit.html.twig', [
-            'tool' => $tool,
-            'form' => $form->createView(),
-        ]);
-    }
-
-    #[Route('/{id}', name: 'app_tool_delete', methods: ['POST'])]
-    public function delete(Request $request, Tool $tool): Response
-    {
-        if (!$this->permissionService->hasPermission($this->getUser(), 'tools', 'DELETE')) {
-            throw $this->createAccessDeniedException('Brak uprawnień do usuwania narzędzi.');
-        }
-
-        if (!$tool->isActive()) {
-            throw $this->createNotFoundException('Narzędzie nie zostało znalezione.');
-        }
-
-        if ($this->isCsrfTokenValid('delete'.$tool->getId(), $request->request->get('_token'))) {
-            // Soft delete - mark as inactive instead of removing
-            $tool->setIsActive(false);
-            $tool->setUpdatedBy($this->getUser());
-            
-            $this->entityManager->flush();
-
-            $this->addFlash('success', sprintf('Narzędzie "%s" zostało usunięte pomyślnie.', $tool->getName()));
-        } else {
-            $this->addFlash('error', 'Nieprawidłowy token CSRF.');
-        }
-
-        return $this->redirectToRoute('app_tool_index');
-    }
-
     #[Route('/statistics/dashboard', name: 'app_tool_statistics', methods: ['GET'])]
     public function statistics(ToolRepository $toolRepository): Response
     {
@@ -369,6 +295,80 @@ class ToolController extends AbstractController
             $this->addFlash('success', sprintf('Zaktualizowano %d narzędzi.', $count));
         } else {
             $this->addFlash('warning', 'Nie zaktualizowano żadnych narzędzi.');
+        }
+
+        return $this->redirectToRoute('app_tool_index');
+    }
+
+    #[Route('/{id}', name: 'app_tool_show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function show(Tool $tool): Response
+    {
+        if (!$this->permissionService->hasPermission($this->getUser(), 'tools', 'VIEW')) {
+            throw $this->createAccessDeniedException('Brak uprawnień do przeglądania narzędzi.');
+        }
+
+        if (!$tool->isActive()) {
+            throw $this->createNotFoundException('Narzędzie nie zostało znalezione.');
+        }
+
+        return $this->render('tool/show.html.twig', [
+            'tool' => $tool,
+            'can_edit' => $this->permissionService->hasPermission($this->getUser(), 'tools', 'EDIT'),
+            'can_delete' => $this->permissionService->hasPermission($this->getUser(), 'tools', 'DELETE'),
+        ]);
+    }
+
+    #[Route('/{id}/edit', name: 'app_tool_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
+    public function edit(Request $request, Tool $tool): Response
+    {
+        if (!$this->permissionService->hasPermission($this->getUser(), 'tools', 'EDIT')) {
+            throw $this->createAccessDeniedException('Brak uprawnień do edycji narzędzi.');
+        }
+
+        if (!$tool->isActive()) {
+            throw $this->createNotFoundException('Narzędzie nie zostało znalezione.');
+        }
+
+        $form = $this->createForm(ToolFormType::class, $tool);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $tool->setUpdatedBy($this->getUser());
+            
+            $this->entityManager->flush();
+
+            $this->addFlash('success', sprintf('Narzędzie "%s" zostało zaktualizowane pomyślnie.', $tool->getName()));
+
+            return $this->redirectToRoute('app_tool_show', ['id' => $tool->getId()]);
+        }
+
+        return $this->render('tool/edit.html.twig', [
+            'tool' => $tool,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/{id}', name: 'app_tool_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function delete(Request $request, Tool $tool): Response
+    {
+        if (!$this->permissionService->hasPermission($this->getUser(), 'tools', 'DELETE')) {
+            throw $this->createAccessDeniedException('Brak uprawnień do usuwania narzędzi.');
+        }
+
+        if (!$tool->isActive()) {
+            throw $this->createNotFoundException('Narzędzie nie zostało znalezione.');
+        }
+
+        if ($this->isCsrfTokenValid('delete'.$tool->getId(), $request->request->get('_token'))) {
+            // Soft delete - mark as inactive instead of removing
+            $tool->setIsActive(false);
+            $tool->setUpdatedBy($this->getUser());
+            
+            $this->entityManager->flush();
+
+            $this->addFlash('success', sprintf('Narzędzie "%s" zostało usunięte pomyślnie.', $tool->getName()));
+        } else {
+            $this->addFlash('error', 'Nieprawidłowy token CSRF.');
         }
 
         return $this->redirectToRoute('app_tool_index');
