@@ -250,8 +250,7 @@ class ToolType extends AbstractType
                     new Assert\Range([
                         'min' => 1,
                         'max' => 120,
-                        'minMessage' => 'Interwał musi być co najmniej {{ limit }} miesiąc',
-                        'maxMessage' => 'Interwał nie może być dłuższy niż {{ limit }} miesięcy'
+                        'notInRangeMessage' => 'Interwał musi być między {{ min }} a {{ max }} miesięcy'
                     ])
                 ]
             ])
