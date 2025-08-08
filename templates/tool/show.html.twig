@@ -160,7 +160,7 @@
                                             {{ tool.nextInspectionDate|date('d.m.Y') }}
                                             {% if tool.isInspectionDue %}
                                             <span class="text-danger">(zaległe)</span>
-                                            {% elseif tool.inspectionInterval %}
+                                            {% elseif tool.inspectionIntervalMonths %}
                                             <small class="text-muted">(co {{ tool.inspectionIntervalMonths }} mies.)</small>
                                             {% endif %}
                                         </td>
