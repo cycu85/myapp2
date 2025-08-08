@@ -181,7 +181,7 @@ class ToolType extends AbstractType
             
             ->add('status', ChoiceType::class, [
                 'label' => 'Status',
-                'choices' => Tool::STATUSES,
+                'choices' => array_flip(Tool::STATUSES),
                 'attr' => ['class' => 'form-select']
             ])
             
