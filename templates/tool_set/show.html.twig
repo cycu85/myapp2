@@ -254,38 +254,12 @@
                 </h6>
             </div>
             <div class="card-body">
-                {% if tool_set.status == 'checked_out' %}
-                    <div class="alert alert-info">
-                        <h6 class="alert-heading">Zestaw wydany</h6>
-                        {% if tool_set.assignedTo %}
-                        <p class="mb-2">Wydany dla: <strong>{{ tool_set.assignedTo.fullName }}</strong></p>
-                        {% endif %}
-                        {% if tool_set.checkedOutAt %}
-                        <p class="mb-0 small">Data wydania: {{ tool_set.checkedOutAt|date('d.m.Y H:i') }}</p>
-                        {% endif %}
-                    </div>
-                    
-                    <form method="post" action="{{ path('app_tool_set_checkin', {id: tool_set.id}) }}" onsubmit="return confirm('Czy na pewno chcesz odebrać zestaw?')">
-                        <input type="hidden" name="_token" value="{{ csrf_token('checkin' ~ tool_set.id) }}">
-                        <button type="submit" class="btn btn-warning w-100">
-                            <i class="ri-arrow-up-line me-1"></i>Odbierz zestaw
-                        </button>
-                    </form>
-                {% else %}
-                    <form method="post" action="{{ path('app_tool_set_checkout', {id: tool_set.id}) }}">
-                        <input type="hidden" name="_token" value="{{ csrf_token('checkout' ~ tool_set.id) }}">
-                        <div class="mb-3">
-                            <label class="form-label">Wydaj dla:</label>
-                            <select name="assigned_to" class="form-select" required>
-                                <option value="">Wybierz osobę...</option>
-                                {# Tu będą opcje użytkowników - to wymaga dodania danych do kontrolera #}
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="ri-arrow-down-line me-1"></i>Wydaj zestaw
-                        </button>
-                    </form>
-                {% endif %}
+                <div class="alert alert-info">
+                    <h6 class="alert-heading">Funkcja w przygotowaniu</h6>
+                    <p class="mb-0 small">
+                        System wydawania i odbioru zestawów narzędzi będzie dostępny w kolejnej wersji.
+                    </p>
+                </div>
             </div>
         </div>
         {% endif %}
