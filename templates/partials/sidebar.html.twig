@@ -72,10 +72,10 @@
                             </li>
                             {% elseif module.name == 'tools' %}
                             <li class="nav-item">
-                                <a class="nav-link menu-link {{ app.request.get('_route') starts with 'app_tool' ? 'active' : '' }}" href="#sidebarTools" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarTools">
+                                <a class="nav-link menu-link {{ app.request.get('_route') starts with 'app_tool' ? 'active' : '' }}" href="#sidebarTools" data-bs-toggle="collapse" role="button" aria-expanded="{{ app.request.get('_route') starts with 'app_tool' ? 'true' : 'false' }}" aria-controls="sidebarTools">
                                     <i class="ri-hammer-line"></i> <span>{{ module.displayName }}</span>
                                 </a>
-                                <div class="collapse menu-dropdown" id="sidebarTools">
+                                <div class="collapse menu-dropdown {{ app.request.get('_route') starts with 'app_tool' ? 'show' : '' }}" id="sidebarTools">
                                     <ul class="nav nav-sm flex-column">
                                         <li class="nav-item">
                                             <a href="{{ path('app_tool_index') }}" class="nav-link {{ app.request.get('_route') == 'app_tool_index' or app.request.get('_route') starts with 'app_tool_' and not (app.request.get('_route') starts with 'app_tool_set' or app.request.get('_route') starts with 'app_tool_inspection') ? 'active' : '' }}">
@@ -118,10 +118,10 @@
                                 </li>
                                 {% elseif module.name == 'tools' %}
                                 <li class="nav-item">
-                                    <a class="nav-link menu-link {{ app.request.get('_route') starts with 'app_tool' ? 'active' : '' }}" href="#sidebarToolsAdmin" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarToolsAdmin">
+                                    <a class="nav-link menu-link {{ app.request.get('_route') starts with 'app_tool' ? 'active' : '' }}" href="#sidebarToolsAdmin" data-bs-toggle="collapse" role="button" aria-expanded="{{ app.request.get('_route') starts with 'app_tool' ? 'true' : 'false' }}" aria-controls="sidebarToolsAdmin">
                                         <i class="ri-hammer-line"></i> <span>{{ module.displayName }}</span>
                                     </a>
-                                    <div class="collapse menu-dropdown" id="sidebarToolsAdmin">
+                                    <div class="collapse menu-dropdown {{ app.request.get('_route') starts with 'app_tool' ? 'show' : '' }}" id="sidebarToolsAdmin">
                                         <ul class="nav nav-sm flex-column">
                                             <li class="nav-item">
                                                 <a href="{{ path('app_tool_index') }}" class="nav-link {{ app.request.get('_route') == 'app_tool_index' or app.request.get('_route') starts with 'app_tool_' and not (app.request.get('_route') starts with 'app_tool_set' or app.request.get('_route') starts with 'app_tool_inspection') ? 'active' : '' }}">
