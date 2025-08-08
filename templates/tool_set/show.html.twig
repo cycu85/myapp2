@@ -192,7 +192,7 @@
                                 </td>
                                 <td>
                                     {% if item.notes %}
-                                        <span class="text-muted small">{{ item.notes|truncate(50) }}</span>
+                                        <span class="text-muted small">{{ item.notes|length > 50 ? item.notes|slice(0, 50) ~ '...' : item.notes }}</span>
                                     {% else %}
                                         <span class="text-muted">—</span>
                                     {% endif %}
