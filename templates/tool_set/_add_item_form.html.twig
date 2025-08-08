@@ -1,0 +1,30 @@
+{{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate', 'id': 'modalAddItemForm'}}) }}
+
+<div class="mb-3">
+    {{ form_label(form.tool, null, {'label_attr': {'class': 'form-label required'}}) }}
+    {{ form_widget(form.tool, {'attr': {'class': 'form-select'}}) }}
+    {{ form_errors(form.tool) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.requiredQuantity, null, {'label_attr': {'class': 'form-label required'}}) }}
+    {{ form_widget(form.requiredQuantity, {'attr': {'class': 'form-control', 'min': 1}}) }}
+    {{ form_errors(form.requiredQuantity) }}
+    {{ form_help(form.requiredQuantity) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.quantity, null, {'label_attr': {'class': 'form-label required'}}) }}
+    {{ form_widget(form.quantity, {'attr': {'class': 'form-control', 'min': 0}}) }}
+    {{ form_errors(form.quantity) }}
+    {{ form_help(form.quantity) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.notes, null, {'label_attr': {'class': 'form-label'}}) }}
+    {{ form_widget(form.notes, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+    {{ form_errors(form.notes) }}
+    {{ form_help(form.notes) }}
+</div>
+
+{{ form_end(form) }}

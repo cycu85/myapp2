@@ -167,6 +167,7 @@ class ToolSetController extends AbstractController
     #[Route('/{id}/add-item', name: 'app_tool_set_add_item', methods: ['GET', 'POST'])]
     public function addItem(Request $request, ToolSet $toolSet): Response
     {
+
         if (!$this->permissionService->hasPermission($this->getUser(), 'tools', 'EDIT')) {
             throw $this->createAccessDeniedException('Brak uprawnień do edycji zestawów narzędzi.');
         }
@@ -198,7 +199,7 @@ class ToolSetController extends AbstractController
 
         // Handle AJAX request for form rendering/validation errors
         if ($request->isXmlHttpRequest()) {
-            return $this->render('tool_set/add_item.html.twig', [
+            return $this->render('tool_set/_add_item_form.html.twig', [
                 'tool_set' => $toolSet,
                 'item' => $item,
                 'form' => $form->createView(),

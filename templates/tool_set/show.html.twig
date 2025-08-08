@@ -124,9 +124,6 @@
                         <button type="button" class="btn btn-success btn-sm" onclick="showAddItemModal()">
                             <i class="ri-add-line me-1"></i>Dodaj narzędzie
                         </button>
-                        <a href="{{ path('app_tool_set_add_item', {id: tool_set.id}) }}" class="btn btn-outline-primary btn-sm ms-1" target="_blank">
-                            <i class="ri-external-link-line me-1"></i>Test
-                        </a>
                     </div>
                     {% endif %}
                 </div>
@@ -445,43 +442,50 @@ function loadAddItemForm() {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         
-        // Find the form itself
+        // The response should contain the complete form fragment
         const form = tempDiv.querySelector('form');
         if (!form) {
             throw new Error('No form found in response');
         }
         
-        // Find form fields in the response - look for the main form container
-        let formFields = form.querySelector('.card-body');
+        console.log('Form found, extracting content');
         
-        if (formFields) {
-            // Clear existing content
-            document.getElementById('addItemFormContent').innerHTML = formFields.innerHTML;
+        // Get all content except form_start and form_end tags
+        const formContent = [];
+        const children = form.children;
+        
+        for (let child of children) {
+            // Skip hidden CSRF token - we'll handle it separately
+            if (child.tagName === 'INPUT' && child.type === 'hidden') {
+                continue;
+            }
+            formContent.push(child.outerHTML);
+        }
+        
+        // Set form content
+        document.getElementById('addItemFormContent').innerHTML = formContent.join('');
+        
+        // Extract and set CSRF token from the loaded form - look for the token input
+        const csrfToken = form.querySelector('input[type="hidden"][name*="_token"]');
+        if (csrfToken) {
+            console.log('CSRF token found:', csrfToken.name, csrfToken.value);
             
-            // Extract and set CSRF token from the loaded form - look for the token input
-            const csrfToken = form.querySelector('input[type="hidden"][name*="_token"]');
-            if (csrfToken) {
-                console.log('CSRF token found:', csrfToken.name, csrfToken.value);
-                
-                // Remove any existing token in the modal form
-                const existingToken = document.querySelector('#addItemForm input[name*="_token"]');
-                if (existingToken) {
-                    existingToken.remove();
-                }
-                
-                // Add the token to the modal form
-                const tokenClone = csrfToken.cloneNode(true);
-                document.getElementById('addItemForm').appendChild(tokenClone);
-            } else {
-                console.error('CSRF token not found in form');
+            // Remove any existing token in the modal form
+            const existingToken = document.querySelector('#addItemForm input[name*="_token"]');
+            if (existingToken) {
+                existingToken.remove();
             }
             
-            // Enable submit button
-            document.getElementById('addItemSubmit').disabled = false;
-            addItemFormLoaded = true;
+            // Add the token to the modal form
+            const tokenClone = csrfToken.cloneNode(true);
+            document.getElementById('addItemForm').appendChild(tokenClone);
         } else {
-            throw new Error('No form fields found in form');
+            console.error('CSRF token not found in form');
         }
+        
+        // Enable submit button
+        document.getElementById('addItemSubmit').disabled = false;
+        addItemFormLoaded = true;
     })
     .catch(error => {
         console.error('Error loading form:', error);
@@ -537,23 +541,33 @@ document.getElementById('addItemForm').addEventListener('submit', function(e) {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = html;
                 
-                // Find the form with errors
+                // Find the form with errors - same logic as loading
                 const form = tempDiv.querySelector('form');
                 if (form) {
-                    const formFields = form.querySelector('.card-body');
-                    if (formFields) {
-                        document.getElementById('addItemFormContent').innerHTML = formFields.innerHTML;
-                        
-                        // Re-extract CSRF token
-                        const csrfToken = form.querySelector('input[type="hidden"][name*="_token"]');
-                        if (csrfToken) {
-                            const existingToken = document.querySelector('#addItemForm input[name*="_token"]');
-                            if (existingToken) {
-                                existingToken.remove();
-                            }
-                            const tokenClone = csrfToken.cloneNode(true);
-                            document.getElementById('addItemForm').appendChild(tokenClone);
+                    // Get all content except form_start and form_end tags
+                    const formContent = [];
+                    const children = form.children;
+                    
+                    for (let child of children) {
+                        // Skip hidden CSRF token - we'll handle it separately
+                        if (child.tagName === 'INPUT' && child.type === 'hidden') {
+                            continue;
                         }
+                        formContent.push(child.outerHTML);
+                    }
+                    
+                    // Set form content with errors
+                    document.getElementById('addItemFormContent').innerHTML = formContent.join('');
+                    
+                    // Re-extract CSRF token
+                    const csrfToken = form.querySelector('input[type="hidden"][name*="_token"]');
+                    if (csrfToken) {
+                        const existingToken = document.querySelector('#addItemForm input[name*="_token"]');
+                        if (existingToken) {
+                            existingToken.remove();
+                        }
+                        const tokenClone = csrfToken.cloneNode(true);
+                        document.getElementById('addItemForm').appendChild(tokenClone);
                     }
                 }
                 throw new Error('Validation failed');
