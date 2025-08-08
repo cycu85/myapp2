@@ -421,27 +421,56 @@ function loadAddItemForm() {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => response.text())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        return response.text();
+    })
     .then(html => {
+        console.log('Form loaded successfully');
+        console.log('HTML received:', html.substring(0, 200) + '...');
+        
         // Extract form content from response
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         
-        // Find form fields in the response
-        const formFields = tempDiv.querySelector('.card-body');
+        // Find the form itself
+        const form = tempDiv.querySelector('form');
+        if (!form) {
+            throw new Error('No form found in response');
+        }
+        
+        // Find form fields in the response - look for the main form container
+        let formFields = form.querySelector('.card-body');
+        
         if (formFields) {
+            // Clear existing content
             document.getElementById('addItemFormContent').innerHTML = formFields.innerHTML;
+            
+            // Extract and set CSRF token from the loaded form - look for the token input
+            const csrfToken = form.querySelector('input[type="hidden"][name*="_token"]');
+            if (csrfToken) {
+                console.log('CSRF token found:', csrfToken.name, csrfToken.value);
+                
+                // Remove any existing token in the modal form
+                const existingToken = document.querySelector('#addItemForm input[name*="_token"]');
+                if (existingToken) {
+                    existingToken.remove();
+                }
+                
+                // Add the token to the modal form
+                const tokenClone = csrfToken.cloneNode(true);
+                document.getElementById('addItemForm').appendChild(tokenClone);
+            } else {
+                console.error('CSRF token not found in form');
+            }
             
             // Enable submit button
             document.getElementById('addItemSubmit').disabled = false;
             addItemFormLoaded = true;
         } else {
-            document.getElementById('addItemFormContent').innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="ri-error-warning-line me-2"></i>
-                    Błąd podczas ładowania formularza. Spróbuj ponownie.
-                </div>
-            `;
+            throw new Error('No form fields found in form');
         }
     })
     .catch(error => {
@@ -475,17 +504,35 @@ document.getElementById('addItemForm').addEventListener('submit', function(e) {
         }
     })
     .then(response => {
+        console.log('Form submission response:', response.status);
         if (response.ok) {
             // Success - reload page to show new item
             window.location.reload();
         } else {
             return response.text().then(html => {
+                console.log('Validation error response:', html.substring(0, 200) + '...');
                 // Show validation errors
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = html;
-                const formFields = tempDiv.querySelector('.card-body');
-                if (formFields) {
-                    document.getElementById('addItemFormContent').innerHTML = formFields.innerHTML;
+                
+                // Find the form with errors
+                const form = tempDiv.querySelector('form');
+                if (form) {
+                    const formFields = form.querySelector('.card-body');
+                    if (formFields) {
+                        document.getElementById('addItemFormContent').innerHTML = formFields.innerHTML;
+                        
+                        // Re-extract CSRF token
+                        const csrfToken = form.querySelector('input[type="hidden"][name*="_token"]');
+                        if (csrfToken) {
+                            const existingToken = document.querySelector('#addItemForm input[name*="_token"]');
+                            if (existingToken) {
+                                existingToken.remove();
+                            }
+                            const tokenClone = csrfToken.cloneNode(true);
+                            document.getElementById('addItemForm').appendChild(tokenClone);
+                        }
+                    }
                 }
                 throw new Error('Validation failed');
             });
