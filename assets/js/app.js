@@ -1952,11 +1952,15 @@ File: Main Js File
 		var lightDarkBtn = document.querySelectorAll(".light-dark-mode");
 		if (lightDarkBtn && lightDarkBtn.length) {
 			lightDarkBtn[0].addEventListener("click", function (event) {
-				html.hasAttribute("data-bs-theme") && html.getAttribute("data-bs-theme") == "dark" ?
-					setLayoutMode("data-bs-theme", "light", "layout-mode-light", html) :
+				if (html.hasAttribute("data-bs-theme") && html.getAttribute("data-bs-theme") == "dark") {
+					setLayoutMode("data-bs-theme", "light", "layout-mode-light", html);
+					sessionStorage.setItem("data-bs-theme", "light");
+				} else {
 					setLayoutMode("data-bs-theme", "dark", "layout-mode-dark", html);
-					// Dispatch the resize event on the window object
-					window.dispatchEvent(resizeEvent);
+					sessionStorage.setItem("data-bs-theme", "dark");
+				}
+				// Dispatch the resize event on the window object
+				window.dispatchEvent(resizeEvent);
 			});
 		}
 	}

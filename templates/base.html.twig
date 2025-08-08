@@ -118,6 +118,31 @@
     <!-- App js -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
     <script src="{{ asset('assets/js/search.js') }}"></script>
+    
+    <!-- Theme persistence fix -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved theme on page load
+            var savedTheme = sessionStorage.getItem('data-bs-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            }
+            
+            // Patch the light-dark-mode click handler to save to sessionStorage
+            var lightDarkBtn = document.querySelectorAll('.light-dark-mode');
+            if (lightDarkBtn && lightDarkBtn.length) {
+                lightDarkBtn[0].addEventListener('click', function() {
+                    // Small delay to let the original handler execute first
+                    setTimeout(function() {
+                        var currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                        if (currentTheme) {
+                            sessionStorage.setItem('data-bs-theme', currentTheme);
+                        }
+                    }, 50);
+                });
+            }
+        });
+    </script>
     {% endif %}
     
     <!-- Content for non-authenticated users (like login page) -->
