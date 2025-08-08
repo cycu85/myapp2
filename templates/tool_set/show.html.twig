@@ -124,6 +124,9 @@
                         <button type="button" class="btn btn-success btn-sm" onclick="showAddItemModal()">
                             <i class="ri-add-line me-1"></i>Dodaj narzędzie
                         </button>
+                        <a href="{{ path('app_tool_set_add_item', {id: tool_set.id}) }}" class="btn btn-outline-primary btn-sm ms-1" target="_blank">
+                            <i class="ri-external-link-line me-1"></i>Test
+                        </a>
                     </div>
                     {% endif %}
                 </div>
@@ -422,6 +425,13 @@ function loadAddItemForm() {
         }
     })
     .then(response => {
+        console.log('Response status:', response.status, 'URL:', response.url);
+        
+        // Check for redirect to login page
+        if (response.redirected && response.url.includes('/login')) {
+            throw new Error('Session expired - redirecting to login');
+        }
+        
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -475,10 +485,22 @@ function loadAddItemForm() {
     })
     .catch(error => {
         console.error('Error loading form:', error);
+        
+        let errorMessage = 'Błąd podczas ładowania formularza.';
+        if (error.message.includes('Session expired')) {
+            errorMessage = 'Sesja wygasła. <a href="/login" class="alert-link">Zaloguj się ponownie</a>.';
+        } else if (error.message.includes('HTTP 403')) {
+            errorMessage = 'Brak uprawnień do dodawania narzędzi do zestawu.';
+        } else if (error.message.includes('HTTP 404')) {
+            errorMessage = 'Zestaw narzędzi nie został znaleziony.';
+        } else if (error.message.includes('HTTP')) {
+            errorMessage = 'Błąd serwera. Spróbuj ponownie za chwilę.';
+        }
+        
         document.getElementById('addItemFormContent').innerHTML = `
             <div class="alert alert-danger">
                 <i class="ri-error-warning-line me-2"></i>
-                Błąd podczas ładowania formularza. Sprawdź połączenie internetowe.
+                ${errorMessage}
             </div>
         `;
     });
@@ -540,6 +562,17 @@ document.getElementById('addItemForm').addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error submitting form:', error);
+        
+        // Show error message if it's a session issue
+        if (error.message.includes('Session expired')) {
+            document.getElementById('addItemFormContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="ri-error-warning-line me-2"></i>
+                    Sesja wygasła. <a href="/login" class="alert-link">Zaloguj się ponownie</a>.
+                </div>
+            `;
+        }
+        
         // Reset button state
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
