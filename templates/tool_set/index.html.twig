@@ -193,7 +193,7 @@
                                 <th scope="col">Status</th>
                                 <th scope="col">Kompletność</th>
                                 <th scope="col">Lokalizacja</th>
-                                <th scope="col">Przypisany do</th>
+                                <th scope="col">Pozycje</th>
                                 <th scope="col">Utworzony</th>
                                 <th scope="col">Akcje</th>
                             </tr>
@@ -241,14 +241,16 @@
                                     <span class="text-muted">{{ set.location ?: 'Nieokreślona' }}</span>
                                 </td>
                                 <td>
-                                    {% if set.assignedTo %}
-                                    <span class="text-muted">{{ set.assignedTo.fullName }}</span>
-                                    {% if set.checkedOutAt %}
-                                    <br><small class="text-muted fs-11">od {{ set.checkedOutAt|date('d.m.Y') }}</small>
-                                    {% endif %}
-                                    {% else %}
-                                    <span class="text-muted">—</span>
-                                    {% endif %}
+                                    <span class="badge bg-info-subtle text-info">
+                                        {{ set.items|length }}
+                                        {% if set.items|length == 1 %}
+                                            pozycja
+                                        {% elseif set.items|length < 5 %}
+                                            pozycje
+                                        {% else %}
+                                            pozycji
+                                        {% endif %}
+                                    </span>
                                 </td>
                                 <td>
                                     <span class="text-muted">{{ set.createdAt|date('d.m.Y') }}</span>
