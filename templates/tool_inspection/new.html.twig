@@ -138,12 +138,6 @@
                 </div>
 
                 <div class="mb-3">
-                    {{ form_label(form.recommendations, 'Zalecenia', {'label_attr': {'class': 'form-label'}}) }}
-                    {{ form_widget(form.recommendations, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Zalecenia dotyczące konserwacji, napraw lub dalszego użytkowania'}}) }}
-                    {{ form_errors(form.recommendations) }}
-                </div>
-
-                <div class="mb-3">
                     {{ form_label(form.notes, 'Dodatkowe uwagi', {'label_attr': {'class': 'form-label'}}) }}
                     {{ form_widget(form.notes, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Inne uwagi dotyczące przeglądu'}}) }}
                     {{ form_errors(form.notes) }}
