@@ -188,7 +188,21 @@ class ToolSetController extends AbstractController
             $this->addFlash('success', sprintf('Narzędzie "%s" zostało dodane do zestawu.', 
                 $item->getTool()?->getName() ?? 'nieznane'));
 
+            // Handle AJAX request
+            if ($request->isXmlHttpRequest()) {
+                return new Response('', 200);
+            }
+
             return $this->redirectToRoute('app_tool_set_show', ['id' => $toolSet->getId()]);
+        }
+
+        // Handle AJAX request for form rendering/validation errors
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('tool_set/add_item.html.twig', [
+                'tool_set' => $toolSet,
+                'item' => $item,
+                'form' => $form->createView(),
+            ], new Response('', $form->isSubmitted() && !$form->isValid() ? 400 : 200));
         }
 
         return $this->render('tool_set/add_item.html.twig', [

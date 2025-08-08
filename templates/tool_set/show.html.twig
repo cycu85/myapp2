@@ -121,9 +121,9 @@
                     </h6>
                     {% if can_edit %}
                     <div class="flex-shrink-0">
-                        <a href="{{ path('app_tool_set_add_item', {id: tool_set.id}) }}" class="btn btn-success btn-sm">
+                        <button type="button" class="btn btn-success btn-sm" onclick="showAddItemModal()">
                             <i class="ri-add-line me-1"></i>Dodaj narzędzie
-                        </a>
+                        </button>
                     </div>
                     {% endif %}
                 </div>
@@ -234,9 +234,9 @@
                     <h5>Brak narzędzi</h5>
                     <p class="text-muted">Ten zestaw nie zawiera jeszcze żadnych narzędzi.</p>
                     {% if can_edit %}
-                    <a href="{{ path('app_tool_set_add_item', {id: tool_set.id}) }}" class="btn btn-success">
+                    <button type="button" class="btn btn-success" onclick="showAddItemModal()">
                         <i class="ri-add-line me-1"></i>Dodaj pierwsze narzędzie
-                    </a>
+                    </button>
                     {% endif %}
                 </div>
                 {% endif %}
@@ -360,10 +360,145 @@
     </div>
 </div>
 
+<!-- Add Item Modal -->
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addItemModalLabel">
+                    <i class="ri-add-line me-2"></i>Dodaj narzędzie do zestawu
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addItemForm" method="post" action="{{ path('app_tool_set_add_item', {id: tool_set.id}) }}">
+                <div class="modal-body">
+                    <div id="addItemFormContent">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Ładowanie...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Ładowanie formularza...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i>Anuluj
+                    </button>
+                    <button type="submit" class="btn btn-success" id="addItemSubmit" disabled>
+                        <i class="ri-save-line me-1"></i>Dodaj narzędzie
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block javascript %}
 <script>
+let addItemModal;
+let addItemFormLoaded = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    addItemModal = new bootstrap.Modal(document.getElementById('addItemModal'));
+});
+
+function showAddItemModal() {
+    addItemModal.show();
+    
+    // Load form content only once
+    if (!addItemFormLoaded) {
+        loadAddItemForm();
+    }
+}
+
+function loadAddItemForm() {
+    fetch('{{ path("app_tool_set_add_item", {id: tool_set.id}) }}', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        // Extract form content from response
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        
+        // Find form fields in the response
+        const formFields = tempDiv.querySelector('.card-body');
+        if (formFields) {
+            document.getElementById('addItemFormContent').innerHTML = formFields.innerHTML;
+            
+            // Enable submit button
+            document.getElementById('addItemSubmit').disabled = false;
+            addItemFormLoaded = true;
+        } else {
+            document.getElementById('addItemFormContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="ri-error-warning-line me-2"></i>
+                    Błąd podczas ładowania formularza. Spróbuj ponownie.
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error loading form:', error);
+        document.getElementById('addItemFormContent').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="ri-error-warning-line me-2"></i>
+                Błąd podczas ładowania formularza. Sprawdź połączenie internetowe.
+            </div>
+        `;
+    });
+}
+
+// Handle form submission
+document.getElementById('addItemForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitBtn = document.getElementById('addItemSubmit');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Dodawanie...';
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            // Success - reload page to show new item
+            window.location.reload();
+        } else {
+            return response.text().then(html => {
+                // Show validation errors
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                const formFields = tempDiv.querySelector('.card-body');
+                if (formFields) {
+                    document.getElementById('addItemFormContent').innerHTML = formFields.innerHTML;
+                }
+                throw new Error('Validation failed');
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error submitting form:', error);
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+});
+
 function deleteToolSet() {
     new bootstrap.Modal(document.getElementById('deleteRecordModal')).show();
 }
