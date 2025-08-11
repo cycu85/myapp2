@@ -30,6 +30,7 @@ class Tool
     public const STATUS_BROKEN = 'broken';
     public const STATUS_SOLD = 'sold';
     public const STATUS_DISPOSED = 'disposed';
+    public const STATUS_UNDER_INSPECTION = 'under_inspection';
 
     public const STATUSES = [
         self::STATUS_ACTIVE => 'Aktywny',
@@ -38,6 +39,7 @@ class Tool
         self::STATUS_BROKEN => 'Uszkodzony',
         self::STATUS_SOLD => 'Sprzedany',
         self::STATUS_DISPOSED => 'Zutylizowany',
+        self::STATUS_UNDER_INSPECTION => 'Na przeglądzie',
     ];
 
     #[ORM\Id]
@@ -543,6 +545,56 @@ class Tool
     public function getFailedInspections(): Collection
     {
         return $this->inspections->filter(fn(ToolInspection $inspection) => $inspection->isFailed());
+    }
+
+    public function isUnderInspection(): bool
+    {
+        return $this->status === self::STATUS_UNDER_INSPECTION;
+    }
+
+    public function canBeInspected(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_ACTIVE,
+            self::STATUS_MAINTENANCE,
+            self::STATUS_BROKEN
+        ]) && $this->isActive;
+    }
+
+    public function sendForInspection(): static
+    {
+        if (!$this->canBeInspected()) {
+            throw new \LogicException('Narzędzie nie może być wysłane na przegląd w obecnym statusie.');
+        }
+        
+        $this->status = self::STATUS_UNDER_INSPECTION;
+        return $this;
+    }
+
+    public function completeInspection(string $inspectionResult): static
+    {
+        if (!$this->isUnderInspection()) {
+            throw new \LogicException('Narzędzie nie jest na przeglądzie.');
+        }
+
+        switch ($inspectionResult) {
+            case ToolInspection::RESULT_PASSED:
+            case ToolInspection::RESULT_PASSED_WITH_REMARKS:
+                $this->status = self::STATUS_ACTIVE;
+                break;
+            case ToolInspection::RESULT_FAILED:
+            case ToolInspection::RESULT_NEEDS_REPAIR:
+                $this->status = self::STATUS_BROKEN;
+                break;
+            case ToolInspection::RESULT_OUT_OF_SERVICE:
+                $this->status = self::STATUS_DISPOSED;
+                $this->isActive = false;
+                break;
+            default:
+                throw new \InvalidArgumentException('Nieprawidłowy wynik przeglądu: ' . $inspectionResult);
+        }
+
+        return $this;
     }
 
     #[ORM\PreUpdate]

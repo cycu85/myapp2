@@ -10,12 +10,14 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\File;
 
 class ToolInspectionType extends AbstractType
 {
@@ -154,6 +156,32 @@ class ToolInspectionType extends AbstractType
                 ],
                 'constraints' => [
                     new Assert\PositiveOrZero(['message' => 'Koszt przeglądu musi być liczbą dodatnią'])
+                ]
+            ])
+            
+            ->add('inspectionReportFile', FileType::class, [
+                'label' => 'Plik z raportem z przeglądu',
+                'required' => false,
+                'mapped' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'accept' => '.pdf,.doc,.docx,.jpg,.jpeg,.png'
+                ],
+                'help' => 'Dozwolone formaty: PDF, DOC, DOCX, JPG, JPEG, PNG (max 5MB)',
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => [
+                            'application/pdf',
+                            'application/msword',
+                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            'image/jpeg',
+                            'image/jpg',
+                            'image/png',
+                        ],
+                        'mimeTypesMessage' => 'Proszę wybrać poprawny format pliku (PDF, DOC, DOCX, JPG, PNG)',
+                        'maxSizeMessage' => 'Plik nie może być większy niż 5MB'
+                    ])
                 ]
             ]);
     }

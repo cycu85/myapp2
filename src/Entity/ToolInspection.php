@@ -86,6 +86,9 @@ class ToolInspection
     #[Assert\PositiveOrZero(message: 'Koszt przeglądu musi być liczbą dodatnią')]
     private ?string $cost = null;
 
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $inspectionReportFile = null;
+
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true])]
     private bool $isActive = true;
 
@@ -266,6 +269,22 @@ class ToolInspection
     {
         $this->cost = $cost;
         return $this;
+    }
+
+    public function getInspectionReportFile(): ?string
+    {
+        return $this->inspectionReportFile;
+    }
+
+    public function setInspectionReportFile(?string $inspectionReportFile): static
+    {
+        $this->inspectionReportFile = $inspectionReportFile;
+        return $this;
+    }
+
+    public function hasInspectionReport(): bool
+    {
+        return !empty($this->inspectionReportFile);
     }
 
     public function isActive(): bool

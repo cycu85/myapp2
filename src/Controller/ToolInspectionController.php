@@ -11,10 +11,13 @@ use App\Service\PermissionService;
 use App\Service\InspectionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/tools/inspections')]
 #[IsGranted('ROLE_USER')]
@@ -23,7 +26,8 @@ class ToolInspectionController extends AbstractController
     public function __construct(
         private PermissionService $permissionService,
         private EntityManagerInterface $entityManager,
-        private InspectionService $inspectionService
+        private InspectionService $inspectionService,
+        private SluggerInterface $slugger
     ) {
     }
 
@@ -83,19 +87,39 @@ class ToolInspectionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $inspection->setInspectedBy($this->getUser());
+            $inspection->setCreatedBy($this->getUser());
             
-            $this->entityManager->persist($inspection);
-            $this->entityManager->flush();
-
-            // Update tool's next inspection date if passed
-            if ($inspection->isPassed() && $inspection->getTool()) {
-                $nextDate = $inspection->calculateNextInspectionDate();
-                if ($nextDate) {
-                    $inspection->getTool()->setNextInspectionDate($nextDate);
-                    $this->entityManager->flush();
+            // Handle file upload
+            $inspectionReportFile = $form->get('inspectionReportFile')->getData();
+            if ($inspectionReportFile instanceof UploadedFile) {
+                $fileName = $this->handleFileUpload($inspectionReportFile);
+                if ($fileName) {
+                    $inspection->setInspectionReportFile($fileName);
                 }
             }
+            
+            $this->entityManager->persist($inspection);
+            
+            // Update tool status based on inspection result
+            $tool = $inspection->getTool();
+            if ($tool && $tool->isUnderInspection()) {
+                try {
+                    $tool->completeInspection($inspection->getResult());
+                    $tool->setUpdatedBy($this->getUser());
+                    
+                    // Update next inspection date if passed
+                    if ($inspection->isPassed()) {
+                        $nextDate = $inspection->calculateNextInspectionDate();
+                        if ($nextDate) {
+                            $tool->setNextInspectionDate($nextDate);
+                        }
+                    }
+                } catch (\LogicException $e) {
+                    // Tool not under inspection, continue normally
+                }
+            }
+            
+            $this->entityManager->flush();
 
             $this->addFlash('success', sprintf('Przegląd narzędzia "%s" został dodany pomyślnie.', 
                 $inspection->getTool()?->getName() ?? 'nieznane'));
@@ -129,19 +153,38 @@ class ToolInspectionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $inspection->setInspectedBy($this->getUser());
+            $inspection->setCreatedBy($this->getUser());
             
-            $this->entityManager->persist($inspection);
-            $this->entityManager->flush();
-
-            // Update tool's next inspection date if passed
-            if ($inspection->isPassed()) {
-                $nextDate = $inspection->calculateNextInspectionDate();
-                if ($nextDate) {
-                    $tool->setNextInspectionDate($nextDate);
-                    $this->entityManager->flush();
+            // Handle file upload
+            $inspectionReportFile = $form->get('inspectionReportFile')->getData();
+            if ($inspectionReportFile instanceof UploadedFile) {
+                $fileName = $this->handleFileUpload($inspectionReportFile);
+                if ($fileName) {
+                    $inspection->setInspectionReportFile($fileName);
                 }
             }
+            
+            $this->entityManager->persist($inspection);
+            
+            // Update tool status based on inspection result
+            if ($tool->isUnderInspection()) {
+                try {
+                    $tool->completeInspection($inspection->getResult());
+                    $tool->setUpdatedBy($this->getUser());
+                    
+                    // Update next inspection date if passed
+                    if ($inspection->isPassed()) {
+                        $nextDate = $inspection->calculateNextInspectionDate();
+                        if ($nextDate) {
+                            $tool->setNextInspectionDate($nextDate);
+                        }
+                    }
+                } catch (\LogicException $e) {
+                    // Tool not under inspection, continue normally
+                }
+            }
+            
+            $this->entityManager->flush();
 
             $this->addFlash('success', sprintf('Przegląd narzędzia "%s" został dodany pomyślnie.', $tool->getName()));
 
@@ -180,16 +223,40 @@ class ToolInspectionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-
-            // Update tool's next inspection date if status changed to passed
-            if ($inspection->isPassed() && $inspection->getTool()) {
-                $nextDate = $inspection->calculateNextInspectionDate();
-                if ($nextDate) {
-                    $inspection->getTool()->setNextInspectionDate($nextDate);
-                    $this->entityManager->flush();
+            // Handle file upload
+            $inspectionReportFile = $form->get('inspectionReportFile')->getData();
+            if ($inspectionReportFile instanceof UploadedFile) {
+                // Remove old file if exists
+                if ($inspection->getInspectionReportFile()) {
+                    $this->removeFile($inspection->getInspectionReportFile());
+                }
+                
+                $fileName = $this->handleFileUpload($inspectionReportFile);
+                if ($fileName) {
+                    $inspection->setInspectionReportFile($fileName);
                 }
             }
+            
+            // Update tool status if result changed and tool is under inspection
+            $tool = $inspection->getTool();
+            if ($tool && $tool->isUnderInspection()) {
+                try {
+                    $tool->completeInspection($inspection->getResult());
+                    $tool->setUpdatedBy($this->getUser());
+                    
+                    // Update next inspection date if passed
+                    if ($inspection->isPassed()) {
+                        $nextDate = $inspection->calculateNextInspectionDate();
+                        if ($nextDate) {
+                            $tool->setNextInspectionDate($nextDate);
+                        }
+                    }
+                } catch (\LogicException $e) {
+                    // Tool not under inspection, continue normally
+                }
+            }
+            
+            $this->entityManager->flush();
 
             $this->addFlash('success', sprintf('Przegląd narzędzia "%s" został zaktualizowany pomyślnie.', 
                 $inspection->getTool()?->getName() ?? 'nieznane'));
@@ -212,6 +279,11 @@ class ToolInspectionController extends AbstractController
 
         if ($this->isCsrfTokenValid('delete'.$inspection->getId(), $request->request->get('_token'))) {
             $toolName = $inspection->getTool()?->getName() ?? 'nieznane';
+            
+            // Remove inspection report file if exists
+            if ($inspection->getInspectionReportFile()) {
+                $this->removeFile($inspection->getInspectionReportFile());
+            }
             
             $this->entityManager->remove($inspection);
             $this->entityManager->flush();
@@ -291,5 +363,35 @@ class ToolInspectionController extends AbstractController
         return $this->render('tool_inspection/bulk_schedule.html.twig', [
             'tools' => $toolsNeedingInspection,
         ]);
+    }
+
+    private function handleFileUpload(UploadedFile $file): ?string
+    {
+        $uploadsDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/inspections';
+        
+        // Create directory if it doesn't exist
+        if (!is_dir($uploadsDirectory)) {
+            mkdir($uploadsDirectory, 0755, true);
+        }
+        
+        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $safeFilename = $this->slugger->slug($originalFilename);
+        $fileName = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
+
+        try {
+            $file->move($uploadsDirectory, $fileName);
+            return $fileName;
+        } catch (FileException $e) {
+            $this->addFlash('error', 'Nie udało się wgrać pliku.');
+            return null;
+        }
+    }
+
+    private function removeFile(string $fileName): void
+    {
+        $filePath = $this->getParameter('kernel.project_dir') . '/public/uploads/inspections/' . $fileName;
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
     }
 }

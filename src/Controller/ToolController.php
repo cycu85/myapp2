@@ -277,6 +277,12 @@ class ToolController extends AbstractController
                     $tool->setStatus(Tool::STATUS_MAINTENANCE);
                     $count++;
                     break;
+                case 'send_for_inspection':
+                    if ($tool->canBeInspected()) {
+                        $tool->sendForInspection();
+                        $count++;
+                    }
+                    break;
                 case 'delete':
                     if ($this->permissionService->hasPermission($this->getUser(), 'tools', 'DELETE')) {
                         $tool->setIsActive(false);
@@ -372,5 +378,34 @@ class ToolController extends AbstractController
         }
 
         return $this->redirectToRoute('app_tool_index');
+    }
+
+    #[Route('/{id}/send-for-inspection', name: 'app_tool_send_for_inspection', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function sendForInspection(Request $request, Tool $tool): Response
+    {
+        if (!$this->permissionService->hasPermission($this->getUser(), 'tools', 'EDIT')) {
+            throw $this->createAccessDeniedException('Brak uprawnień do wysyłania narzędzi na przegląd.');
+        }
+
+        if (!$tool->isActive()) {
+            throw $this->createNotFoundException('Narzędzie nie zostało znalezione.');
+        }
+
+        if ($this->isCsrfTokenValid('send_for_inspection'.$tool->getId(), $request->request->get('_token'))) {
+            try {
+                $tool->sendForInspection();
+                $tool->setUpdatedBy($this->getUser());
+                
+                $this->entityManager->flush();
+
+                $this->addFlash('success', sprintf('Narzędzie "%s" zostało wysłane na przegląd.', $tool->getName()));
+            } catch (\LogicException $e) {
+                $this->addFlash('error', $e->getMessage());
+            }
+        } else {
+            $this->addFlash('error', 'Nieprawidłowy token CSRF.');
+        }
+
+        return $this->redirectToRoute('app_tool_show', ['id' => $tool->getId()]);
     }
 }
