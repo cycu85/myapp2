@@ -80,7 +80,7 @@ class ToolSet
     #[ORM\OrderBy(['id' => 'ASC'])]
     private Collection $items;
 
-    #[ORM\ManyToMany(targetEntity: ToolInspection::class)]
+    #[ORM\ManyToMany(targetEntity: ToolInspection::class, inversedBy: 'toolSets')]
     #[ORM\JoinTable(
         name: 'tool_set_inspections',
         joinColumns: [new ORM\JoinColumn(name: 'tool_set_id', referencedColumnName: 'id', onDelete: 'CASCADE')],
